@@ -1,0 +1,33 @@
+# Build outputs
+*.exe
+*.spec
+build/
+dist/
+_internal/
+
+# Temp & logs
+logs/
+temp_dxf/
+nul
+webview_data/
+
+# Backup & saved data
+backup/
+saved/
+
+# Claude Code
+.claude/
+
+# PDF working files
+PDF/
+PDFVectorExtract/
+
+# Test data
+test/
+
+# Large data & drawings
+drawings/
+data/*.pdf
+data/*.PDF
+data/*.png
+data/pid/

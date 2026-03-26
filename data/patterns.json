@@ -1,0 +1,167 @@
+[
+  {
+    "name": "패턴 1",
+    "elements": [
+      {
+        "id": "OCB_BLOCK_705.6_1304.2",
+        "name": "OCB008800D",
+        "type": "OCB_BLOCK",
+        "cx": 705.6,
+        "cy": 1304.2,
+        "isGroup": true,
+        "normalizedName": "OCB_BLOCK",
+        "childPorts": [
+          {
+            "name": "OUT",
+            "normalizedName": "PORT",
+            "relX": -130,
+            "relY": -45,
+            "cx": 575.6,
+            "cy": 1259.2
+          },
+          {
+            "name": "A",
+            "normalizedName": "PORT",
+            "relX": -189.39999999999998,
+            "relY": -30.600000000000136,
+            "cx": 516.2,
+            "cy": 1273.6
+          }
+        ]
+      },
+      {
+        "id": "OCB_BLOCK_1121.4_1334.2",
+        "name": "OCB0088008",
+        "type": "OCB_BLOCK",
+        "cx": 1121.4,
+        "cy": 1334.2,
+        "isGroup": true,
+        "normalizedName": "OCB_BLOCK",
+        "childPorts": [
+          {
+            "name": "FLAG",
+            "normalizedName": "PORT",
+            "relX": -200.20000000000005,
+            "relY": -125.20000000000005,
+            "cx": 921.2,
+            "cy": 1209
+          },
+          {
+            "name": "YES",
+            "normalizedName": "PORT",
+            "relX": -162.30000000000007,
+            "relY": -130.20000000000005,
+            "cx": 959.1,
+            "cy": 1204
+          },
+          {
+            "name": "NO",
+            "normalizedName": "PORT",
+            "relX": -216.9000000000001,
+            "relY": -75,
+            "cx": 904.5,
+            "cy": 1259.2
+          },
+          {
+            "name": "OUT",
+            "normalizedName": "PORT",
+            "relX": -162.30000000000007,
+            "relY": 5.7999999999999545,
+            "cx": 959.1,
+            "cy": 1340
+          },
+          {
+            "name": "T",
+            "normalizedName": "BLOCK_TYPE",
+            "relX": -149.60000000000014,
+            "relY": -59.299999999999955,
+            "cx": 971.8,
+            "cy": 1274.9
+          }
+        ]
+      },
+      {
+        "id": "D03-062-01_725_1102",
+        "name": "D03-062-01_725_1102",
+        "type": "GROUP",
+        "cx": 725,
+        "cy": 1102.2,
+        "isGroup": true,
+        "normalizedName": "GROUP",
+        "childPorts": [
+          {
+            "name": "3/062",
+            "normalizedName": "SHEET_REF",
+            "relX": -106.20000000000005,
+            "relY": 45.59999999999991,
+            "cx": 618.8,
+            "cy": 1147.8
+          },
+          {
+            "name": "DESC: No",
+            "normalizedName": "OTHER",
+            "relX": -449.2,
+            "relY": -23.40000000000009,
+            "cx": 275.8,
+            "cy": 1078.8
+          },
+          {
+            "name": "Description Defined",
+            "normalizedName": "OTHER",
+            "relX": -336.2,
+            "relY": 12.599999999999909,
+            "cx": 388.8,
+            "cy": 1114.8
+          },
+          {
+            "name": "(D03-062-01)",
+            "normalizedName": "OTHER",
+            "relX": -412.4,
+            "relY": 48.59999999999991,
+            "cx": 312.6,
+            "cy": 1150.8
+          }
+        ]
+      }
+    ],
+    "connections": [
+      {
+        "fromElemIdx": 2,
+        "toElemIdx": 1,
+        "fromPortName": "D03-062-01",
+        "toPortName": "FLAG",
+        "fromPortFullName": "D03-062-01",
+        "toPortFullName": "FLAG",
+        "fromPortIdx": -1,
+        "toPortIdx": 0,
+        "fromPortRelX": 0,
+        "fromPortRelY": 0,
+        "toPortRelX": -200.20000000000005,
+        "toPortRelY": -125.20000000000005,
+        "waypoints": [
+          {
+            "relX": 89.94695941419536,
+            "relY": 0.39133284931676826
+          }
+        ]
+      },
+      {
+        "fromElemIdx": 0,
+        "toElemIdx": 1,
+        "fromPortName": "OUT",
+        "toPortName": "NO",
+        "fromPortFullName": "OUT",
+        "toPortFullName": "NO",
+        "fromPortIdx": 0,
+        "toPortIdx": 2,
+        "fromPortRelX": -130,
+        "fromPortRelY": -45,
+        "toPortRelX": -216.9000000000001,
+        "toPortRelY": -75,
+        "waypoints": []
+      }
+    ],
+    "signature": "GROUP,OCB_BLOCK,OCB_BLOCK",
+    "createdAt": "2026-01-24T00:35:51.997Z"
+  }
+]

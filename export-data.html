@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>데이터 내보내기</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: #16213e;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        h1 { margin-bottom: 20px; }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .btn:hover { background: #45a049; }
+        .btn-blue { background: #2196F3; }
+        .btn-blue:hover { background: #1976D2; }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #0f3460;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .success { color: #4CAF50; }
+        .data-preview {
+            margin-top: 15px;
+            text-align: left;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Control Logic Editor 데이터 내보내기</h1>
+
+        <div class="data-preview" id="preview"></div>
+
+        <button class="btn" onclick="exportAll()">전체 데이터 내보내기</button>
+
+        <div class="info">
+            <p>버튼을 누르면 <strong>editor_data.json</strong> 파일이 다운로드됩니다.</p>
+            <p>이 파일을 <strong>ControlLogicEditor/data/</strong> 폴더에 넣으세요.</p>
+        </div>
+
+        <div id="status"></div>
+    </div>
+
+    <script>
+        // 저장된 데이터 미리보기
+        window.onload = function() {
+            const templates = localStorage.getItem('blockTemplates');
+            const patterns = localStorage.getItem('connectionPatterns');
+            const recent = localStorage.getItem('recentDrawings');
+
+            let preview = '<strong>저장된 데이터:</strong><br>';
+
+            if (templates) {
+                try {
+                    const t = JSON.parse(templates);
+                    preview += `- 템플릿: ${t.length}개<br>`;
+                } catch(e) {
+                    preview += `- 템플릿: 있음<br>`;
+                }
+            } else {
+                preview += `- 템플릿: 없음<br>`;
+            }
+
+            if (patterns) {
+                try {
+                    const p = JSON.parse(patterns);
+                    preview += `- 연결 패턴: ${p.length}개<br>`;
+                } catch(e) {
+                    preview += `- 연결 패턴: 있음<br>`;
+                }
+            } else {
+                preview += `- 연결 패턴: 없음<br>`;
+            }
+
+            if (recent) {
+                try {
+                    const r = JSON.parse(recent);
+                    preview += `- 최근 도면: ${r.length}개<br>`;
+                } catch(e) {
+                    preview += `- 최근 도면: 있음<br>`;
+                }
+            } else {
+                preview += `- 최근 도면: 없음<br>`;
+            }
+
+            document.getElementById('preview').innerHTML = preview;
+        };
+
+        function exportAll() {
+            const data = {
+                exportDate: new Date().toISOString(),
+                blockTemplates: localStorage.getItem('blockTemplates'),
+                connectionPatterns: localStorage.getItem('connectionPatterns'),
+                recentDrawings: localStorage.getItem('recentDrawings'),
+                elementMemos: localStorage.getItem('elementMemos')
+            };
+
+            // null 값 제거
+            Object.keys(data).forEach(key => {
+                if (data[key] === null) delete data[key];
+            });
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'editor_data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            document.getElementById('status').innerHTML = '<p class="success">다운로드 완료!</p>';
+        }
+    </script>
+</body>
+</html>

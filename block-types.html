@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>심볼 사전 - AI Reference</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        /* 헤더 */
+        .header {
+            background: linear-gradient(180deg, rgba(20, 20, 35, 0.98) 0%, rgba(15, 15, 25, 0.95) 100%);
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .logo-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .logo-badge {
+            font-size: 9px;
+            padding: 2px 6px;
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .nav-link {
+            padding: 6px 12px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 13px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 7px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-scan {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        /* 컴팩트 스탯 바 */
+        .stat-bar {
+            background: rgba(139, 92, 246, 0.05);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #a78bfa;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .stat-divider {
+            width: 1px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* 메인 레이아웃 */
+        .main {
+            display: flex;
+            height: calc(100vh - 56px - 48px);
+        }
+
+        /* 사이드바 - 블록 목록 */
+        .sidebar {
+            width: 280px;
+            background: rgba(0, 0, 0, 0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 8px 12px 8px 32px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 4px;
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            flex-wrap: wrap;
+        }
+
+        .filter-chip {
+            padding: 4px 8px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-chip:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .filter-chip.active {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: rgba(139, 92, 246, 0.4);
+            color: #a78bfa;
+        }
+
+        .block-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .block-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .block-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .block-item.active {
+            background: rgba(139, 92, 246, 0.1);
+            border-left: 2px solid #a78bfa;
+        }
+
+        .block-icon-sm {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .block-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .block-name-sm {
+            font-size: 12px;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .block-meta {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.4);
+            display: flex;
+            gap: 8px;
+            margin-top: 2px;
+        }
+
+        .block-status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .status-complete { background: #10b981; }
+        .status-partial { background: #f59e0b; }
+        .status-empty { background: rgba(255, 255, 255, 0.2); }
+
+        /* 메인 컨텐츠 - 상세 보기 */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .detail-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .detail-header {
+            padding: 20px 24px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .detail-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .detail-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .detail-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .detail-id {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+            margin-top: 2px;
+        }
+
+        .cat-badge {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .detail-body {
+            padding: 24px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .edit-btn {
+            margin-left: auto;
+            padding: 3px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .section-title .edit-btn:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: rgba(139, 92, 246, 0.3);
+            color: #a78bfa;
+        }
+
+        .desc-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        .port-variants {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .port-variant {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            align-items: center;
+        }
+
+        .port-tag {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            font-family: 'SF Mono', Consolas, monospace;
+        }
+
+        .port-in { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+        .port-out { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .port-param { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+        .variant-label {
+            margin-left: auto;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .ai-box {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(99, 102, 241, 0.05));
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .ai-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .ai-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #a78bfa;
+        }
+
+        .ai-text {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.75);
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+
+        .ai-text.empty {
+            color: rgba(255, 255, 255, 0.35);
+            font-style: italic;
+        }
+
+        .images-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .img-thumb {
+            width: 80px;
+            height: 60px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid transparent;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .img-thumb:hover {
+            border-color: #a78bfa;
+        }
+
+        .img-thumb img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .img-add {
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 20px;
+        }
+
+        .img-add:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+            color: #a78bfa;
+        }
+
+        /* 인스턴스 테이블 */
+        .instance-table {
+            width: 100%;
+            font-size: 11px;
+            border-collapse: collapse;
+        }
+
+        .instance-table th {
+            text-align: left;
+            padding: 8px 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .instance-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .instance-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .instance-link {
+            color: #60a5fa;
+            cursor: pointer;
+        }
+
+        .instance-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 아이콘 색상 */
+        .icon-logic { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+        .icon-math { background: linear-gradient(135deg, #3b82f6, #6366f1); }
+        .icon-control { background: linear-gradient(135deg, #10b981, #059669); }
+        .icon-compare { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .icon-timer { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .icon-unknown { background: linear-gradient(135deg, #6b7280, #4b5563); }
+
+        .cat-logic { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+        .cat-math { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+        .cat-control { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .cat-compare { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        .cat-timer { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+        .cat-unknown { background: rgba(107, 114, 128, 0.15); color: #9ca3af; }
+
+        /* 모달 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: #141420;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            width: 500px;
+            max-width: 95vw;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .modal-close {
+            width: 28px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 6px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 6px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: #1a1a2e;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .form-select option {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 8px;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-hint {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.35);
+            margin-top: 4px;
+        }
+
+        .modal-footer {
+            padding: 14px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-delete:hover { background: rgba(239, 68, 68, 0.2); }
+
+        /* 토스트 */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 20px;
+            background: #1e1e2e;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 13px;
+            z-index: 2000;
+            animation: toastIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.success { border-color: rgba(16, 185, 129, 0.3); }
+        .toast.success::before { content: '✓'; color: #10b981; }
+
+        @keyframes toastIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* 스캔 진행 상태 */
+        .scan-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .scan-overlay.show { display: flex; }
+
+        .scan-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(139, 92, 246, 0.2);
+            border-top-color: #a78bfa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .scan-text {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        /* 스크롤바 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <a href="editor.html" class="logo">
+                <div class="logo-icon">📦</div>
+                <span class="logo-text">심볼 사전</span>
+                <span class="logo-badge">AI REF</span>
+            </a>
+            <a href="editor.html" class="nav-link">에디터</a>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-scan" onclick="scanAllDrawings()">전체 도면 스캔</button>
+            <button class="btn btn-ghost" onclick="addNewBlock()">+ 새 블록</button>
+            <button class="btn btn-ghost" onclick="resetToDefaults()" style="color:#ff9800;">초기화</button>
+            <button class="btn btn-primary" onclick="generateAIData()">AI 데이터 생성</button>
+        </div>
+    </header>
+
+    <div class="stat-bar">
+        <div class="stat-item">
+            <span class="stat-value" id="statBlocks">0</span>
+            <span class="stat-label">블록 타입</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="stat-value" id="statInstances">0</span>
+            <span class="stat-label">인스턴스</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <span class="stat-value" id="statComplete">0%</span>
+            <span class="stat-label">설명 완성도</span>
+        </div>
+    </div>
+
+    <div class="main">
+        <!-- 사이드바: 블록 목록 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-input" id="searchInput" placeholder="블록 검색..." oninput="filterBlocks()">
+                </div>
+            </div>
+            <div class="filter-row">
+                <button class="filter-chip active" data-cat="all" onclick="setCategory('all')">전체</button>
+                <button class="filter-chip" data-cat="logic" onclick="setCategory('logic')">논리</button>
+                <button class="filter-chip" data-cat="math" onclick="setCategory('math')">수학</button>
+                <button class="filter-chip" data-cat="control" onclick="setCategory('control')">제어</button>
+                <button class="filter-chip" data-cat="compare" onclick="setCategory('compare')">비교</button>
+                <button class="filter-chip" data-cat="timer" onclick="setCategory('timer')">타이머</button>
+                <button class="filter-chip" data-cat="unknown" onclick="setCategory('unknown')">미분류</button>
+            </div>
+            <div class="block-list" id="blockList"></div>
+        </div>
+
+        <!-- 메인: 상세 보기 -->
+        <div class="content" id="content">
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <div>왼쪽에서 블록을 선택하세요</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 편집 모달 -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle">블록 편집</span>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editId">
+
+                <div class="form-group">
+                    <label class="form-label">블록 ID</label>
+                    <input type="text" class="form-input" id="editBlockId" placeholder="T, PID, AND 등">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">블록 이름</label>
+                    <input type="text" class="form-input" id="editName" placeholder="예: T블록 (조건분기)">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">카테고리</label>
+                    <select class="form-select" id="editCategory">
+                        <option value="logic">논리 (Logic)</option>
+                        <option value="math">수학 (Math)</option>
+                        <option value="control">제어 (Control)</option>
+                        <option value="compare">비교 (Compare)</option>
+                        <option value="timer">타이머 (Timer)</option>
+                        <option value="unknown">미분류</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">기본 설명</label>
+                    <textarea class="form-textarea" id="editDesc" placeholder="블록의 기본 기능"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">상세 설명</label>
+                    <textarea class="form-textarea" id="editDetail" style="min-height:80px" placeholder="블록의 동작을 상세히 설명..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">AI용 상세 설명</label>
+                    <textarea class="form-textarea" id="editAI" style="min-height:120px" placeholder="AI가 이해할 수 있도록 상세히 설명..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">포트 구성</label>
+                    <div id="editPortsContainer" style="background:rgba(0,0,0,0.3); border-radius:8px; padding:12px; max-height:200px; overflow-y:auto;">
+                        <!-- 포트 목록이 여기에 표시됨 -->
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:8px;">
+                        <input type="text" id="newPortName" class="form-input" placeholder="포트 이름" style="flex:1;">
+                        <select id="newPortDir" class="form-select" style="width:80px;">
+                            <option value="input">입력</option>
+                            <option value="output">출력</option>
+                            <option value="model">모델</option>
+                        </select>
+                        <button class="btn btn-ghost" onclick="addPortToEdit()" style="padding:8px 12px;">+ 추가</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-delete" onclick="deleteBlock()" id="deleteBtn" style="display:none">삭제</button>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-ghost" onclick="closeModal()">취소</button>
+                    <button class="btn btn-primary" onclick="saveBlock()">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 스캔 진행 오버레이 -->
+    <div class="scan-overlay" id="scanOverlay">
+        <div class="scan-spinner"></div>
+        <div class="scan-text" id="scanText">도면 스캔 중...</div>
+    </div>
+
+    <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImage(event)">
+
+    <script>
+        let blockData = {};
+        let scannedData = null;
+        let currentCat = 'all';
+        let selectedBlock = null;
+        let deletedBlocks = []; // 삭제된 블록 목록 (자동 추가 방지용)
+
+        const catNames = { logic: '논리', math: '수학', control: '제어', compare: '비교', timer: '타이머', unknown: '미분류' };
+        const iconClass = { logic: 'icon-logic', math: 'icon-math', control: 'icon-control', compare: 'icon-compare', timer: 'icon-timer', unknown: 'icon-unknown' };
+
+        // 기본 블록 정의 (포트 정보 포함)
+        const defaultBlocks = {
+            // ===== LOGIC (논리) =====
+            'AND': {
+                id: 'AND', name: 'AND', category: 'logic',
+                desc: '논리곱 (AND) 연산',
+                ai: 'AND 블록은 모든 입력이 TRUE일 때만 출력이 TRUE가 됩니다. 하나라도 FALSE이면 출력은 FALSE입니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'OR': {
+                id: 'OR', name: 'OR', category: 'logic',
+                desc: '논리합 (OR) 연산',
+                ai: 'OR 블록은 하나라도 입력이 TRUE이면 출력이 TRUE가 됩니다. 모든 입력이 FALSE일 때만 출력이 FALSE입니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'NOT': {
+                id: 'NOT', name: 'NOT', category: 'logic',
+                desc: '논리 부정 (NOT) 연산',
+                ai: 'NOT 블록은 입력을 반전시킵니다. TRUE → FALSE, FALSE → TRUE로 변환합니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'XOR': {
+                id: 'XOR', name: 'XOR', category: 'logic',
+                desc: '배타적 논리합 (XOR) 연산',
+                ai: 'XOR 블록은 두 입력이 서로 다를 때 TRUE를 출력합니다. 같으면 FALSE입니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'NAND': {
+                id: 'NAND', name: 'NAND', category: 'logic',
+                desc: 'AND의 부정 (NAND) 연산',
+                ai: 'NAND 블록은 AND의 결과를 반전합니다. 모든 입력이 TRUE일 때만 FALSE, 그 외에는 TRUE입니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'NOR': {
+                id: 'NOR', name: 'NOR', category: 'logic',
+                desc: 'OR의 부정 (NOR) 연산',
+                ai: 'NOR 블록은 OR의 결과를 반전합니다. 모든 입력이 FALSE일 때만 TRUE입니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'T': {
+                id: 'T', name: 'T', category: 'logic',
+                desc: '조건 분기 블록 - YES/NO 분기 출력',
+                ai: 'T블록은 조건 분기(Conditional Branch) 블록입니다. FLAG 입력이 TRUE일 때 YES 출력으로, FALSE일 때 NO 출력으로 값을 분기합니다.\n\n【입력 포트】\n• FLAG: 분기 조건 신호 (TRUE/FALSE)\n• T: 분기할 아날로그/디지털 값\n• STPT: 설정값(Set Point) - 일부 변형에서 사용\n\n【출력 포트】\n• YES: FLAG=TRUE일 때 T값 출력\n• NO: FLAG=FALSE일 때 T값 출력\n• OUT: 현재 상태 출력\n\n【사용 예시】\n알람 조건에 따라 다른 경로로 신호를 보내거나, 조건부 제어 로직 구현에 사용됩니다. OCB0088xxx 계열 인스턴스 21개가 DH_Apparatus 도면에서 발견되었습니다.',
+                ports: [{ name: 'FLAG', direction: 'input' }, { name: 'T', direction: 'input' }, { name: 'STPT', direction: 'input' }, { name: 'YES', direction: 'output' }, { name: 'NO', direction: 'output' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'SEL': {
+                id: 'SEL', name: 'SEL', category: 'logic',
+                desc: '선택 블록',
+                ai: 'SEL 블록은 조건에 따라 두 입력 중 하나를 선택하여 출력합니다. G=0이면 IN0, G=1이면 IN1을 출력합니다.',
+                ports: [{ name: 'G', direction: 'input' }, { name: 'IN0', direction: 'input' }, { name: 'IN1', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'SR': {
+                id: 'SR', name: 'SR', category: 'logic',
+                desc: 'Set-Reset 래치 (Set 우선)',
+                ai: 'SR 래치는 Set 우선 플립플롭입니다. S=1이면 Q=1, R=1이면 Q=0. S와 R이 동시에 1이면 S가 우선합니다.',
+                ports: [{ name: 'S', direction: 'input' }, { name: 'R', direction: 'input' }, { name: 'Q', direction: 'output' }],
+                images: []
+            },
+            'RS': {
+                id: 'RS', name: 'RS', category: 'logic',
+                desc: 'Reset-Set 래치 (Reset 우선)',
+                ai: 'RS 래치는 Reset 우선 플립플롭입니다. R=1이면 Q=0, S=1이면 Q=1. R과 S가 동시에 1이면 R이 우선합니다.',
+                ports: [{ name: 'S', direction: 'input' }, { name: 'R', direction: 'input' }, { name: 'Q', direction: 'output' }],
+                images: []
+            },
+
+            // ===== MATH (수학) =====
+            'ADD': {
+                id: 'ADD', name: 'ADD', category: 'math',
+                desc: '덧셈 연산',
+                ai: 'ADD 블록은 입력값들을 더합니다. OUT = IN1 + IN2 (+ IN3 + ...)  여러 입력을 가질 수 있습니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'SUB': {
+                id: 'SUB', name: 'SUB', category: 'math',
+                desc: '뺄셈 블록 - IN1 - IN2',
+                ai: 'SUB 블록은 뺄셈(Subtraction) 연산을 수행합니다. 첫 번째 입력에서 두 번째 입력을 빼서 결과를 출력합니다.\n\n【연산 공식】\nOUT = A - B (또는 IN1 - IN2)\n\n【입력 포트】\n• A (또는 IN1): 피감수 (빼지는 값)\n• B (또는 IN2): 감수 (빼는 값)\n\n【출력 포트】\n• OUT: 뺄셈 결과\n\n【변형】\n일부 인스턴스는 단일 입력(A)만 사용하여 상수값과의 차이를 계산합니다. ALG-0113xxx 계열 인스턴스 4개가 DH_Apparatus 도면에서 발견되었습니다.\n\n【사용 예시】\n두 센서값의 차이 계산, 편차(Deviation) 계산, 오프셋 보정 등에 사용됩니다.',
+                ports: [{ name: 'A', direction: 'input' }, { name: 'B', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'MUL': {
+                id: 'MUL', name: 'MUL', category: 'math',
+                desc: '곱셈 연산',
+                ai: 'MUL 블록은 입력값들을 곱합니다. OUT = IN1 × IN2',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'DIV': {
+                id: 'DIV', name: 'DIV', category: 'math',
+                desc: '나눗셈 연산',
+                ai: 'DIV 블록은 첫 번째 입력을 두 번째 입력으로 나눕니다. OUT = IN1 / IN2. 0으로 나누기 방지 로직이 있을 수 있습니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'ABS': {
+                id: 'ABS', name: 'ABS', category: 'math',
+                desc: '절대값 연산',
+                ai: 'ABS 블록은 입력의 절대값을 출력합니다. OUT = |IN|',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'SQRT': {
+                id: 'SQRT', name: 'SQRT', category: 'math',
+                desc: '제곱근 연산',
+                ai: 'SQRT 블록은 입력의 제곱근을 출력합니다. OUT = √IN. 음수 입력 시 에러 처리가 있을 수 있습니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'LIM': {
+                id: 'LIM', name: 'LIM', category: 'math',
+                desc: '리미터 (상/하한 제한)',
+                ai: 'LIM 블록은 입력값을 상한(HI)과 하한(LO) 범위 내로 제한합니다. IN < LO이면 OUT=LO, IN > HI이면 OUT=HI, 그 외에는 OUT=IN',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'HI', direction: 'input' }, { name: 'LO', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'MAX': {
+                id: 'MAX', name: 'MAX', category: 'math',
+                desc: '최대값 선택',
+                ai: 'MAX 블록은 입력값들 중 가장 큰 값을 출력합니다. OUT = max(IN1, IN2, ...)',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'MIN': {
+                id: 'MIN', name: 'MIN', category: 'math',
+                desc: '최소값 선택',
+                ai: 'MIN 블록은 입력값들 중 가장 작은 값을 출력합니다. OUT = min(IN1, IN2, ...)',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'AVG': {
+                id: 'AVG', name: 'AVG', category: 'math',
+                desc: '평균값 계산',
+                ai: 'AVG 블록은 입력값들의 평균을 계산합니다. OUT = (IN1 + IN2 + ...) / n',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'SUM': {
+                id: 'SUM', name: 'SUM', category: 'math',
+                desc: '합계 계산',
+                ai: 'SUM 블록은 여러 입력의 합계를 계산합니다. ADD와 유사하지만 더 많은 입력을 처리할 수 있습니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'IN3', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'SCALE': {
+                id: 'SCALE', name: 'SCALE', category: 'math',
+                desc: '스케일 변환',
+                ai: 'SCALE 블록은 입력값을 하나의 범위에서 다른 범위로 변환합니다. 예: 4-20mA를 0-100%로 변환',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'IN_LO', direction: 'input' }, { name: 'IN_HI', direction: 'input' }, { name: 'OUT_LO', direction: 'input' }, { name: 'OUT_HI', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+
+            // ===== CONTROL (제어) =====
+            'PID': {
+                id: 'PID', name: 'PID', category: 'control',
+                desc: 'PID 제어기',
+                ai: 'PID 블록은 비례(P)-적분(I)-미분(D) 제어를 수행합니다. PV(현재값)와 SP(설정값)의 편차를 기반으로 MV(조작값)를 계산합니다. 자동/수동 모드 전환이 가능합니다.',
+                ports: [{ name: 'PV', direction: 'input' }, { name: 'SP', direction: 'input' }, { name: 'A/M', direction: 'input' }, { name: 'MV', direction: 'output' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'M/A': {
+                id: 'M/A', name: 'M/A', category: 'control',
+                desc: 'Manual/Auto 전환 스테이션',
+                ai: 'M/A 블록은 수동/자동 모드 전환 스테이션입니다. 자동 모드에서는 AUTO 입력값을, 수동 모드에서는 MANUAL 입력값을 출력합니다.',
+                ports: [{ name: 'AUTO', direction: 'input' }, { name: 'MANUAL', direction: 'input' }, { name: 'MODE', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'LAG': {
+                id: 'LAG', name: 'LAG', category: 'control',
+                desc: '1차 지연 필터',
+                ai: 'LAG 블록은 1차 지연(저역 통과 필터)을 적용합니다. 급격한 신호 변화를 부드럽게 만들어 노이즈를 제거합니다. 시상수(Time Constant)로 지연 정도를 조절합니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'TC', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'LEAD': {
+                id: 'LEAD', name: 'LEAD', category: 'control',
+                desc: '리드 보상기',
+                ai: 'LEAD 블록은 위상 앞섬(리드) 보상을 제공합니다. 제어 시스템의 응답 속도를 개선하는 데 사용됩니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'TC', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'INTEG': {
+                id: 'INTEG', name: 'INTEG', category: 'control',
+                desc: '적분기',
+                ai: 'INTEG 블록은 입력값을 시간에 따라 적분합니다. 누적값 계산이나 적분 제어에 사용됩니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'RESET', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'DERIV': {
+                id: 'DERIV', name: 'DERIV', category: 'control',
+                desc: '미분기',
+                ai: 'DERIV 블록은 입력값의 변화율(미분값)을 계산합니다. 값의 변화 속도를 감지하는 데 사용됩니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'RAMP': {
+                id: 'RAMP', name: 'RAMP', category: 'control',
+                desc: '램프 생성기',
+                ai: 'RAMP 블록은 설정된 속도로 값을 점진적으로 변화시킵니다. 급격한 설정값 변경을 방지하여 부드러운 제어를 구현합니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'RATE', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+
+            // ===== COMPARE (비교) =====
+            'GT': {
+                id: 'GT', name: 'GT', category: 'compare',
+                desc: '크다 비교 (>)',
+                ai: 'GT(Greater Than) 블록은 IN1 > IN2이면 TRUE를 출력합니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'LT': {
+                id: 'LT', name: 'LT', category: 'compare',
+                desc: '작다 비교 (<)',
+                ai: 'LT(Less Than) 블록은 IN1 < IN2이면 TRUE를 출력합니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'GE': {
+                id: 'GE', name: 'GE', category: 'compare',
+                desc: '크거나 같다 비교 (>=)',
+                ai: 'GE(Greater or Equal) 블록은 IN1 >= IN2이면 TRUE를 출력합니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'LE': {
+                id: 'LE', name: 'LE', category: 'compare',
+                desc: '작거나 같다 비교 (<=)',
+                ai: 'LE(Less or Equal) 블록은 IN1 <= IN2이면 TRUE를 출력합니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'EQ': {
+                id: 'EQ', name: 'EQ', category: 'compare',
+                desc: '같다 비교 (==)',
+                ai: 'EQ(Equal) 블록은 IN1 == IN2이면 TRUE를 출력합니다. 실수 비교 시 허용 오차를 설정할 수 있습니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'NE': {
+                id: 'NE', name: 'NE', category: 'compare',
+                desc: '같지 않다 비교 (!=)',
+                ai: 'NE(Not Equal) 블록은 IN1 != IN2이면 TRUE를 출력합니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'CMP': {
+                id: 'CMP', name: 'CMP', category: 'compare',
+                desc: '범위 비교',
+                ai: 'CMP 블록은 입력값이 상한(HI)과 하한(LO) 범위 내에 있는지 비교합니다. 경보 발생 등에 사용됩니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'HI', direction: 'input' }, { name: 'LO', direction: 'input' }, { name: 'HI_ALM', direction: 'output' }, { name: 'LO_ALM', direction: 'output' }],
+                images: []
+            },
+
+            // ===== TIMER (타이머) =====
+            'TON': {
+                id: 'TON', name: 'TON', category: 'timer',
+                desc: 'On-Delay 타이머',
+                ai: 'TON(Timer On-Delay)은 입력이 ON된 후 설정 시간이 지나면 출력이 ON됩니다. 채터링 방지, 지연 동작에 사용됩니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'PT', direction: 'input' }, { name: 'Q', direction: 'output' }, { name: 'ET', direction: 'output' }],
+                images: []
+            },
+            'TOF': {
+                id: 'TOF', name: 'TOF', category: 'timer',
+                desc: 'Off-Delay 타이머',
+                ai: 'TOF(Timer Off-Delay)는 입력이 OFF된 후 설정 시간이 지나면 출력이 OFF됩니다. 유지 동작에 사용됩니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'PT', direction: 'input' }, { name: 'Q', direction: 'output' }, { name: 'ET', direction: 'output' }],
+                images: []
+            },
+            'TP': {
+                id: 'TP', name: 'TP', category: 'timer',
+                desc: '펄스 타이머',
+                ai: 'TP(Timer Pulse)는 입력 상승 에지에서 설정 시간 동안만 출력이 ON됩니다. 원샷 펄스 생성에 사용됩니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'PT', direction: 'input' }, { name: 'Q', direction: 'output' }, { name: 'ET', direction: 'output' }],
+                images: []
+            },
+            'CTU': {
+                id: 'CTU', name: 'CTU', category: 'timer',
+                desc: '업 카운터',
+                ai: 'CTU(Counter Up)는 펄스 입력을 받을 때마다 카운트를 증가시킵니다. 설정값에 도달하면 출력이 ON됩니다.',
+                ports: [{ name: 'CU', direction: 'input' }, { name: 'R', direction: 'input' }, { name: 'PV', direction: 'input' }, { name: 'Q', direction: 'output' }, { name: 'CV', direction: 'output' }],
+                images: []
+            },
+            'CTD': {
+                id: 'CTD', name: 'CTD', category: 'timer',
+                desc: '다운 카운터',
+                ai: 'CTD(Counter Down)는 펄스 입력을 받을 때마다 카운트를 감소시킵니다. 0에 도달하면 출력이 ON됩니다.',
+                ports: [{ name: 'CD', direction: 'input' }, { name: 'LD', direction: 'input' }, { name: 'PV', direction: 'input' }, { name: 'Q', direction: 'output' }, { name: 'CV', direction: 'output' }],
+                images: []
+            },
+            'CTUD': {
+                id: 'CTUD', name: 'CTUD', category: 'timer',
+                desc: '업/다운 카운터',
+                ai: 'CTUD는 업 카운트와 다운 카운트를 모두 수행합니다. CU 입력으로 증가, CD 입력으로 감소합니다.',
+                ports: [{ name: 'CU', direction: 'input' }, { name: 'CD', direction: 'input' }, { name: 'R', direction: 'input' }, { name: 'PV', direction: 'input' }, { name: 'QU', direction: 'output' }, { name: 'QD', direction: 'output' }, { name: 'CV', direction: 'output' }],
+                images: []
+            },
+
+            // ===== DH APPARATUS 도면 발견 블록 =====
+            'K': {
+                id: 'K', name: 'K', category: 'math',
+                desc: '상수 블록 (Constant)',
+                ai: 'K 블록은 상수(Constant) 값을 출력하는 블록입니다.\n\n【기능】\n설정된 고정 상수값을 지속적으로 출력합니다. 제어 시스템에서 기준값, 오프셋, 게인 등을 제공할 때 사용됩니다.\n\n【출력 포트】\n• OUT: 설정된 상수값 출력\n\n【사용 예시】\n• 제어 루프의 바이어스(Bias) 값 설정\n• 스케일 팩터(Scale Factor) 제공\n• 기준 설정값 공급\n\n【참고】\nDH_Apparatus 도면 Page 187에서 OCB008800E, OCB008801E, OCB0088032, OCB0088047 블록에서 K 타입이 발견되었습니다.',
+                ports: [{ name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'H': {
+                id: 'H', name: 'H', category: 'compare',
+                desc: 'High Select (최대값 선택)',
+                ai: 'H 블록은 High Select(최대값 선택) 블록입니다.\n\n【기능】\n여러 입력 중 가장 높은 값을 선택하여 출력합니다. MAX 블록과 유사한 기능입니다.\n\n【입력 포트】\n• IN1, IN2, ...: 비교할 입력값들\n\n【출력 포트】\n• OUT: 입력 중 최대값\n\n【사용 예시】\n• 여러 센서 중 가장 높은 측정값 선택\n• 보호 로직에서 최악의 경우 선택\n• 리던던트(Redundant) 신호 처리\n\n【참고】\nDH_Apparatus 도면 Page 187의 압력/온도 제어 로직에서 발견되었습니다.',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'L': {
+                id: 'L', name: 'L', category: 'compare',
+                desc: 'Low Select (최소값 선택)',
+                ai: 'L 블록은 Low Select(최소값 선택) 블록입니다.\n\n【기능】\n여러 입력 중 가장 낮은 값을 선택하여 출력합니다. MIN 블록과 유사한 기능입니다.\n\n【입력 포트】\n• IN1, IN2, ...: 비교할 입력값들\n\n【출력 포트】\n• OUT: 입력 중 최소값\n\n【사용 예시】\n• 보수적인 제어를 위한 최소값 선택\n• 안전 로직에서 가장 보수적인 값 선택\n• 밸브 개도 제한 등',
+                ports: [{ name: 'IN1', direction: 'input' }, { name: 'IN2', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'N': {
+                id: 'N', name: 'N', category: 'logic',
+                desc: '부정 블록 (Negation)',
+                ai: 'N 블록은 부정(Negation) 블록입니다. NOT 블록의 간략 표기입니다.\n\n【기능】\n입력 신호를 반전시킵니다. TRUE → FALSE, FALSE → TRUE로 변환합니다.\n\n【입력 포트】\n• IN: 반전할 입력 신호\n\n【출력 포트】\n• OUT: 반전된 출력 신호\n\n【사용 예시】\n• 신호 반전 로직\n• 인터락 조건 반전\n• 경보 상태 반전\n\n【참고】\nDH_Apparatus 도면 Page 187에서 여러 위치에서 N 타입이 발견되었습니다. OCB0088xxx 계열 블록 포트에서 사용됩니다.',
+                ports: [{ name: 'IN', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            },
+            'RATIO': {
+                id: 'RATIO', name: 'RATIO', category: 'math',
+                desc: '비율 계산 블록 (NUM/DEN)',
+                ai: 'RATIO 블록은 비율(Ratio) 계산 블록입니다.\n\n【기능】\nNUM(분자)을 DEN(분모)으로 나누어 비율을 계산합니다. DIV 블록과 유사하지만 비율 제어에 특화되어 있습니다.\n\n【입력 포트】\n• NUM: 분자 (Numerator)\n• DEN: 분모 (Denominator)\n\n【출력 포트】\n• OUT: NUM / DEN 결과값\n\n【사용 예시】\n• 연료/공기 비율 제어\n• 혼합비 계산\n• 효율 계산\n\n【참고】\nDH_Apparatus 도면 Page 187에서 OCB0088007 블록에서 NUM, DEN 포트가 발견되었습니다.',
+                ports: [{ name: 'NUM', direction: 'input' }, { name: 'DEN', direction: 'input' }, { name: 'OUT', direction: 'output' }],
+                images: []
+            }
+        };
+
+        async function init() {
+            // 삭제된 블록 목록 로드
+            try {
+                const deletedSaved = localStorage.getItem('blockDictionary_deleted');
+                if (deletedSaved) {
+                    deletedBlocks = JSON.parse(deletedSaved);
+                }
+            } catch (e) {
+                deletedBlocks = [];
+            }
+
+            // 저장된 데이터 로드
+            const saved = localStorage.getItem('blockDictionary_v3');
+            if (saved) {
+                blockData = JSON.parse(saved);
+            } else {
+                blockData = { ...defaultBlocks };
+            }
+
+            // 스캔 데이터 로드
+            try {
+                const resp = await fetch('data/function_blocks.json');
+                if (resp.ok) {
+                    scannedData = await resp.json();
+                    mergeScannedData();
+                }
+            } catch (e) {
+                console.log('스캔 데이터 없음');
+            }
+
+            renderBlockList();
+            updateStats();
+        }
+
+        function mergeScannedData() {
+            if (!scannedData?.blockTypes) return;
+
+            for (const [typeId, typeData] of Object.entries(scannedData.blockTypes)) {
+                // 삭제된 블록은 자동 추가하지 않음
+                if (deletedBlocks.includes(typeId)) {
+                    console.log(`Skipping deleted block: ${typeId}`);
+                    continue;
+                }
+
+                if (!blockData[typeId]) {
+                    // 새로운 블록 타입 추가
+                    blockData[typeId] = {
+                        id: typeId,
+                        name: typeData.name || typeId,
+                        category: guessCategory(typeId),
+                        desc: typeData.description || '',
+                        ai: '',
+                        images: [],
+                        ports: [],
+                        instances: typeData.instances || []
+                    };
+                } else {
+                    // 기존 블록에 인스턴스 정보만 추가 (포트 덮어쓰기 안함)
+                    blockData[typeId].instances = typeData.instances || [];
+                }
+
+                // 포트가 없거나 빈 배열일 때만 스캔 데이터에서 포트 수집
+                if (!blockData[typeId].ports || blockData[typeId].ports.length === 0) {
+                    const portVariants = new Set();
+                    for (const inst of (typeData.instances || [])) {
+                        portVariants.add(inst.ports.sort().join(','));
+                    }
+                    blockData[typeId].ports = [...portVariants].map(p => p.split(','));
+                }
+            }
+
+            save();
+        }
+
+        function guessCategory(typeId) {
+            const id = typeId.toUpperCase();
+            if (['AND', 'OR', 'NOT', 'XOR', 'NAND', 'NOR', 'T', 'SEL', 'SR', 'RS', 'N'].includes(id)) return 'logic';
+            if (['ADD', 'SUB', 'MUL', 'DIV', 'ABS', 'SQRT', 'LIM', 'MAX', 'MIN', 'AVG', 'SUM', 'K', 'RATIO', 'SCALE'].includes(id)) return 'math';
+            if (['PID', 'LAG', 'LEAD', 'INTEG', 'DERIV', 'M/A', 'RAMP'].includes(id)) return 'control';
+            if (['GT', 'LT', 'GE', 'LE', 'EQ', 'NE', 'COMPARE', 'CMP', 'H', 'L'].includes(id)) return 'compare';
+            if (['TIMER', 'TON', 'TOF', 'COUNTER', 'CTU', 'CTD', 'CTUD', 'TP'].includes(id)) return 'timer';
+            return 'unknown';
+        }
+
+        function save() {
+            localStorage.setItem('blockDictionary_v3', JSON.stringify(blockData));
+        }
+
+        function resetToDefaults() {
+            const msg = `심볼 사전을 초기화하시겠습니까?\n\n` +
+                        `• 현재 저장된 모든 블록이 삭제됩니다\n` +
+                        `• 기본 블록 ${Object.keys(defaultBlocks).length}개로 초기화됩니다\n` +
+                        `• 삭제 기록도 초기화됩니다\n\n` +
+                        `이 작업은 되돌릴 수 없습니다.`;
+
+            if (!confirm(msg)) return;
+
+            // localStorage 초기화
+            localStorage.removeItem('blockDictionary_v3');
+            localStorage.removeItem('blockDictionary_deleted');
+
+            // 변수 초기화
+            deletedBlocks = [];
+            blockData = JSON.parse(JSON.stringify(defaultBlocks)); // deep copy
+
+            save();
+
+            selectedBlock = null;
+            renderBlockList();
+            renderDetail();
+            updateStats();
+            toast(`기본 블록 ${Object.keys(defaultBlocks).length}개로 초기화되었습니다`);
+        }
+
+        function updateStats() {
+            const blocks = Object.values(blockData);
+            document.getElementById('statBlocks').textContent = blocks.length;
+
+            const totalInstances = blocks.reduce((sum, b) => sum + (b.instances?.length || 0), 0);
+            document.getElementById('statInstances').textContent = totalInstances;
+
+            document.getElementById('statImages').textContent = blocks.reduce((sum, b) => sum + (b.images?.length || 0), 0);
+
+            const withAI = blocks.filter(b => b.ai && b.ai.length > 10).length;
+            document.getElementById('statComplete').textContent = blocks.length ? Math.round(withAI / blocks.length * 100) + '%' : '0%';
+        }
+
+        function renderBlockList() {
+            const list = document.getElementById('blockList');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+
+            const filtered = Object.values(blockData).filter(b => {
+                if (currentCat !== 'all' && b.category !== currentCat) return false;
+                if (search && !b.id.toLowerCase().includes(search) && !b.name.toLowerCase().includes(search)) return false;
+                return true;
+            }).sort((a, b) => {
+                // 인스턴스 많은 순
+                const aCount = a.instances?.length || 0;
+                const bCount = b.instances?.length || 0;
+                return bCount - aCount;
+            });
+
+            list.innerHTML = filtered.map(b => {
+                const count = b.instances?.length || 0;
+                const hasAI = b.ai && b.ai.length > 10;
+                const statusClass = hasAI ? 'status-complete' : (b.desc ? 'status-partial' : 'status-empty');
+
+                return `
+                    <div class="block-item ${selectedBlock === b.id ? 'active' : ''}" onclick="selectBlock('${b.id}')">
+                        <div class="block-icon-sm ${iconClass[b.category] || 'icon-unknown'}">${b.id.slice(0, 2)}</div>
+                        <div class="block-info">
+                            <div class="block-name-sm">${b.id}</div>
+                            <div class="block-meta">
+                                <span>${catNames[b.category] || '미분류'}</span>
+                                <span>${count}개</span>
+                            </div>
+                        </div>
+                        <div class="block-status ${statusClass}"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setCategory(cat) {
+            currentCat = cat;
+            document.querySelectorAll('.filter-chip').forEach(c => {
+                c.classList.toggle('active', c.dataset.cat === cat);
+            });
+            renderBlockList();
+        }
+
+        function filterBlocks() {
+            renderBlockList();
+        }
+
+        function selectBlock(id) {
+            selectedBlock = id;
+            renderBlockList();
+            renderDetail();
+        }
+
+        function renderDetail() {
+            const content = document.getElementById('content');
+            const b = blockData[selectedBlock];
+
+            if (!b) {
+                content.innerHTML = `<div class="empty-state"><div class="empty-icon">📦</div><div>왼쪽에서 블록을 선택하세요</div></div>`;
+                return;
+            }
+
+            const ports = b.ports || [];
+
+            content.innerHTML = `
+                <div class="detail-card">
+                    <div class="detail-header">
+                        <div class="detail-title">
+                            <div class="detail-icon ${iconClass[b.category] || 'icon-unknown'}">${b.id.slice(0, 2)}</div>
+                            <div>
+                                <div class="detail-name">${b.name || b.id}</div>
+                                <div class="detail-id">ID: ${b.id}</div>
+                            </div>
+                        </div>
+                        <span class="cat-badge cat-${b.category}">${catNames[b.category] || '미분류'}</span>
+                    </div>
+                    <div class="detail-body">
+                        <div class="section">
+                            <div class="section-title">
+                                기본 설명
+                                <div style="display:flex; gap:4px;">
+                                    <button class="edit-btn" onclick="editBlock('${b.id}')">편집</button>
+                                    <button class="edit-btn" onclick="quickDeleteBlock('${b.id}')" style="color:#f44336;">삭제</button>
+                                </div>
+                            </div>
+                            <p class="desc-text">${b.desc || '(설명 없음)'}</p>
+                        </div>
+
+                        ${b.detail ? `
+                        <div class="section">
+                            <div class="section-title">상세 설명</div>
+                            <p class="desc-text">${b.detail}</p>
+                        </div>
+                        ` : ''}
+
+                        ${ports.length ? `
+                        <div class="section">
+                            <div class="section-title">포트 구성</div>
+                            <div class="port-variants">
+                                ${(() => {
+                                    // 포트 형식 감지: 2D 배열 vs 객체 배열
+                                    const isNewFormat = ports[0] && typeof ports[0] === 'object' && ports[0].name;
+
+                                    if (isNewFormat) {
+                                        // 새 형식: [{name, direction, type}, ...]
+                                        const inputs = ports.filter(p => p.direction === 'input');
+                                        const outputs = ports.filter(p => p.direction === 'output');
+                                        const models = ports.filter(p => p.direction === 'model');
+                                        return `
+                                            <div class="port-variant" style="flex-direction:column; align-items:flex-start; gap:8px;">
+                                                <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
+                                                    <span style="font-size:10px; color:#4fc3f7; font-weight:600; margin-right:4px;">입력:</span>
+                                                    ${inputs.map(p => `<span class="port-tag port-in">${p.name}</span>`).join('')}
+                                                    ${inputs.length === 0 ? '<span style="color:#666; font-size:10px;">없음</span>' : ''}
+                                                </div>
+                                                <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
+                                                    <span style="font-size:10px; color:#ff9800; font-weight:600; margin-right:4px;">출력:</span>
+                                                    ${outputs.map(p => `<span class="port-tag port-out">${p.name}</span>`).join('')}
+                                                    ${outputs.length === 0 ? '<span style="color:#666; font-size:10px;">없음</span>' : ''}
+                                                </div>
+                                                ${models.length > 0 ? `
+                                                <div style="display:flex; flex-wrap:wrap; gap:4px; align-items:center;">
+                                                    <span style="font-size:10px; color:#ab47bc; font-weight:600; margin-right:4px;">모델:</span>
+                                                    ${models.map(p => `<span class="port-tag port-model" style="background:#ab47bc33; border-color:#ab47bc; color:#ab47bc;">${p.name}</span>`).join('')}
+                                                </div>
+                                                ` : ''}
+                                            </div>
+                                        `;
+                                    } else {
+                                        // 기존 형식: 2D 배열 [[port1, port2], ...]
+                                        return ports.map((row, i) => `
+                                            <div class="port-variant">
+                                                ${(Array.isArray(row) ? row : [row]).map(p => {
+                                                    const portName = typeof p === 'string' ? p : (p.name || p);
+                                                    const upper = portName.toUpperCase();
+                                                    const cls = upper.includes('OUT') ? 'port-out' :
+                                                               (upper.includes('IN') || ['FLAG','T','N','PV','SP','STPT','MEAS','A','B'].includes(upper)) ? 'port-in' : 'port-param';
+                                                    return `<span class="port-tag ${cls}">${portName}</span>`;
+                                                }).join('')}
+                                                ${ports.length > 1 ? `<span class="variant-label">변형 ${i + 1}</span>` : ''}
+                                            </div>
+                                        `).join('');
+                                    }
+                                })()}
+                            </div>
+                        </div>
+                        ` : ''}
+
+                        <div class="section">
+                            <div class="section-title">
+                                🤖 AI 참조 설명
+                            </div>
+                            <div class="ai-box">
+                                <div class="ai-text ${b.ai ? '' : 'empty'}">${b.ai || '아직 AI용 설명이 없습니다. 편집을 클릭해서 추가하세요.'}</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            `;
+        }
+
+        // 편집 중인 포트 목록
+        let editingPorts = [];
+
+        function editBlock(id) {
+            const b = blockData[id];
+            if (!b) return;
+
+            document.getElementById('editId').value = id;
+            document.getElementById('editBlockId').value = b.id;
+            document.getElementById('editBlockId').disabled = true;
+            document.getElementById('editName').value = b.name || '';
+            document.getElementById('editCategory').value = b.category || 'unknown';
+            document.getElementById('editDesc').value = b.desc || '';
+            document.getElementById('editDetail').value = b.detail || '';
+            document.getElementById('editAI').value = b.ai || '';
+
+            // 포트 로드
+            editingPorts = normalizePortsForEdit(b.ports || []);
+            renderEditPorts();
+
+            document.getElementById('modalTitle').textContent = '블록 편집';
+            document.getElementById('deleteBtn').style.display = 'block';
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        function addNewBlock() {
+            document.getElementById('editId').value = '';
+            document.getElementById('editBlockId').value = '';
+            document.getElementById('editBlockId').disabled = false;
+            document.getElementById('editName').value = '';
+            document.getElementById('editCategory').value = 'logic';
+            document.getElementById('editDesc').value = '';
+            document.getElementById('editDetail').value = '';
+            document.getElementById('editAI').value = '';
+
+            // 포트 초기화
+            editingPorts = [];
+            renderEditPorts();
+
+            document.getElementById('modalTitle').textContent = '새 블록 추가';
+            document.getElementById('deleteBtn').style.display = 'none';
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        // 다양한 포트 형식을 통일된 형식으로 변환
+        function normalizePortsForEdit(ports) {
+            if (!ports || ports.length === 0) return [];
+
+            const result = [];
+            const seen = new Set();
+
+            for (const p of ports) {
+                if (typeof p === 'string') {
+                    // 문자열 형식: "OUT"
+                    if (!seen.has(p)) {
+                        seen.add(p);
+                        const upper = p.toUpperCase();
+                        const isOut = upper.includes('OUT') || upper === 'YES' || upper === 'NO' || upper === 'FLAG' || upper === 'MV';
+                        result.push({ name: p, direction: isOut ? 'output' : 'input' });
+                    }
+                } else if (Array.isArray(p)) {
+                    // 배열 형식: ["A", "B", "OUT"]
+                    for (const name of p) {
+                        if (!seen.has(name)) {
+                            seen.add(name);
+                            const upper = name.toUpperCase();
+                            const isOut = upper.includes('OUT') || upper === 'YES' || upper === 'NO' || upper === 'FLAG' || upper === 'MV';
+                            result.push({ name, direction: isOut ? 'output' : 'input' });
+                        }
+                    }
+                } else if (p && p.name) {
+                    // 객체 형식: {name, direction}
+                    if (!seen.has(p.name)) {
+                        seen.add(p.name);
+                        result.push({ name: p.name, direction: p.direction || 'input' });
+                    }
+                }
+            }
+            return result;
+        }
+
+        function renderEditPorts() {
+            const container = document.getElementById('editPortsContainer');
+            if (!container) return;
+
+            if (editingPorts.length === 0) {
+                container.innerHTML = '<div style="color:#666; font-size:12px; text-align:center; padding:10px;">포트 없음</div>';
+                return;
+            }
+
+            const inputs = editingPorts.filter(p => p.direction === 'input');
+            const outputs = editingPorts.filter(p => p.direction === 'output');
+            const models = editingPorts.filter(p => p.direction === 'model');
+
+            let html = '';
+
+            if (inputs.length > 0) {
+                html += `<div style="margin-bottom:8px;"><span style="font-size:10px; color:#4fc3f7; font-weight:600;">입력 (${inputs.length})</span></div>`;
+                html += `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:12px;">`;
+                for (const p of inputs) {
+                    html += `<span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; background:#4fc3f733; border:1px solid #4fc3f7; border-radius:4px; font-size:11px; color:#4fc3f7;">
+                        ${p.name}
+                        <button onclick="removeEditPort('${p.name}')" style="background:none; border:none; color:#ff5252; cursor:pointer; font-size:12px; padding:0; line-height:1;">&times;</button>
+                    </span>`;
+                }
+                html += `</div>`;
+            }
+
+            if (outputs.length > 0) {
+                html += `<div style="margin-bottom:8px;"><span style="font-size:10px; color:#ff9800; font-weight:600;">출력 (${outputs.length})</span></div>`;
+                html += `<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:12px;">`;
+                for (const p of outputs) {
+                    html += `<span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; background:#ff980033; border:1px solid #ff9800; border-radius:4px; font-size:11px; color:#ff9800;">
+                        ${p.name}
+                        <button onclick="removeEditPort('${p.name}')" style="background:none; border:none; color:#ff5252; cursor:pointer; font-size:12px; padding:0; line-height:1;">&times;</button>
+                    </span>`;
+                }
+                html += `</div>`;
+            }
+
+            if (models.length > 0) {
+                html += `<div style="margin-bottom:8px;"><span style="font-size:10px; color:#ab47bc; font-weight:600;">모델 (${models.length})</span></div>`;
+                html += `<div style="display:flex; flex-wrap:wrap; gap:4px;">`;
+                for (const p of models) {
+                    html += `<span style="display:inline-flex; align-items:center; gap:4px; padding:4px 8px; background:#ab47bc33; border:1px solid #ab47bc; border-radius:4px; font-size:11px; color:#ab47bc;">
+                        ${p.name}
+                        <button onclick="removeEditPort('${p.name}')" style="background:none; border:none; color:#ff5252; cursor:pointer; font-size:12px; padding:0; line-height:1;">&times;</button>
+                    </span>`;
+                }
+                html += `</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function addPortToEdit() {
+            const nameInput = document.getElementById('newPortName');
+            const dirSelect = document.getElementById('newPortDir');
+            const name = nameInput.value.trim().toUpperCase();
+            const direction = dirSelect.value;
+
+            if (!name) {
+                alert('포트 이름을 입력하세요');
+                return;
+            }
+
+            if (editingPorts.some(p => p.name === name)) {
+                alert('이미 존재하는 포트입니다');
+                return;
+            }
+
+            editingPorts.push({ name, direction });
+            renderEditPorts();
+            nameInput.value = '';
+        }
+
+        function removeEditPort(name) {
+            editingPorts = editingPorts.filter(p => p.name !== name);
+            renderEditPorts();
+        }
+
+        function saveBlock() {
+            const oldId = document.getElementById('editId').value;
+            const newId = document.getElementById('editBlockId').value.trim().toUpperCase();
+
+            if (!newId) {
+                alert('블록 ID를 입력하세요');
+                return;
+            }
+
+            const data = {
+                id: newId,
+                name: document.getElementById('editName').value.trim() || newId,
+                category: document.getElementById('editCategory').value,
+                desc: document.getElementById('editDesc').value.trim(),
+                detail: document.getElementById('editDetail').value.trim(),
+                ai: document.getElementById('editAI').value.trim(),
+                images: oldId ? (blockData[oldId]?.images || []) : [],
+                ports: editingPorts,  // 편집된 포트 저장
+                instances: oldId ? (blockData[oldId]?.instances || []) : []
+            };
+
+            if (oldId && oldId !== newId) {
+                delete blockData[oldId];
+            }
+
+            blockData[newId] = data;
+            save();
+            closeModal();
+
+            selectedBlock = newId;
+            renderBlockList();
+            renderDetail();
+            updateStats();
+            toast('저장되었습니다');
+        }
+
+        function deleteBlock() {
+            const id = document.getElementById('editId').value;
+            if (!confirm('이 블록을 삭제하시겠습니까?')) return;
+
+            delete blockData[id];
+
+            // 삭제된 블록 목록에 추가 (자동 재추가 방지)
+            if (!deletedBlocks.includes(id)) {
+                deletedBlocks.push(id);
+                localStorage.setItem('blockDictionary_deleted', JSON.stringify(deletedBlocks));
+            }
+
+            save();
+            closeModal();
+
+            selectedBlock = null;
+            renderBlockList();
+            renderDetail();
+            updateStats();
+            toast('삭제되었습니다');
+        }
+
+        function closeModal() {
+            document.getElementById('editModal').classList.remove('show');
+        }
+
+        // 빠른 삭제 (상세 화면에서 직접 삭제)
+        function quickDeleteBlock(id) {
+            const b = blockData[id];
+            if (!b) return;
+
+            // 확인 팝업
+            const portCount = (b.ports || []).length;
+            const hasAI = b.ai && b.ai.length > 10;
+
+            let msg = `"${id}" 블록을 삭제하시겠습니까?\n\n`;
+            msg += `• 카테고리: ${catNames[b.category] || '미분류'}\n`;
+            msg += `• 설명: ${b.desc || '(없음)'}\n`;
+            msg += `• 포트: ${portCount}개\n`;
+            msg += `• AI 설명: ${hasAI ? '있음' : '없음'}\n\n`;
+            msg += `삭제된 데이터는 복구할 수 없습니다.`;
+
+            if (!confirm(msg)) return;
+
+            delete blockData[id];
+
+            // 삭제된 블록 목록에 추가 (자동 재추가 방지)
+            if (!deletedBlocks.includes(id)) {
+                deletedBlocks.push(id);
+                localStorage.setItem('blockDictionary_deleted', JSON.stringify(deletedBlocks));
+            }
+
+            save();
+
+            selectedBlock = null;
+            renderBlockList();
+            renderDetail();
+            updateStats();
+            toast(`${id} 블록이 삭제되었습니다`);
+        }
+
+        let currentImageBlockId = null;
+
+        function addImageFor(id) {
+            currentImageBlockId = id;
+            document.getElementById('imageInput').click();
+        }
+
+        function handleImage(e) {
+            const file = e.target.files[0];
+            if (!file || !currentImageBlockId) return;
+
+            const reader = new FileReader();
+            reader.onload = ev => {
+                if (!blockData[currentImageBlockId].images) {
+                    blockData[currentImageBlockId].images = [];
+                }
+                blockData[currentImageBlockId].images.push(ev.target.result);
+                save();
+                renderDetail();
+                updateStats();
+                toast('이미지가 추가되었습니다');
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        }
+
+        function previewImg(src) {
+            const div = document.createElement('div');
+            div.className = 'modal-overlay show';
+            div.style.cssText = 'cursor:zoom-out';
+            div.onclick = () => div.remove();
+            div.innerHTML = `<img src="${src}" style="max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.5)">`;
+            document.body.appendChild(div);
+        }
+
+        function goToInstance(drop, page, name) {
+            // TODO: 에디터로 이동하는 기능
+            console.log(`Go to: ${drop}/${page}/${name}`);
+            toast(`${name} - 에디터에서 열기 (준비중)`);
+        }
+
+        async function scanAllDrawings() {
+            const overlay = document.getElementById('scanOverlay');
+            const text = document.getElementById('scanText');
+            overlay.classList.add('show');
+
+            text.textContent = '도면 스캔 중... (서버 스크립트 필요)';
+
+            // 서버에서 스캔된 데이터 다시 로드
+            try {
+                await new Promise(r => setTimeout(r, 1000));
+
+                const resp = await fetch('data/function_blocks.json?' + Date.now());
+                if (resp.ok) {
+                    scannedData = await resp.json();
+                    mergeScannedData();
+                    renderBlockList();
+                    updateStats();
+
+                    text.textContent = `스캔 완료! ${Object.keys(scannedData.blockTypes || {}).length}개 블록 타입 발견`;
+                    await new Promise(r => setTimeout(r, 1500));
+                } else {
+                    text.textContent = '스캔 데이터를 찾을 수 없습니다.\n터미널에서 python scripts/analyze_function_blocks.py 실행 필요';
+                    await new Promise(r => setTimeout(r, 3000));
+                }
+            } catch (e) {
+                text.textContent = '오류: ' + e.message;
+                await new Promise(r => setTimeout(r, 2000));
+            }
+
+            overlay.classList.remove('show');
+        }
+
+        function generateAIData() {
+            const aiRef = {
+                title: '제어 로직 심볼 사전',
+                description: 'AI가 도면 분석 시 참조하는 블록 기능 정의',
+                generated: new Date().toISOString(),
+                totalBlocks: Object.keys(blockData).length,
+                blocks: {}
+            };
+
+            for (const [id, b] of Object.entries(blockData)) {
+                aiRef.blocks[id] = {
+                    name: b.name,
+                    category: b.category,
+                    description: b.desc,
+                    ports: b.ports || [],
+                    aiReference: b.ai || '',
+                    instanceCount: b.instances?.length || 0,
+                    hasImages: (b.images?.length || 0) > 0
+                };
+            }
+
+            const blob = new Blob([JSON.stringify(aiRef, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'ai_block_reference.json';
+            a.click();
+
+            console.log('=== AI Reference Data ===');
+            console.log(JSON.stringify(aiRef, null, 2));
+            toast('AI 데이터 생성 완료');
+        }
+
+        function toast(msg) {
+            document.querySelectorAll('.toast').forEach(t => t.remove());
+            const t = document.createElement('div');
+            t.className = 'toast success';
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        init();
+    </script>
+</body>
+</html>

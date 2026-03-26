@@ -1,0 +1,985 @@
+[
+  {
+    "name": "N",
+    "anchor": "N",
+    "anchorType": "BLOCK_TYPE",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": 43,
+        "dy": -11.400000000000091
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -45.200000000000045,
+        "dy": -11.400000000000091
+      },
+      {
+        "name": "N_853_2251",
+        "type": "BLOCK_TYPE",
+        "dx": 0,
+        "dy": 0
+      }
+    ],
+    "priority": 1
+  },
+  {
+    "name": "AND",
+    "anchor": "AND",
+    "anchorType": "BLOCK_TYPE",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": 50.799999999999955,
+        "dy": -9
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -77.5,
+        "dy": -49
+      },
+      {
+        "name": "IN2",
+        "type": "SIGNAL",
+        "dx": -79.5,
+        "dy": 31
+      },
+      {
+        "name": "AND_1145_2288",
+        "type": "BLOCK_TYPE",
+        "dx": 0,
+        "dy": 0
+      }
+    ],
+    "priority": 1
+  },
+  {
+    "name": "MODE_800_2",
+    "anchor": "MODE_800_2350",
+    "anchorType": "OTHER",
+    "ports": [
+      {
+        "name": "MODE",
+        "type": "OTHER",
+        "dx": 0,
+        "dy": 0,
+        "isGenerated": false
+      },
+      {
+        "name": "MRE",
+        "type": "OTHER",
+        "dx": -96.60000000000002,
+        "dy": -51
+      },
+      {
+        "name": "ARE",
+        "type": "OTHER",
+        "dx": -97.20000000000005,
+        "dy": -31
+      },
+      {
+        "name": "RAI",
+        "type": "OTHER",
+        "dx": -95,
+        "dy": -11
+      },
+      {
+        "name": "LWI",
+        "type": "OTHER",
+        "dx": -94.39999999999998,
+        "dy": 9
+      },
+      {
+        "name": "MAN",
+        "type": "OTHER",
+        "dx": 57.39999999999998,
+        "dy": -51
+      },
+      {
+        "name": "AUTO",
+        "type": "OTHER",
+        "dx": 65.60000000000002,
+        "dy": -31
+      },
+      {
+        "name": "MODE",
+        "type": "OTHER",
+        "dx": 69,
+        "dy": 9
+      },
+      {
+        "name": "M/A",
+        "type": "OTHER",
+        "dx": -12.5,
+        "dy": -25
+      }
+    ],
+    "priority": 1,
+    "ignoreName": true
+  },
+  {
+    "name": "TIT2641",
+    "anchor": "TIT2641",
+    "anchorType": "SIGNAL",
+    "ports": [
+      {
+        "name": "G",
+        "type": "PORT",
+        "dx": -13.800000000000011,
+        "dy": 41.400000000000034
+      },
+      {
+        "name": "A",
+        "type": "PORT",
+        "dx": -55.19999999999999,
+        "dy": 41.400000000000034
+      },
+      {
+        "name": "-",
+        "type": "OTHER",
+        "dx": -16.80000000000001,
+        "dy": 163.7
+      },
+      {
+        "name": "DH SPLY MAIN LINE WTR",
+        "type": "OTHER",
+        "dx": 113.80000000000001,
+        "dy": -104.39999999999998
+      },
+      {
+        "name": "TEMP",
+        "type": "OTHER",
+        "dx": -8.600000000000023,
+        "dy": -68.39999999999998
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false
+  },
+  {
+    "name": "D03-524-01",
+    "anchor": "D03-524-01",
+    "anchorType": "REF_SIGNAL",
+    "ports": [
+      {
+        "name": "3/524",
+        "type": "SHEET_REF",
+        "dx": 25.799999999999955,
+        "dy": 163.7
+      },
+      {
+        "name": "G",
+        "type": "PORT",
+        "dx": -30.799999999999955,
+        "dy": 41.400000000000034
+      },
+      {
+        "name": "DH RTN WTR Gcal/H",
+        "type": "OTHER",
+        "dx": 60.60000000000002,
+        "dy": -87.39999999999998
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false
+  },
+  {
+    "name": "OCB0088007",
+    "anchor": "OCB0088007",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "NUM",
+        "type": "PORT",
+        "dx": -182.29999999999995,
+        "dy": -114.20000000000005
+      },
+      {
+        "name": "DEN",
+        "type": "PORT",
+        "dx": -142.29999999999995,
+        "dy": -114.20000000000005
+      },
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": -162.29999999999995,
+        "dy": 1.7999999999999545
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false
+  },
+  {
+    "name": "OCB008800D",
+    "anchor": "OCB008800D",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": -130,
+        "dy": -45
+      },
+      {
+        "name": "A",
+        "type": "PORT",
+        "dx": -189.39999999999998,
+        "dy": -30.600000000000136
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false
+  },
+  {
+    "name": "OCB0088008",
+    "anchor": "OCB0088008",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "FLAG",
+        "type": "PORT",
+        "dx": -200.20000000000005,
+        "dy": -125.20000000000005
+      },
+      {
+        "name": "YES",
+        "type": "PORT",
+        "dx": -162.30000000000007,
+        "dy": -130.20000000000005
+      },
+      {
+        "name": "NO",
+        "type": "PORT",
+        "dx": -216.9000000000001,
+        "dy": -75
+      },
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": -162.30000000000007,
+        "dy": 5.7999999999999545
+      },
+      {
+        "name": "T",
+        "type": "BLOCK_TYPE",
+        "dx": -149.60000000000014,
+        "dy": -59.299999999999955
+      },
+      {
+        "name": "T_972_1275",
+        "type": "BLOCK_TYPE",
+        "dx": -149.60000000000014,
+        "dy": -59.299999999999955
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false
+  },
+  {
+    "name": "D03-522-02",
+    "anchor": "D03-522-02",
+    "anchorType": "REF_SIGNAL",
+    "ports": [
+      {
+        "name": "3/522",
+        "type": "SHEET_REF",
+        "dx": -106.20000000000005,
+        "dy": 45.59999999999991
+      },
+      {
+        "name": "G",
+        "type": "PORT",
+        "dx": -268.8,
+        "dy": 30.5
+      },
+      {
+        "name": "A",
+        "type": "PORT",
+        "dx": -268.2,
+        "dy": -11.5
+      },
+      {
+        "name": "DH CIRC' PP",
+        "type": "OTHER",
+        "dx": -412,
+        "dy": -5.400000000000091
+      },
+      {
+        "name": "DISCH PR H",
+        "type": "OTHER",
+        "dx": -417.2,
+        "dy": 30.59999999999991
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false
+  },
+  {
+    "name": "ALG-011301",
+    "anchor": "ALG-0113011",
+    "anchorType": "ALG_BLOCK",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": 9.5,
+        "dy": -29.200000000000045
+      },
+      {
+        "name": "A",
+        "type": "PORT",
+        "dx": 22.399999999999977,
+        "dy": -96.29999999999995
+      },
+      {
+        "name": "I",
+        "type": "OTHER",
+        "dx": -62.200000000000045,
+        "dy": -96.29999999999995
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false
+  },
+  {
+    "name": "D03-511-03",
+    "anchor": "D03-511-03",
+    "anchorType": "REF_SIGNAL",
+    "ports": [
+      {
+        "name": "3/511",
+        "type": "SHEET_REF",
+        "dx": -106.19999999999999,
+        "dy": 45.59999999999991
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false
+  },
+  {
+    "name": "AND_1",
+    "anchor": "AND",
+    "anchorType": "BLOCK_TYPE",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": 50.79999999999973,
+        "dy": -9
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -77.5,
+        "dy": -49
+      },
+      {
+        "name": "IN2",
+        "type": "SIGNAL",
+        "dx": -79.5,
+        "dy": 31
+      },
+      {
+        "name": "IN3",
+        "type": "SIGNAL",
+        "dx": -79.5,
+        "dy": -9
+      },
+      {
+        "name": "AND_2205_2288",
+        "type": "BLOCK_TYPE",
+        "dx": 0,
+        "dy": 0
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false
+  },
+  {
+    "name": "ALG-011302",
+    "anchor": "ALG-0113020",
+    "anchorType": "ALG_BLOCK",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": -166.39999999999986,
+        "dy": -34.19999999999982
+      },
+      {
+        "name": "T",
+        "type": "BLOCK_TYPE",
+        "dx": -153.69999999999982,
+        "dy": -101.29999999999973
+      },
+      {
+        "name": "A",
+        "type": "PORT",
+        "dx": -73.59999999999991,
+        "dy": -101.29999999999973
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -166.39999999999986,
+        "dy": -170.19999999999982
+      },
+      {
+        "name": "MODE",
+        "type": "OTHER",
+        "dx": -96.59999999999991,
+        "dy": -152
+      },
+      {
+        "name": "I",
+        "type": "OTHER",
+        "dx": 1.800000000000182,
+        "dy": -101.29999999999973
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false
+  },
+  {
+    "name": "OCB008800E",
+    "anchor": "OCB008800E",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "STPT",
+        "type": "PORT",
+        "dx": -145.10000000000002,
+        "dy": -175.0999999999999
+      },
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": -165.10000000000002,
+        "dy": 0.8000000000001819
+      },
+      {
+        "name": "K",
+        "type": "BLOCK_TYPE",
+        "dx": -189.60000000000002,
+        "dy": -62
+      },
+      {
+        "name": "PV",
+        "type": "OTHER",
+        "dx": -185.10000000000002,
+        "dy": -175.19999999999982
+      },
+      {
+        "name": "d",
+        "type": "OTHER",
+        "dx": -127,
+        "dy": -74
+      },
+      {
+        "name": "dt",
+        "type": "OTHER",
+        "dx": -122.60000000000002,
+        "dy": -49
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "OCB0088013",
+    "anchor": "OCB0088013",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -162.30000000000007,
+        "dy": -10.199999999999818
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "OR",
+    "anchor": "OR",
+    "anchorType": "BLOCK_TYPE",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": 57.19999999999982,
+        "dy": -9.100000000000023
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -71.09999999999991,
+        "dy": -49.10000000000002
+      },
+      {
+        "name": "IN2",
+        "type": "SIGNAL",
+        "dx": -73.09999999999991,
+        "dy": 30.899999999999977
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "PIT2621",
+    "anchor": "PIT2621",
+    "anchorType": "SIGNAL",
+    "ports": [
+      {
+        "name": "G",
+        "type": "PORT",
+        "dx": -14.199999999999818,
+        "dy": 41.400000000000034
+      },
+      {
+        "name": "A",
+        "type": "PORT",
+        "dx": -55.599999999999454,
+        "dy": 41.400000000000034
+      },
+      {
+        "name": "-",
+        "type": "OTHER",
+        "dx": -17.199999999999818,
+        "dy": 163.7
+      },
+      {
+        "name": "ACCU PP SUCTN PRESS",
+        "type": "OTHER",
+        "dx": 109.80000000000018,
+        "dy": -87.39999999999998
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "OCB0088016",
+    "anchor": "OCB0088016",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": -162.29999999999927,
+        "dy": 2.7999999999999545
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -182.29999999999927,
+        "dy": -113.30000000000007
+      },
+      {
+        "name": "IN2",
+        "type": "SIGNAL",
+        "dx": -142.29999999999927,
+        "dy": -113.30000000000007
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "ABS",
+    "anchor": "ABS",
+    "anchorType": "BLOCK_TYPE",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": -24.799999999999272,
+        "dy": 61.799999999999955
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -24.799999999999272,
+        "dy": -54.30000000000007
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "OCB008804E",
+    "anchor": "OCB008804E",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": -165.09999999999945,
+        "dy": 0.7999999999999545
+      },
+      {
+        "name": "H",
+        "type": "BLOCK_TYPE",
+        "dx": -178.19999999999982,
+        "dy": -51
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -165.09999999999945,
+        "dy": -95.29999999999995
+      },
+      {
+        "name": "HISP=14.8",
+        "type": "OTHER",
+        "dx": 37.19999999999982,
+        "dy": -54
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "SIT2681A",
+    "anchor": "SIT2681A",
+    "anchorType": "SIGNAL",
+    "ports": [
+      {
+        "name": "G",
+        "type": "PORT",
+        "dx": -19.799999999999955,
+        "dy": 41.5
+      },
+      {
+        "name": "A",
+        "type": "PORT",
+        "dx": -61.200000000000045,
+        "dy": 41.5
+      },
+      {
+        "name": "-",
+        "type": "OTHER",
+        "dx": -22.799999999999955,
+        "dy": 163.5999999999999
+      },
+      {
+        "name": "DH CIRC PP A HYD COUPL",
+        "type": "OTHER",
+        "dx": 118.60000000000002,
+        "dy": -104.40000000000009
+      },
+      {
+        "name": "SPEED P",
+        "type": "OTHER",
+        "dx": 6,
+        "dy": -68.40000000000009
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "OCB0088010",
+    "anchor": "OCB0088010",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "FLAG",
+        "type": "PORT",
+        "dx": -200.20000000000005,
+        "dy": -123.20000000000005
+      },
+      {
+        "name": "YES",
+        "type": "PORT",
+        "dx": -217.4000000000001,
+        "dy": -73
+      },
+      {
+        "name": "NO",
+        "type": "PORT",
+        "dx": -162.30000000000007,
+        "dy": -128.20000000000005
+      },
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": -162.30000000000007,
+        "dy": 7.7999999999999545
+      },
+      {
+        "name": "T",
+        "type": "BLOCK_TYPE",
+        "dx": -149.60000000000014,
+        "dy": -57.299999999999955
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "AND_2",
+    "anchor": "AND",
+    "anchorType": "BLOCK_TYPE",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": 50.799999999999955,
+        "dy": -9.099999999999966
+      },
+      {
+        "name": "IN3",
+        "type": "SIGNAL",
+        "dx": -79.5,
+        "dy": -29.099999999999966
+      },
+      {
+        "name": "IN4",
+        "type": "SIGNAL",
+        "dx": -79.5,
+        "dy": 10.900000000000034
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -77.5,
+        "dy": -49
+      },
+      {
+        "name": "IN2",
+        "type": "SIGNAL",
+        "dx": -79.5,
+        "dy": 30.900000000000034
+      }
+    ],
+    "priority": 1,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "ALG-011304",
+    "anchor": "ALG-0113049",
+    "anchorType": "ALG_BLOCK",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": -166.5,
+        "dy": -34.19999999999982
+      },
+      {
+        "name": "T",
+        "type": "BLOCK_TYPE",
+        "dx": -153.80000000000018,
+        "dy": -101.29999999999973
+      },
+      {
+        "name": "A",
+        "type": "PORT",
+        "dx": -73.60000000000036,
+        "dy": -101.29999999999973
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -166.5,
+        "dy": -170.19999999999982
+      },
+      {
+        "name": "MODE",
+        "type": "OTHER",
+        "dx": -96.60000000000036,
+        "dy": -152
+      },
+      {
+        "name": "I",
+        "type": "OTHER",
+        "dx": 1.7999999999992724,
+        "dy": -101.29999999999973
+      },
+      {
+        "name": "PP252004-CAS",
+        "type": "OTHER",
+        "dx": 250.79999999999927,
+        "dy": -169
+      }
+    ],
+    "priority": 2,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "ALG-011300",
+    "anchor": "ALG-011300C",
+    "anchorType": "ALG_BLOCK",
+    "ports": [
+      {
+        "name": "OUT",
+        "type": "PORT",
+        "dx": -170.69999999999993,
+        "dy": -34.19999999999982
+      },
+      {
+        "name": "T",
+        "type": "BLOCK_TYPE",
+        "dx": -158,
+        "dy": -101.29999999999973
+      },
+      {
+        "name": "A",
+        "type": "PORT",
+        "dx": -77.79999999999995,
+        "dy": -101.29999999999973
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -170.69999999999993,
+        "dy": -170.19999999999982
+      },
+      {
+        "name": "MODE",
+        "type": "OTHER",
+        "dx": -100.79999999999995,
+        "dy": -152
+      },
+      {
+        "name": "I",
+        "type": "OTHER",
+        "dx": -2.3999999999998636,
+        "dy": -101.29999999999973
+      },
+      {
+        "name": "PP252001-CAS",
+        "type": "OTHER",
+        "dx": 146.60000000000014,
+        "dy": -189
+      }
+    ],
+    "priority": 2,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "D03-526-04",
+    "anchor": "D03-526-04",
+    "anchorType": "REF_SIGNAL",
+    "ports": [
+      {
+        "name": "3/526",
+        "type": "SHEET_REF",
+        "dx": 27.799999999999955,
+        "dy": 163.7
+      },
+      {
+        "name": "G",
+        "type": "PORT",
+        "dx": -28.799999999999955,
+        "dy": 41.400000000000034
+      },
+      {
+        "name": "DESC: No Description",
+        "type": "OTHER",
+        "dx": 67.79999999999995,
+        "dy": -104.39999999999998
+      },
+      {
+        "name": "Defined (D03-526-04)",
+        "type": "OTHER",
+        "dx": 65.79999999999995,
+        "dy": -68.39999999999998
+      }
+    ],
+    "priority": 2,
+    "ignoreName": false
+  },
+  {
+    "name": "D03-062-01",
+    "anchor": "D03-062-01",
+    "anchorType": "REF_SIGNAL",
+    "ports": [
+      {
+        "name": "3/062",
+        "type": "SHEET_REF",
+        "dx": -106.20000000000005,
+        "dy": 45.59999999999991
+      },
+      {
+        "name": "DESC: No",
+        "type": "OTHER",
+        "dx": -449.2,
+        "dy": -23.40000000000009
+      },
+      {
+        "name": "Description Defined",
+        "type": "OTHER",
+        "dx": -336.2,
+        "dy": 12.599999999999909
+      },
+      {
+        "name": "(D03-062-01)",
+        "type": "OTHER",
+        "dx": -412.4,
+        "dy": 48.59999999999991
+      }
+    ],
+    "priority": 2,
+    "ignoreName": false
+  },
+  {
+    "name": "D03-522-02_1",
+    "anchor": "D03-522-02",
+    "anchorType": "REF_SIGNAL",
+    "ports": [
+      {
+        "name": "3/522",
+        "type": "SHEET_REF",
+        "dx": -106.20000000000005,
+        "dy": 45.59999999999991
+      },
+      {
+        "name": "G",
+        "type": "PORT",
+        "dx": -268.8,
+        "dy": 30.5
+      },
+      {
+        "name": "A",
+        "type": "PORT",
+        "dx": -268.2,
+        "dy": -11.5
+      },
+      {
+        "name": "DH CIRC' PP",
+        "type": "OTHER",
+        "dx": -412,
+        "dy": -5.400000000000091
+      },
+      {
+        "name": "DISCH PR H",
+        "type": "OTHER",
+        "dx": -417.2,
+        "dy": 30.59999999999991
+      }
+    ],
+    "priority": 2,
+    "ignoreName": false
+  }
+]

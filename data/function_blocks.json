@@ -1,0 +1,573 @@
+{
+  "blockTypes": {
+    "T": {
+      "id": "T",
+      "name": "T",
+      "description": "조건 분기 블록 - YES/NO 분기 출력",
+      "ports": [
+        "FLAG",
+        "NO",
+        "OUT",
+        "STPT",
+        "T",
+        "YES"
+      ],
+      "count": 21,
+      "instances": [
+        {
+          "name": "OCB008802C",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088043",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088005",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088008",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB008801A",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088055",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088010",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB008801D",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088031",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088046",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "STPT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088002",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "STPT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB008805E",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "STPT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB008802F",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "STPT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "ALG-011300C",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT"
+          ]
+        },
+        {
+          "name": "ALG-0113020",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT"
+          ]
+        },
+        {
+          "name": "ALG-0113034",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT"
+          ]
+        },
+        {
+          "name": "ALG-0113049",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT"
+          ]
+        },
+        {
+          "name": "OCB008800F",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088021",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088035",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB008804A",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "OUT",
+            "T",
+            "YES"
+          ]
+        }
+      ]
+    },
+    "SUB": {
+      "id": "SUB",
+      "name": "SUB",
+      "description": "뺄셈 블록 - IN1 - IN2",
+      "ports": [
+        "A",
+        "OUT"
+      ],
+      "count": 4,
+      "instances": [
+        {
+          "name": "ALG-0113015",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "A",
+            "OUT"
+          ]
+        },
+        {
+          "name": "ALG-0113011",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "A",
+            "OUT"
+          ]
+        },
+        {
+          "name": "ALG-0113033",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "A",
+            "OUT"
+          ]
+        },
+        {
+          "name": "ALG-011305D",
+          "drop": "drop_3_DH_Apparatus",
+          "page": "187",
+          "ports": [
+            "A",
+            "OUT"
+          ]
+        }
+      ]
+    }
+  },
+  "summary": {
+    "totalDrawings": 1,
+    "totalBlockTypes": 2,
+    "totalInstances": 25
+  },
+  "drawings": [
+    {
+      "drop": "drop_3_DH_Apparatus",
+      "page": "187",
+      "path": "C:/Users/이성규/AppProduct/AI도면분석/drawings/drop_3_DH_Apparatus/510",
+      "function_blocks": [
+        {
+          "name": "OCB008802C",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "ALG-0113015",
+          "type": "SUB",
+          "ports": [
+            "A",
+            "OUT"
+          ]
+        },
+        {
+          "name": "OCB0088043",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088005",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088008",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB008801A",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088055",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088010",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB008801D",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088031",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "ALG-0113011",
+          "type": "SUB",
+          "ports": [
+            "A",
+            "OUT"
+          ]
+        },
+        {
+          "name": "ALG-0113033",
+          "type": "SUB",
+          "ports": [
+            "A",
+            "OUT"
+          ]
+        },
+        {
+          "name": "ALG-011305D",
+          "type": "SUB",
+          "ports": [
+            "A",
+            "OUT"
+          ]
+        },
+        {
+          "name": "OCB0088046",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "STPT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088002",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "STPT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB008805E",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "STPT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB008802F",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT",
+            "STPT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "ALG-011300C",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT"
+          ]
+        },
+        {
+          "name": "ALG-0113020",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT"
+          ]
+        },
+        {
+          "name": "ALG-0113034",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT"
+          ]
+        },
+        {
+          "name": "ALG-0113049",
+          "type": "T",
+          "ports": [
+            "FLAG",
+            "NO",
+            "OUT"
+          ]
+        },
+        {
+          "name": "OCB008800F",
+          "type": "T",
+          "ports": [
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088021",
+          "type": "T",
+          "ports": [
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB0088035",
+          "type": "T",
+          "ports": [
+            "OUT",
+            "T",
+            "YES"
+          ]
+        },
+        {
+          "name": "OCB008804A",
+          "type": "T",
+          "ports": [
+            "OUT",
+            "T",
+            "YES"
+          ]
+        }
+      ]
+    }
+  ]
+}

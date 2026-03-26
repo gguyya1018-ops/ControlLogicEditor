@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>설비정보 사전</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 0 24px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header-title { font-size: 15px; font-weight: 700; color: #fff; }
+        .header-badge { font-size: 10px; padding: 2px 8px; background: rgba(16,185,129,0.2); color: #10b981; border-radius: 4px; }
+        .nav-link { padding: 6px 12px; color: rgba(255,255,255,0.5); text-decoration: none; font-size: 12px; border-radius: 6px; transition: all 0.2s; }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
+
+        .toolbar {
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-wrap: wrap;
+        }
+        .search-input {
+            flex: 1; min-width: 200px; padding: 8px 12px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px; color: #fff; font-size: 13px; outline: none;
+        }
+        .search-input:focus { border-color: rgba(16,185,129,0.5); }
+        .stats { font-size: 12px; color: rgba(255,255,255,0.5); }
+        .btn { padding: 7px 14px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-export { background: rgba(79,195,247,0.15); color: #4fc3f7; }
+        .btn-export:hover { background: rgba(79,195,247,0.25); }
+        .btn-danger { background: rgba(239,68,68,0.15); color: #ef4444; }
+        .btn-danger:hover { background: rgba(239,68,68,0.25); }
+
+        .filter-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+        .chip { padding: 4px 10px; font-size: 11px; border-radius: 12px; cursor: pointer; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); border: 1px solid transparent; transition: all 0.2s; }
+        .chip:hover { color: #fff; background: rgba(255,255,255,0.1); }
+        .chip.active { color: #10b981; border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.1); }
+
+        .content { padding: 16px 24px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        thead { position: sticky; top: 52px; z-index: 10; }
+        th { padding: 8px 12px; text-align: left; background: #141420; color: rgba(255,255,255,0.6); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        td { padding: 7px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+        tr:hover td { background: rgba(255,255,255,0.03); }
+
+        .name-cell { font-family: monospace; font-weight: 600; color: #fff; font-size: 12px; }
+        .type-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+        .type-OCB_BLOCK { background: rgba(233,69,96,0.2); color: #e94560; }
+        .type-SIGNAL { background: rgba(0,255,136,0.15); color: #00ff88; }
+        .type-REF_SIGNAL { background: rgba(0,188,212,0.15); color: #00bcd4; }
+        .type-BLOCK_TYPE { background: rgba(255,152,0,0.15); color: #ff9800; }
+        .type-OTHER { background: rgba(102,102,102,0.2); color: #999; }
+        .type-PORT { background: rgba(255,255,255,0.1); color: #ccc; }
+
+        .editable { background: transparent; border: 1px solid transparent; color: #e0e0e0; padding: 4px 6px; border-radius: 4px; width: 100%; font-size: 12px; outline: none; transition: all 0.2s; }
+        .editable:hover { border-color: rgba(255,255,255,0.15); }
+        .editable:focus { border-color: rgba(16,185,129,0.5); background: rgba(255,255,255,0.04); }
+
+        .auto-desc { color: rgba(255,255,255,0.4); font-size: 11px; }
+        .empty { color: rgba(255,255,255,0.2); font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <span class="header-title">설비정보 사전</span>
+            <span class="header-badge" id="totalCount">0개</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <a href="block-types.html" class="nav-link">심볼 사전</a>
+            <a href="editor.html" class="nav-link">에디터</a>
+        </div>
+    </div>
+
+    <div class="toolbar">
+        <input type="text" class="search-input" id="searchInput" placeholder="블록명, 설비정보, 메모 검색..." oninput="renderTable()">
+        <div class="filter-chips" id="filterChips"></div>
+        <span class="stats" id="filteredStats"></span>
+        <button class="btn btn-export" onclick="exportCSV()">CSV 내보내기</button>
+    </div>
+
+    <div class="content">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:180px;">블록명</th>
+                    <th style="width:100px;">타입</th>
+                    <th style="width:160px;">자동 분류</th>
+                    <th>설비정보</th>
+                    <th style="width:200px;">메모</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        let data = {};
+        let currentFilter = 'all';
+
+        function load() {
+            const saved = localStorage.getItem('scan_dictionary');
+            if (saved) {
+                try {
+                    data = JSON.parse(saved);
+                    // 마이그레이션
+                    for (const [k, v] of Object.entries(data)) {
+                        if (typeof v === 'string') data[k] = { equipment: v, memo: '' };
+                    }
+                } catch (e) { data = {}; }
+            }
+            document.getElementById('totalCount').textContent = Object.keys(data).length + '개';
+            buildFilters();
+            renderTable();
+        }
+
+        function buildFilters() {
+            const types = new Set();
+            for (const v of Object.values(data)) {
+                types.add(v.type || '기타');
+            }
+            let html = '<span class="chip active" data-filter="all" onclick="setFilter(\'all\')">전체</span>';
+            for (const t of [...types].sort()) {
+                html += `<span class="chip" data-filter="${t}" onclick="setFilter('${t}')">${t}</span>`;
+            }
+            document.getElementById('filterChips').innerHTML = html;
+        }
+
+        function setFilter(f) {
+            currentFilter = f;
+            document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.filter === f));
+            renderTable();
+        }
+
+        function renderTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const tbody = document.getElementById('tableBody');
+
+            const entries = Object.entries(data).filter(([name, info]) => {
+                if (currentFilter !== 'all' && (info.type || '기타') !== currentFilter) return false;
+                if (search) {
+                    const haystack = `${name} ${info.equipment || ''} ${info.memo || ''} ${info.autoDesc || ''} ${info.category || ''}`.toLowerCase();
+                    if (!haystack.includes(search)) return false;
+                }
+                return true;
+            }).sort((a, b) => a[0].localeCompare(b[0]));
+
+            document.getElementById('filteredStats').textContent = `${entries.length} / ${Object.keys(data).length}`;
+
+            tbody.innerHTML = entries.map(([name, info]) => {
+                const typeClass = 'type-' + (info.type || 'OTHER');
+                const eqVal = (info.equipment || '').replace(/"/g, '&quot;');
+                const memoVal = (info.memo || '').replace(/"/g, '&quot;');
+                return `<tr>
+                    <td class="name-cell">${name}</td>
+                    <td><span class="type-badge ${typeClass}">${info.type || '기타'}</span></td>
+                    <td class="auto-desc">${info.autoDesc || info.category || '-'}</td>
+                    <td><input class="editable" value="${eqVal}" placeholder="설비정보 입력" onblur="saveField('${name.replace(/'/g,"\\'")}', 'equipment', this.value)"></td>
+                    <td><input class="editable" value="${memoVal}" placeholder="메모" onblur="saveField('${name.replace(/'/g,"\\'")}', 'memo', this.value)"></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function saveField(name, field, value) {
+            if (!data[name]) data[name] = { equipment: '', memo: '' };
+            data[name][field] = value;
+            localStorage.setItem('scan_dictionary', JSON.stringify(data));
+        }
+
+        function exportCSV() {
+            let csv = '블록명,타입,자동분류,설비정보,메모\n';
+            for (const [name, info] of Object.entries(data).sort((a,b) => a[0].localeCompare(b[0]))) {
+                const eq = (info.equipment || '').replace(/"/g, '""');
+                const memo = (info.memo || '').replace(/"/g, '""');
+                const auto = (info.autoDesc || info.category || '').replace(/"/g, '""');
+                csv += `"${name}","${info.type || ''}","${auto}","${eq}","${memo}"\n`;
+            }
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `설비정보사전_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+        }
+
+        load();
+    </script>
+</body>
+</html>
