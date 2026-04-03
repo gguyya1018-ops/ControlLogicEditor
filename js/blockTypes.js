@@ -23,6 +23,13 @@ function initBlockTypeLibrary() {
 
 function loadBlockDictionary() {
     try {
+        // Ovation 데이터 강제 갱신 (버전 체크)
+        const ovVer = localStorage.getItem('ovation_merge_ver');
+        if (ovVer !== '20260327u') {
+            localStorage.removeItem('blockDictionary_v3');
+            localStorage.setItem('ovation_merge_ver', '20260327u');
+            console.log('[BlockDict] Ovation 버전 변경 → localStorage 초기화');
+        }
         const saved = localStorage.getItem('blockDictionary_v3');
         if (saved) {
             blockDictionary = JSON.parse(saved);
@@ -37,6 +44,94 @@ function loadBlockDictionary() {
         }
     } catch (e) {
         console.error('Failed to load block dictionary:', e);
+    }
+    // Ovation 매뉴얼 심볼 데이터 머지
+    mergeOvationSymbols();
+}
+
+let ovationSymbols = null;
+
+async function mergeOvationSymbols() {
+    try {
+        if (!ovationSymbols) {
+            const resp = await fetch('data/ovation_symbols.json?v=' + Date.now());
+            if (!resp.ok) return;
+            ovationSymbols = await resp.json();
+            console.log('[OvationSymbols] 로드:', Object.keys(ovationSymbols).length, '개 심볼');
+        }
+        let merged = 0;
+        for (const [key, sym] of Object.entries(ovationSymbols)) {
+            if (!blockDictionary[key]) {
+                // 새 심볼 등록
+                blockDictionary[key] = {
+                    id: sym.id,
+                    name: sym.name,
+                    category: sym.category || 'unknown',
+                    desc: sym.desc || '',
+                    detail: sym.detail || '',
+                    ai: sym.ai || '',
+                    formula: sym.formula || '',
+                    symbol: sym.symbol || '',
+                    ports: sym.ports || [],
+                    settings: sym.settings || [],
+                    guidelines: sym.guidelines || [],
+                    diagramDesc: sym.diagramDesc || '',
+                    fullDesc: sym.fullDesc || '',
+                    detailFull: sym.detailFull || '',
+                    section: sym.section || '',
+                    pdfPages: sym.pdfPages || [],
+                    core: sym.core || false,
+                    images: [],
+                    instances: [],
+                    source: 'ovation'
+                };
+                merged++;
+            } else {
+                // 기존 블록에 Ovation 정보 강제 덮어쓰기
+                const existing = blockDictionary[key];
+                if (sym.formula) existing.formula = sym.formula;
+                if (sym.detail) existing.detail = sym.detail;
+                if (sym.section) existing.section = sym.section;
+                if (sym.pdfPages) existing.pdfPages = sym.pdfPages;
+                if (sym.settings && sym.settings.length) existing.settings = sym.settings;
+                if (sym.guidelines && sym.guidelines.length) existing.guidelines = sym.guidelines;
+                if (sym.diagramDesc) existing.diagramDesc = sym.diagramDesc;
+                if (sym.fullDesc) existing.fullDesc = sym.fullDesc;
+                if (sym.detailFull) existing.detailFull = sym.detailFull;
+                if (sym.core !== undefined) existing.core = sym.core;
+                if (sym.ai && sym.ai.length > (existing.ai || '').length) existing.ai = sym.ai;
+                if (sym.ports && sym.ports.length > (existing.ports || []).length) existing.ports = sym.ports;
+                existing.source = 'merged';
+            }
+        }
+        console.log('[OvationSymbols] 신규 등록:', merged, '개, 기존 보강 포함');
+        // localStorage를 Ovation 데이터로 갱신 (diagramDesc 등 새 필드 반영)
+        localStorage.setItem('blockDictionary_v3', JSON.stringify(blockDictionary));
+        console.log('[OvationSymbols] localStorage 갱신 완료. PID diagramDesc:', !!blockDictionary['PID']?.diagramDesc);
+        // btBlockData에도 동기화 (심볼 탭용)
+        if (typeof btBlockData !== 'undefined') {
+            for (const [key, val] of Object.entries(blockDictionary)) {
+                if (!btBlockData[key]) {
+                    btBlockData[key] = val;
+                } else {
+                    const bt = btBlockData[key];
+                    if (!bt.formula && val.formula) bt.formula = val.formula;
+                    if (!bt.detail && val.detail) bt.detail = val.detail;
+                    if (!bt.section && val.section) bt.section = val.section;
+                    if (!bt.pdfPages && val.pdfPages) bt.pdfPages = val.pdfPages;
+                    if (!bt.settings && val.settings) bt.settings = val.settings;
+                    if (!bt.guidelines && val.guidelines) bt.guidelines = val.guidelines;
+                    if (val.ai && val.ai.length > (bt.ai || '').length) bt.ai = val.ai;
+                    if (val.diagramDesc) bt.diagramDesc = val.diagramDesc;
+                    if (val.fullDesc) bt.fullDesc = val.fullDesc;
+                    if (val.detailFull) bt.detailFull = val.detailFull;
+                    if (val.core !== undefined) bt.core = val.core;
+                    if (val.ports && val.ports.length > (bt.ports || []).length) bt.ports = val.ports;
+                }
+            }
+        }
+    } catch (e) {
+        console.log('[OvationSymbols] 로드 실패 (정상):', e.message);
     }
 }
 
@@ -133,9 +228,13 @@ function identifyBlockType(groupName, ports) {
         return { type: 'LOGIC', category: 'logic', description: '논리 연산 블록' };
     }
 
-    // M/A 블록
+    // M/A 블록 (Manual/Auto/Cascade 전환)
     if (portSet.has('AUTO') || portSet.has('MAN') || nameUpper.includes('M/A')) {
         return { type: 'M/A', category: 'control', description: '수동/자동 전환' };
+    }
+    // M/A/C 블록: T + A + I + MODE 포트 조합 (Manual/Auto/Cascade 운전 모드 전환)
+    if (portSet.has('T') && portSet.has('A') && portSet.has('I') && portSet.has('MODE')) {
+        return { type: 'M/A/C', category: 'control', description: '운전모드 전환 (Manual/Auto/Cascade)' };
     }
 
     // K 상수 블록

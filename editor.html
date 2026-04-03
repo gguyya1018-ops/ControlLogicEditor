@@ -9,7 +9,7 @@
     <title>Control Logic Editor</title>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="css/editor.css?v=20260326f">
+    <link rel="stylesheet" href="css/editor.css?v=20260327a">
 
     <!-- Supabase Client Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -26,7 +26,7 @@
                 <button class="nav-tab" data-tab="home" onclick="goHome()">홈</button>
                 <button class="nav-tab active" data-tab="editor" onclick="switchMainTab('editor')">도면</button>
                 <button class="nav-tab" data-tab="block-types" onclick="switchMainTab('block-types')">심볼 사전</button>
-                <button class="nav-tab" data-tab="scan-dict" onclick="switchMainTab('scan-dict')">설비정보</button>
+                <button class="nav-tab" data-tab="block-info" onclick="switchMainTab('block-info')">블록정보</button>
             </nav>
         </div>
         <!-- 통합 검색 (제어로직 태그 / P&ID 밸브,계기) -->
@@ -401,7 +401,7 @@
             <button class="sidebar-tab" data-tab="autoconnect" data-logic-only onclick="switchSidebarTab('autoconnect')">분석</button>
             <button class="sidebar-tab" data-tab="connections" data-logic-only onclick="switchSidebarTab('connections')">연결</button>
             <button class="sidebar-tab" data-tab="scan" data-logic-only onclick="switchSidebarTab('scan')">스캔</button>
-            <button class="sidebar-tab" data-tab="blocktype" data-logic-only onclick="switchSidebarTab('blocktype')">사전</button>
+            <button class="sidebar-tab" data-tab="block" data-logic-only onclick="switchSidebarTab('block')">블록</button>
         </div>
 
         <!-- Tab 1: Selection Info -->
@@ -444,67 +444,14 @@
 
         <!-- Tab 4: Connection Pattern -->
         <!-- Tab 6: Function Blocks (현재 도면) -->
-        <div id="tab-blocktype" class="sidebar-tab-content">
-            <div style="display:flex; flex-direction:column; height:100%; gap:6px;">
-                <!-- 상단: 버튼 -->
-                <div style="flex-shrink:0;">
-                    <div style="display:flex; gap:6px;">
-                        <button onclick="scanFunctionBlocks(); findUnregisteredSymbols();" style="flex:1; padding:7px; background:var(--accent-blue); color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">심볼 검색</button>
-                        <button onclick="addBlockToDictionary()" style="flex:1; padding:7px; background:#10b981; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">심볼 등록</button>
-                    </div>
-                    <div id="func-block-summary" style="margin-top:6px; font-size:10px; color:var(--text-muted); display:flex; justify-content:space-between;">
-                        <span id="func-block-count">0개</span>
-                        <span id="func-block-unregistered" style="color:#ff5722; display:none;"></span>
-                    </div>
-                </div>
-
-                <!-- 검색 -->
-                <input type="text" id="func-block-search" placeholder="심볼 검색..."
-                       style="padding:6px 8px; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); font-size:11px; flex-shrink:0;"
-                       oninput="filterFunctionBlocks()">
-
-                <!-- 타입 필터 -->
-                <div style="display:flex; flex-wrap:wrap; gap:3px; flex-shrink:0;">
-                    <button class="func-type-filter active" data-type="all" onclick="setFuncTypeFilter('all')" style="font-size:10px; padding:3px 7px;">전체</button>
-                    <button class="func-type-filter" data-type="UNREGISTERED" onclick="setFuncTypeFilter('UNREGISTERED')" style="font-size:10px; padding:3px 7px; border-color:#ff5722; color:#ff5722;">미등록</button>
-                    <button class="func-type-filter" data-type="T" onclick="setFuncTypeFilter('T')" style="font-size:10px; padding:3px 7px;">T</button>
-                    <button class="func-type-filter" data-type="PID" onclick="setFuncTypeFilter('PID')" style="font-size:10px; padding:3px 7px;">PID</button>
-                    <button class="func-type-filter" data-type="AND" onclick="setFuncTypeFilter('AND')" style="font-size:10px; padding:3px 7px;">AND</button>
-                    <button class="func-type-filter" data-type="OR" onclick="setFuncTypeFilter('OR')" style="font-size:10px; padding:3px 7px;">OR</button>
-                    <button class="func-type-filter" data-type="NOT" onclick="setFuncTypeFilter('NOT')" style="font-size:10px; padding:3px 7px;">NOT</button>
-                    <button class="func-type-filter" data-type="MATH" onclick="setFuncTypeFilter('MATH')" style="font-size:10px; padding:3px 7px;">수학</button>
-                </div>
-
-                <!-- 블록 목록 (등록/미등록 구분) -->
-                <div id="func-block-list" style="flex:1; overflow-y:auto; min-height:0;">
-                    <div style="font-size:10px; color:var(--text-muted); padding:15px; text-align:center;">
-                        '심볼 검색' 버튼을 눌러주세요
-                    </div>
-                </div>
-
-                <!-- 선택된 블록 상세 -->
-                <div id="func-block-detail" style="display:none; border:1px solid var(--border-color); border-radius:6px; padding:8px; background:rgba(255,255,255,0.03); flex-shrink:0; max-height:150px; overflow-y:auto;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <span id="func-block-detail-name" style="font-size:11px; color:#4caf50; font-weight:600;">블록명</span>
-                        <div style="display:flex; gap:4px;">
-                            <span id="func-block-registered-badge" style="font-size:9px; padding:2px 6px; border-radius:3px; display:none;"></span>
-                            <button style="font-size:9px; padding:3px 8px; background:var(--accent-blue); border:none; color:#fff; border-radius:3px; cursor:pointer;" onclick="goToFuncBlock()">이동</button>
-                        </div>
-                    </div>
-                    <div style="margin-bottom:3px;">
-                        <span style="font-size:10px; color:var(--text-muted);">타입: </span>
-                        <span id="func-block-detail-type" style="font-size:11px; color:#e94560; font-weight:600;"></span>
-                    </div>
-                    <div>
-                        <span style="font-size:10px; color:var(--text-muted);">포트: </span>
-                        <span id="func-block-detail-ports" style="font-size:10px; color:var(--text-secondary);"></span>
-                    </div>
-                    <div id="func-block-add-to-dict" style="display:none; margin-top:6px; padding-top:6px; border-top:1px solid var(--border-color);">
-                        <button style="width:100%; font-size:10px; padding:5px; background:#ff5722; border:none; color:#fff; border-radius:4px; cursor:pointer;" onclick="addBlockToDictionary()">
-                            사전에 등록
-                        </button>
-                    </div>
-                </div>
+        <div id="tab-block" class="sidebar-tab-content" style="display:none;">
+            <div style="display:flex; flex-direction:column; height:100%; gap:8px;">
+                <div style="flex-shrink:0; font-size:11px; font-weight:600; color:var(--accent-cyan);">블록 목록</div>
+                <input type="text" id="block-search" placeholder="블록/타입 검색..."
+                       style="padding:6px 8px; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); font-size:11px;"
+                       oninput="filterBlockList()">
+                <div id="block-type-filters" style="display:flex; flex-wrap:wrap; gap:3px; flex-shrink:0;"></div>
+                <div id="block-list" style="flex:1; overflow-y:auto; overflow-x:hidden;"></div>
             </div>
         </div>
 
@@ -772,14 +719,18 @@
                 </div>
                 <div style="display:flex; gap:4px; padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.04); flex-wrap:wrap;">
                     <button class="bt-filter-chip active" data-cat="all" onclick="btSetCategory('all')">전체</button>
-                    <button class="bt-filter-chip" data-cat="logic" onclick="btSetCategory('logic')">논리</button>
-                    <button class="bt-filter-chip" data-cat="math" onclick="btSetCategory('math')">수학</button>
+                    <button class="bt-filter-chip" data-cat="core" onclick="btSetCategory('core')" style="border-color:#e94560; color:#e94560;">★핵심</button>
                     <button class="bt-filter-chip" data-cat="control" onclick="btSetCategory('control')">제어</button>
-                    <button class="bt-filter-chip" data-cat="compare" onclick="btSetCategory('compare')">비교</button>
-                    <button class="bt-filter-chip" data-cat="timer" onclick="btSetCategory('timer')">타이머</button>
-                    <button class="bt-filter-chip" data-cat="io" onclick="btSetCategory('io')">입출력</button>
-                    <button class="bt-filter-chip" data-cat="signal" onclick="btSetCategory('signal')">신호</button>
-                    <button class="bt-filter-chip" data-cat="unknown" onclick="btSetCategory('unknown')">미분류</button>
+                    <button class="bt-filter-chip" data-cat="arithmetic" onclick="btSetCategory('arithmetic')">산술</button>
+                    <button class="bt-filter-chip" data-cat="logic" onclick="btSetCategory('logic')">논리</button>
+                    <button class="bt-filter-chip" data-cat="selector" onclick="btSetCategory('selector')">선택기</button>
+                    <button class="bt-filter-chip" data-cat="limiter" onclick="btSetCategory('limiter')">리미터</button>
+                    <button class="bt-filter-chip" data-cat="monitor" onclick="btSetCategory('monitor')">감시</button>
+                    <button class="bt-filter-chip" data-cat="digital" onclick="btSetCategory('digital')">디지털</button>
+                    <button class="bt-filter-chip" data-cat="sequencer" onclick="btSetCategory('sequencer')">시퀀서</button>
+                    <button class="bt-filter-chip" data-cat="steam" onclick="btSetCategory('steam')">열역학</button>
+                    <button class="bt-filter-chip" data-cat="io" onclick="btSetCategory('io')">I/O</button>
+                    <button class="bt-filter-chip" data-cat="other" onclick="btSetCategory('other')">기타</button>
                 </div>
                 <div id="btBlockList" style="flex:1; overflow-y:auto; padding:8px 0;"></div>
             </div>
@@ -854,53 +805,41 @@
 
     </div><!-- end tab-block-types -->
 
-    <!-- ===== 설비정보 사전 탭 ===== -->
-    <div id="tab-scan-dict" class="tab-content">
+    <!-- ===== 블록정보 탭 (심볼사전 형식) ===== -->
+    <div id="tab-block-info" class="tab-content">
         <div style="display:flex; flex-direction:column; height:100%; background:#0a0a0f;">
-            <!-- 상단 툴바 -->
-            <div style="padding:12px 20px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,0.06); flex-wrap:wrap;">
-                <input type="text" id="sdSearchInput" placeholder="블록명, 설비정보, 메모 검색..." oninput="sdRenderTable()"
-                       style="flex:1; min-width:200px; padding:8px 12px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; font-size:12px; outline:none;">
-                <div id="sdFilterChips" style="display:flex; gap:4px; flex-wrap:wrap;"></div>
-                <span id="sdStats" style="font-size:11px; color:rgba(255,255,255,0.4);"></span>
-                <button onclick="sdExportCSV()" style="padding:6px 12px; border:none; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; background:rgba(79,195,247,0.15); color:#4fc3f7;">CSV 내보내기</button>
+            <!-- 상단 통계바 -->
+            <div style="padding:10px 20px; display:flex; align-items:center; gap:20px; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0;">
+                <div style="display:flex; align-items:center; gap:6px;"><span id="biStatBlocks" style="font-size:18px; font-weight:700; color:#4fc3f7;">0</span><span style="font-size:11px; color:rgba(255,255,255,0.4);">블록</span></div>
+                <div style="width:1px; height:20px; background:rgba(255,255,255,0.1);"></div>
+                <div style="display:flex; align-items:center; gap:6px;"><span id="biStatTypes" style="font-size:18px; font-weight:700; color:#a78bfa;">0</span><span style="font-size:11px; color:rgba(255,255,255,0.4);">타입</span></div>
+                <div style="width:1px; height:20px; background:rgba(255,255,255,0.1);"></div>
+                <div style="display:flex; align-items:center; gap:6px;"><span id="biStatEquip" style="font-size:18px; font-weight:700; color:#10b981;">0%</span><span style="font-size:11px; color:rgba(255,255,255,0.4);">설비입력</span></div>
+                <div style="flex:1;"></div>
+                <button onclick="biExportCSV()" style="padding:6px 12px; border:none; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; background:rgba(79,195,247,0.15); color:#4fc3f7;">CSV</button>
+                <button onclick="biResetAll()" style="padding:6px 12px; border:none; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; background:rgba(239,68,68,0.15); color:#f87171;">초기화</button>
             </div>
-            <!-- 고정 헤더 -->
-            <div style="flex-shrink:0; background:#16162a; border-bottom:2px solid rgba(255,255,255,0.2); overflow-y:scroll;">
-                <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:12px; table-layout:fixed;">
-                    <colgroup>
-                        <col style="width:14%;">
-                        <col style="width:8%;">
-                        <col style="width:14%;">
-                        <col>
-                        <col style="width:25%;">
-                    </colgroup>
-                    <thead>
-                        <tr>
-                            <th class="sd-th">블록명</th>
-                            <th class="sd-th">타입</th>
-                            <th class="sd-th">지정타입</th>
-                            <th class="sd-th">설비정보</th>
-                            <th class="sd-th">메모</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-            <!-- 스크롤 가능한 데이터 영역 -->
-            <div style="flex:1; overflow-y:scroll; overflow-x:hidden; padding:0;">
-                <table style="width:100%; border-collapse:separate; border-spacing:0; font-size:12px; table-layout:fixed;">
-                    <colgroup>
-                        <col style="width:14%;">
-                        <col style="width:8%;">
-                        <col style="width:14%;">
-                        <col>
-                        <col style="width:25%;">
-                    </colgroup>
-                    <tbody id="sdTableBody"></tbody>
-                </table>
+            <!-- 본문: 좌측 목록 + 우측 상세 -->
+            <div style="display:flex; flex:1; overflow:hidden;">
+                <!-- 좌측 사이드바: 블록 목록 -->
+                <div style="width:300px; background:rgba(0,0,0,0.2); border-right:1px solid rgba(255,255,255,0.04); display:flex; flex-direction:column; flex-shrink:0;">
+                    <div style="padding:12px; border-bottom:1px solid rgba(255,255,255,0.04);">
+                        <input type="text" id="biSearchInput" placeholder="블록/설비/타입 검색..."
+                               style="width:100%; padding:8px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;"
+                               oninput="biFilterList()">
+                    </div>
+                    <div id="biFilterChips" style="display:flex; gap:4px; padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.04); flex-wrap:wrap;"></div>
+                    <div id="biBlockList" style="flex:1; overflow-y:auto; padding:8px 0;"></div>
+                </div>
+                <!-- 우측 상세 패널 -->
+                <div id="biContent" style="flex:1; overflow-y:auto; padding:0; background:#0a0a0f;">
+                    <div style="display:flex; align-items:center; justify-content:center; height:100%; color:rgba(255,255,255,0.3); font-size:13px;">
+                        좌측에서 블록을 선택하세요
+                    </div>
+                </div>
             </div>
         </div>
-    </div><!-- end tab-scan-dict -->
+    </div><!-- end tab-block-info -->
 
 </div><!-- end app-container -->
 
@@ -1035,11 +974,11 @@ select.form-input option {
 <script src="js/groups.js?v=20260326"></script>
 <script src="js/connections.js?v=20260326"></script>
 <script src="js/patterns.js?v=20260326"></script>
-<script src="js/blockTypes.js?v=20260326"></script>
+<script src="js/blockTypes.js?v=20260327u"></script>
 <script src="js/templates.js?v=20260326"></script>
 <script src="js/graph.js?v=20260326"></script>
-<script src="js/fileIO.js?v=20260326"></script>
-<script src="js/ui.js?v=20260326"></script>
+<script src="js/fileIO.js?v=20260327b"></script>
+<script src="js/ui.js?v=20260402a"></script>
 <script src="js/pid.js?v=20260326"></script>
 <script src="js/splitView.js?v=20260326"></script>
 <script src="js/app.js?v=20260326"></script>

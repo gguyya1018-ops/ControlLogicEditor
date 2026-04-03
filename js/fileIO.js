@@ -1292,36 +1292,116 @@ async function exportForLLM() {
         }
     }
 
-    const llmObj = {
-        drawingNumber: currentDrawingNumber || '',
-        pageNumber: currentPageNumber || '',
-        groups: llmGroups,
-        connections: allConns
+    // blockInfo에서 설비명/심볼타입 가져오기
+    const blockInfo = JSON.parse(localStorage.getItem('blockInfo') || '{}');
+    const scanDesc = typeof scanDescriptions !== 'undefined' ? scanDescriptions : {};
+
+    // 블록 표시명 생성: 설비명(코드명) 또는 코드명
+    const displayName = (code) => {
+        const bi = blockInfo[code] || scanDesc[code] || {};
+        const equip = bi.equipment || '';
+        return equip ? `${equip}(${code})` : code;
     };
 
-    // 로직 데이터만 저장 (사전은 별도 파일)
-    const csvLines = [];
-    csvLines.push(`# 도면: ${llmObj.drawingNumber || 'unknown'} / 페이지: ${llmObj.pageNumber || '?'}`);
-    csvLines.push('# 이 파일은 dcs_symbol_dictionary.csv와 함께 사용하세요');
-    csvLines.push('');
-    csvLines.push('[블록]');
-    csvLines.push('블록명,타입,포트');
+    // 심볼타입 가져오기
+    const symbolType = (code) => {
+        const bi = blockInfo[code] || {};
+        if (bi.symbolType) return bi.symbolType;
+        if (typeof identifyBlockType === 'function' && groupsData[code]) {
+            const ports = (groupsData[code].ports || []);
+            const result = identifyBlockType(code, ports);
+            if (result && result.type !== 'UNKNOWN') return result.type;
+        }
+        return groupsData[code]?.type || '';
+    };
+
+    // 심볼 설명 가져오기
+    const symbolDesc = (type) => {
+        if (typeof blockDictionary !== 'undefined' && blockDictionary[type]) {
+            return blockDictionary[type].desc || '';
+        }
+        return '';
+    };
+
+    // TXT 생성 — LLM이 이해할 수 있는 자연어 기반 구조
+    const lines = [];
+    const drawingTitle = currentDrawingName || `${currentDrawingNumber || '?'}-${currentPageNumber || '?'}`;
+
+    lines.push(`=== 도면 정보 ===`);
+    lines.push(`도면번호: ${currentDrawingNumber || '?'}, 페이지: ${currentPageNumber || '?'}`);
+    lines.push(`제목: ${drawingTitle}`);
+    lines.push('');
+
+    // 블록 목록 — 심볼 설명 + 포트 역할 포함
+    lines.push(`=== 블록 목록 (${Object.keys(llmGroups).length}개) ===`);
+    lines.push('');
     for (const [name, info] of Object.entries(llmGroups)) {
-        csvLines.push(`${name},${info.type},"${info.ports.join(',')}"`);
-    }
-    csvLines.push('');
-    csvLines.push('[연결]');
-    csvLines.push('FROM,TO,소스');
-    for (const c of allConns) {
-        csvLines.push(`${c.from},${c.to},${c.source}`);
+        const bi = blockInfo[name] || scanDesc[name] || {};
+        const st = symbolType(name);
+        const sd = symbolDesc(st);
+        const equip = bi.equipment || '';
+
+        // 블록 헤더: [설비명(코드)] 심볼타입 — 기본설명
+        let header = `[${equip ? equip + '(' + name + ')' : name}]`;
+        if (st) header += ` ${st}`;
+        if (sd) header += ` — ${sd}`;
+        lines.push(header);
+
+        // 포트 + 심볼사전 설명 (매핑된 경우)
+        const portsDetail = bi.portsDetail || [];
+        if (portsDetail.length > 0) {
+            const portDescs = portsDetail.map(p => {
+                let s = p.name;
+                if (p.description) s += `(${p.description})`;
+                return s;
+            });
+            lines.push(`  포트: ${portDescs.join(', ')}`);
+        } else if (info.ports.length > 0) {
+            lines.push(`  포트: ${info.ports.join(', ')}`);
+        }
+
+        // 입력 연결
+        const inputs = bi.inputFrom || [];
+        if (inputs.length > 0) {
+            for (const inp of inputs) {
+                const fromBi = blockInfo[inp.fromBlock] || scanDesc[inp.fromBlock] || {};
+                const fromEquip = fromBi.equipment || inp.fromBlock;
+                lines.push(`  ← ${fromEquip}(${inp.fromBlock}).${inp.fromPort} → ${inp.toPort}`);
+            }
+        }
+
+        // 출력 연결
+        const outputs = bi.outputTo || [];
+        if (outputs.length > 0) {
+            for (const out of outputs) {
+                const toBi = blockInfo[out.toBlock] || scanDesc[out.toBlock] || {};
+                const toEquip = toBi.equipment || out.toBlock;
+                lines.push(`  → ${out.fromPort} → ${toEquip}(${out.toBlock}).${out.toPort}`);
+            }
+        }
+
+        lines.push('');
     }
 
-    const textStr = csvLines.join('\n');
+    // 전체 연결 흐름 요약
+    lines.push(`=== 신호 흐름 (${allConns.length}개 연결) ===`);
+    for (const c of allConns) {
+        const [fromBlock, fromPort] = c.from.split('.');
+        const [toBlock, toPort] = c.to.split('.');
+        const fromBi = blockInfo[fromBlock] || scanDesc[fromBlock] || {};
+        const toBi = blockInfo[toBlock] || scanDesc[toBlock] || {};
+        const fromEquip = fromBi.equipment || fromBlock;
+        const toEquip = toBi.equipment || toBlock;
+
+        lines.push(`${fromEquip}(${fromBlock}).${fromPort || '?'} → ${toEquip}(${toBlock}).${toPort || '?'}`);
+    }
+
+    const textStr = lines.join('\n');
 
     const drawingName = currentDrawingNumber || currentDrawingName || 'untitled';
     const now = new Date();
     const ts = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
-    const filename = `${drawingName}_llm_${ts}.csv`;
+    const filename = `${drawingName}_llm_${ts}.txt`;
 
     // 저장 시도
     try {

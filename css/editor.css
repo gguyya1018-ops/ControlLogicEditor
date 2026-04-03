@@ -1200,7 +1200,7 @@ tr:hover .sd-td { background: rgba(255,255,255,0.04); }
 #tab-connections.active,
 #tab-pattern.active,
 #tab-scan.active,
-#tab-blocktype.active {
+#tab-block.active {
     display: flex !important;
     flex-direction: column;
     flex: 1;

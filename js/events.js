@@ -702,7 +702,7 @@ function onKeyDown(e) {
     if (e.key === '3') { switchSidebarTab('autoconnect'); return; }
     if (e.key === '4') { switchSidebarTab('connections'); return; }
     if (e.key === '5') { switchSidebarTab('scan'); return; }
-    if (e.key === '6') { switchSidebarTab('blocktype'); return; }
+    if (e.key === '6') { switchSidebarTab('block'); return; }
 }
 
 // ============ 연결 생성 ============

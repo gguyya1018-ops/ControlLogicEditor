@@ -1144,7 +1144,7 @@ function closeDrawingMenu() {
 
 function switchSidebarTab(tabName) {
     // 탭 버튼 활성화 - 탭 이름에 따라 버튼 찾기
-    const tabIndex = { 'info': 0, 'template': 1, 'autoconnect': 2, 'connections': 3, 'scan': 4, 'blocktype': 5 };
+    const tabIndex = { 'info': 0, 'template': 1, 'autoconnect': 2, 'connections': 3, 'scan': 4, 'block': 5 };
 
     document.querySelectorAll('.sidebar-tab').forEach((t, i) => {
         if (i === tabIndex[tabName]) {
@@ -1509,8 +1509,8 @@ async function goHome() {
         const result = await showGoHomeConfirm();
         if (result === 'cancel') return;
         if (result === 'save') {
-            if (typeof saveToSupabase === 'function') {
-                await saveToSupabase();
+            if (typeof saveData === 'function') {
+                await saveData();
             }
         }
         // result === 'discard' → 저장 안 하고 이동
@@ -1607,8 +1607,8 @@ function switchMainTab(tabName) {
         }
     } else if (tabName === 'block-types') {
         if (btBtns) btBtns.style.display = 'flex';
-    } else if (tabName === 'scan-dict') {
-        sdInit();
+    } else if (tabName === 'block-info') {
+        biInit();
     }
 }
 
@@ -1690,6 +1690,7 @@ function sdRenderTable() {
             <td class="sd-td"><select class="sd-select" onchange="sdSave('${escapedName}','userType',this.value)"><option value="">-</option>${typeOpts}</select></td>
             <td class="sd-td"><input class="sd-input" value="${eqVal}" placeholder="설비정보 입력..." onblur="sdSave('${escapedName}','equipment',this.value)"></td>
             <td class="sd-td"><input class="sd-input" value="${memoVal}" placeholder="메모 입력..." onblur="sdSave('${escapedName}','memo',this.value)"></td>
+            <td class="sd-td" style="text-align:center; width:40px;"><button onclick="sdDeleteItem('${escapedName}')" style="background:none; border:none; color:#f87171; cursor:pointer; font-size:13px; padding:2px 6px;" title="삭제">&times;</button></td>
         </tr>`;
     }).join('');
 }
@@ -1719,6 +1720,39 @@ function sdExportCSV() {
     showToast('CSV 내보내기 완료', 'success');
 }
 
+async function sdResetAll() {
+    const count = Object.keys(sdData).length;
+    if (count === 0) {
+        showToast('삭제할 데이터가 없습니다.', 'info');
+        return;
+    }
+    const ok = await showConfirm(
+        `설비정보 ${count}건을 모두 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`,
+        { title: '설비정보 초기화', confirmText: '전체 삭제', cancelText: '취소', type: 'danger' }
+    );
+    if (!ok) return;
+    sdData = {};
+    scanDescriptions = {};
+    localStorage.removeItem('scan_dictionary');
+    sdBuildFilters();
+    sdRenderTable();
+    showToast('설비정보가 초기화되었습니다.', 'success');
+}
+
+async function sdDeleteItem(name) {
+    const ok = await showConfirm(
+        `"${name}" 설비정보를 삭제하시겠습니까?`,
+        { title: '항목 삭제', confirmText: '삭제', cancelText: '취소', type: 'danger' }
+    );
+    if (!ok) return;
+    delete sdData[name];
+    delete scanDescriptions[name];
+    localStorage.setItem('scan_dictionary', JSON.stringify(sdData));
+    sdBuildFilters();
+    sdRenderTable();
+    showToast(`${name} 삭제 완료`, 'success');
+}
+
 // ============ 블록 사전 기능 (localStorage 연동) ============
 
 let btBlockData = {};
@@ -1727,7 +1761,7 @@ let btSelectedBlock = null;
 let btDeletedBlocks = [];
 let btEditingPorts = [];
 
-const btCatNames = { logic: '논리', math: '수학', control: '제어', compare: '비교', timer: '타이머', io: '입출력', signal: '신호', unknown: '미분류' };
+const btCatNames = { logic: '논리', math: '수학', control: '제어', compare: '비교', timer: '타이머', io: '입출력', signal: '신호', unknown: '미분류', arithmetic: '산술', digital: '디지털', selector: '선택기', limiter: '리미터', monitor: '감시', sequencer: '시퀀서', steam: '열역학', other: '기타' };
 
 const btDefaultBlocks = {
     // === 논리 블록 (Logic) ===
@@ -1828,6 +1862,13 @@ async function btInit() {
     const saved = localStorage.getItem('blockDictionary_v3');
     btBlockData = saved ? JSON.parse(saved) : { ...btDefaultBlocks };
 
+    // Ovation 매뉴얼 심볼 머지 대기
+    await mergeOvationSymbols();
+
+    // 머지 후 localStorage에서 다시 로드 (diagramDesc 등 새 필드 반영)
+    const refreshed = localStorage.getItem('blockDictionary_v3');
+    if (refreshed) btBlockData = JSON.parse(refreshed);
+
     btRenderBlockList();
     btUpdateStats();
 }
@@ -1858,20 +1899,32 @@ function btRenderBlockList() {
     const search = document.getElementById('btSearchInput')?.value.toLowerCase() || '';
 
     const filtered = Object.values(btBlockData).filter(b => {
-        if (btCurrentCat !== 'all' && b.category !== btCurrentCat) return false;
-        if (search && !b.id.toLowerCase().includes(search) && !(b.name||'').toLowerCase().includes(search)) return false;
+        if (btCurrentCat === 'core') { if (!b.core) return false; }
+        else if (btCurrentCat !== 'all' && b.category !== btCurrentCat) return false;
+        if (search && !b.id.toLowerCase().includes(search) && !(b.name||'').toLowerCase().includes(search) && !(b.desc||'').toLowerCase().includes(search)) return false;
         return true;
-    }).sort((a, b) => (b.instances?.length || 0) - (a.instances?.length || 0));
+    }).sort((a, b) => {
+        // core 우선, 그 다음 인스턴스 수
+        if (a.core !== b.core) return a.core ? -1 : 1;
+        return (b.instances?.length || 0) - (a.instances?.length || 0);
+    });
 
+    const catColors = {
+        control: '#e94560', arithmetic: '#ff9800', logic: '#4fc3f7', selector: '#a78bfa',
+        limiter: '#f0a050', monitor: '#10b981', digital: '#38bdf8', sequencer: '#c084fc',
+        io: '#8b95a5', steam: '#fb923c', other: '#9ca3af', math: '#ff9800', unknown: '#6b7280'
+    };
     list.innerHTML = filtered.map(b => {
         const count = b.instances?.length || 0;
         const hasAI = b.ai && b.ai.length > 10;
         const statusClass = hasAI ? 'bt-status-complete' : (b.desc ? 'bt-status-partial' : 'bt-status-empty');
+        const cc = catColors[b.category] || '#6b7280';
+        const isCore = b.core;
         return `
-            <div class="bt-block-item ${btSelectedBlock === b.id ? 'active' : ''}" onclick="btSelectBlock('${b.id}')">
-                <div class="bt-block-icon bt-icon-${b.category || 'unknown'}">${b.id.slice(0, 2)}</div>
+            <div class="bt-block-item ${btSelectedBlock === b.id ? 'active' : ''}" onclick="btSelectBlock('${b.id}')" style="${isCore ? 'border-left:2px solid ' + cc + ';' : ''}">
+                <div style="width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; background:${cc}22; color:${cc}; flex-shrink:0;">${b.id.slice(0, 3)}</div>
                 <div style="flex:1; min-width:0;">
-                    <div style="font-size:12px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${b.id}</div>
+                    <div style="font-size:12px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${isCore ? '★ ' : ''}${b.id}</div>
                     <div style="font-size:10px; color:rgba(255,255,255,0.4);">${btCatNames[b.category]||'미분류'} · ${count}개</div>
                 </div>
                 <div class="bt-block-status ${statusClass}"></div>
@@ -1906,49 +1959,150 @@ function btRenderDetail() {
     const inputs = ports.filter(p => p.direction === 'input');
     const outputs = ports.filter(p => p.direction === 'output');
 
+    // 접기/펼치기 헬퍼
+    const collapseSection = (id, title, color, content, defaultOpen = false) => {
+        if (!content) return '';
+        return `<div style="margin-bottom:8px; border:1px solid rgba(255,255,255,0.06); border-radius:8px; overflow:hidden;">
+            <div onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display==='none'?'block':'none'; this.querySelector('.bt-arrow').textContent = this.nextElementSibling.style.display==='none'?'▶':'▼';"
+                 style="padding:10px 14px; background:rgba(255,255,255,0.03); cursor:pointer; display:flex; align-items:center; gap:8px; user-select:none;">
+                <span class="bt-arrow" style="font-size:9px; color:rgba(255,255,255,0.4);">${defaultOpen ? '▼' : '▶'}</span>
+                <span style="font-size:11px; font-weight:600; color:${color};">${title}</span>
+            </div>
+            <div style="display:${defaultOpen ? 'block' : 'none'}; padding:12px 14px;">${content}</div>
+        </div>`;
+    };
+
+    // 포트를 실제 연결 포트(Variable)와 파라미터(R/S/X/LU)로 분리
+    const isConnectionPort = (p) => {
+        const t = (p.type || '').toUpperCase();
+        return t.includes('VARIABLE') || t === '' || t === 'LA' || t === 'LD' || t === 'LP';
+    };
+    const connPorts = ports.filter(p => isConnectionPort(p));
+    const connInputs = connPorts.filter(p => p.direction === 'input');
+    const connOutputs = connPorts.filter(p => p.direction === 'output');
+    const paramPorts = ports.filter(p => !isConnectionPort(p));
+
+    // 연결 포트 HTML (설명 앞에 표시)
+    let connPortsHtml = '';
+    if (connPorts.length) {
+        connPortsHtml = '<div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px;">';
+        connPortsHtml += connInputs.map(p =>
+            `<span style="padding:3px 8px; border-radius:4px; font-size:10px; font-weight:600; background:rgba(79,195,247,0.1); color:#4fc3f7; border:1px solid rgba(79,195,247,0.2);" title="${p.description || ''}">${p.name}</span>`
+        ).join('');
+        connPortsHtml += connOutputs.map(p =>
+            `<span style="padding:3px 8px; border-radius:4px; font-size:10px; font-weight:600; background:rgba(255,152,0,0.1); color:#ff9800; border:1px solid rgba(255,152,0,0.2);" title="${p.description || ''}">${p.name}</span>`
+        ).join('');
+        connPortsHtml += '</div>';
+    }
+
+    // 파라미터 + 설정옵션 통합 HTML
+    let paramsHtml = '';
+    if (paramPorts.length || (b.settings && b.settings.length)) {
+        let items = '';
+        // 튜닝 파라미터
+        for (const p of paramPorts) {
+            items += `<tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+                <td style="padding:4px 8px; font-weight:600; color:#e0e0e0; white-space:nowrap;">${p.name}</td>
+                <td style="padding:4px 8px; font-size:10px; color:rgba(255,255,255,0.35);">${p.type || ''}</td>
+                <td style="padding:4px 8px; font-size:10px; color:#ffb74d;">${p.default !== null && p.default !== undefined ? p.default : ''}</td>
+                <td style="padding:4px 8px; font-size:10px; color:rgba(255,255,255,0.5);">${(p.description || '').slice(0, 50)}</td>
+            </tr>`;
+        }
+        // 설정 옵션
+        if (b.settings) {
+            for (const s of b.settings) {
+                items += `<tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+                    <td style="padding:4px 8px; font-weight:600; color:#c4b5fd;">${s.name}</td>
+                    <td style="padding:4px 8px; font-size:10px; color:rgba(255,255,255,0.35);">설정</td>
+                    <td style="padding:4px 8px; font-size:10px; color:#ffb74d;">${s.default || ''}</td>
+                    <td style="padding:4px 8px; font-size:10px; color:rgba(255,255,255,0.5);">${(s.options || []).join(' / ')}${s.description ? ' — ' + s.description.slice(0, 40) : ''}</td>
+                </tr>`;
+            }
+        }
+        paramsHtml = `<table style="width:100%; border-collapse:collapse; font-size:11px;">
+            <tr style="background:rgba(255,255,255,0.04);"><th style="padding:5px 8px; text-align:left; font-size:10px; color:rgba(255,255,255,0.4);">이름</th><th style="padding:5px 8px; text-align:left; font-size:10px; color:rgba(255,255,255,0.4);">타입</th><th style="padding:5px 8px; text-align:left; font-size:10px; color:rgba(255,255,255,0.4);">기본값</th><th style="padding:5px 8px; text-align:left; font-size:10px; color:rgba(255,255,255,0.4);">설명</th></tr>
+            ${items}
+        </table>`;
+    }
+
+    // 기존 변수 유지 (하위 호환)
+    let portsHtml = connPortsHtml;
+    let settingsHtml = paramsHtml;
+
+    // 설정 옵션 HTML (기존 - 사용 안 함)
+    if (false && b.settings && b.settings.length) {
+        settingsHtml = b.settings.map(s => `<div style="padding:6px 10px; background:rgba(255,255,255,0.03); border-radius:6px; border-left:3px solid #a78bfa; margin-bottom:4px;">
+            <div style="font-size:11px; font-weight:600; color:#c4b5fd;">${s.name}: ${(s.options||[]).join(' / ')}</div>
+            ${s.description ? `<div style="font-size:10px; color:rgba(255,255,255,0.4); margin-top:2px;">${s.description}</div>` : ''}
+        </div>`).join('');
+    }
+
+    // 가이드라인 HTML
+    let guidelinesHtml = '';
+    if (b.guidelines && b.guidelines.length) {
+        guidelinesHtml = `<ul style="margin:0; padding-left:16px;">${b.guidelines.map(g => `<li style="font-size:11px; color:rgba(255,255,255,0.6); margin-bottom:4px; line-height:1.4;">${g}</li>`).join('')}</ul>`;
+    }
+
+    const catColors2 = {
+        control: '#e94560', arithmetic: '#ff9800', logic: '#4fc3f7', selector: '#a78bfa',
+        limiter: '#f0a050', monitor: '#10b981', digital: '#38bdf8', sequencer: '#c084fc',
+        io: '#8b95a5', steam: '#fb923c', other: '#9ca3af', math: '#ff9800', unknown: '#6b7280'
+    };
+    const cc2 = catColors2[b.category] || '#6b7280';
+
     content.innerHTML = `
         <div class="bt-detail-card">
-            <div class="bt-detail-header">
+            <!-- 헤더 -->
+            <div class="bt-detail-header" style="border-bottom:1px solid rgba(255,255,255,0.06);">
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <div class="bt-detail-icon bt-icon-${b.category || 'unknown'}">${b.id.slice(0, 2)}</div>
+                    <div style="width:40px; height:40px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; background:${cc2}22; color:${cc2}; flex-shrink:0;">${b.id.slice(0, 3)}</div>
                     <div>
-                        <div style="font-size:18px; font-weight:700; color:#fff;">${b.name || b.id}</div>
-                        <div style="font-size:11px; color:rgba(255,255,255,0.4);">ID: ${b.id} · ${b.instances?.length || 0}개 인스턴스</div>
+                        <div style="font-size:18px; font-weight:700; color:#fff;">${b.core ? '★ ' : ''}${b.name || b.id}</div>
+                        <div style="font-size:11px; color:rgba(255,255,255,0.4);">${btCatNames[b.category] || '미분류'}${b.instances?.length ? ` · ${b.instances.length}개 인스턴스` : ''}${b.pdfPages && b.pdfPages[0] ? ` · 매뉴얼 ${b.section || ''} p.${b.pdfPages[0]}~${b.pdfPages[1]}` : ''}</div>
                     </div>
                 </div>
-                <span class="bt-cat-badge bt-cat-${b.category || 'unknown'}">${btCatNames[b.category] || '미분류'}</span>
+                <div style="display:flex; gap:4px;">
+                    <button class="bt-edit-btn" onclick="btEditBlock('${b.id}')">편집</button>
+                    <button class="bt-edit-btn" onclick="btQuickDelete('${b.id}')" style="color:#f87171;">삭제</button>
+                </div>
             </div>
             <div style="padding:20px;">
-                <div class="bt-section">
-                    <div class="bt-section-title">기본 설명
-                        <div style="display:flex; gap:4px;">
-                            <button class="bt-edit-btn" onclick="btEditBlock('${b.id}')">편집</button>
-                            <button class="bt-edit-btn" onclick="btQuickDelete('${b.id}')" style="color:#f87171;">삭제</button>
-                        </div>
-                    </div>
-                    <p class="bt-desc-text">${b.desc || '(설명 없음)'}</p>
+
+                <!-- 통합 설명 박스 — 항상 보임 -->
+                ${(() => {
+                    const ov = ovationSymbols && ovationSymbols[b.id] ? ovationSymbols[b.id] : {};
+                    if (!b.fullDesc && ov.fullDesc) b.fullDesc = ov.fullDesc;
+                    if (!b.detailFull && ov.detailFull) b.detailFull = ov.detailFull;
+                    if (!b.diagramDesc && ov.diagramDesc) b.diagramDesc = ov.diagramDesc;
+                    return '';
+                })()}
+                <!-- 연결 포트 (설명 앞에 표시) -->
+                ${connPortsHtml ? `<div style="margin-bottom:12px;">${connPortsHtml}</div>` : ''}
+
+                <!-- 통합 설명 -->
+                <div style="padding:16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; margin-bottom:12px;">
+                    <div style="font-size:13px; color:rgba(255,255,255,0.85); line-height:1.8;">${(b.fullDesc || b.ai || b.desc || '(설명 없음)').replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>')}</div>
                 </div>
 
-                ${ports.length ? `
-                <div class="bt-section">
-                    <div class="bt-section-title">포트 구성</div>
-                    <div style="display:flex; flex-direction:column; gap:8px;">
-                        <div><span style="font-size:10px; color:#4fc3f7; font-weight:600;">입력:</span>
-                            ${inputs.map(p => `<span class="bt-port-tag bt-port-in">${p.name}</span>`).join('') || '<span style="color:#666; font-size:10px;">없음</span>'}
-                        </div>
-                        <div><span style="font-size:10px; color:#ff9800; font-weight:600;">출력:</span>
-                            ${outputs.map(p => `<span class="bt-port-tag bt-port-out">${p.name}</span>`).join('') || '<span style="color:#666; font-size:10px;">없음</span>'}
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
+                <!-- 접기/펼치기: 상세 설명 (PDF 원본 번역) -->
+                ${collapseSection('detailFull', '상세 설명', '#a78bfa',
+                    b.detailFull ? `<div style="font-size:12px; color:rgba(255,255,255,0.75); line-height:1.8;">${b.detailFull.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>')}</div>`
+                    : (b.diagramDesc ? `<div style="font-size:12px; color:rgba(255,255,255,0.75); line-height:1.8;">${b.diagramDesc.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>')}</div>` : ''), false)}
 
-                <div class="bt-section">
-                    <div class="bt-section-title">AI 참조 설명</div>
-                    <div class="bt-ai-box">
-                        <div class="bt-ai-text">${b.ai || '아직 AI용 설명이 없습니다. 편집을 클릭해서 추가하세요.'}</div>
-                    </div>
-                </div>
+                <!-- 접기/펼치기: 매뉴얼 원본 다이어그램 (전체 페이지) -->
+                ${(() => {
+                    const pages = b.pdfPages ? (b.pdfPages[1] - b.pdfPages[0] + 1) : 1;
+                    let imgs = `<img src="data/symbol_images/${b.id}.png" style="width:100%; border-radius:6px; background:#fff; margin-bottom:8px;" onerror="this.style.display='none'">`;
+                    if (pages > 1) {
+                        for (let i = 1; i <= pages; i++) {
+                            imgs += `<img src="data/symbol_images/${b.id}_p${i}.png" style="width:100%; border-radius:6px; background:#fff; margin-bottom:8px;" onerror="this.style.display='none'">`;
+                        }
+                    }
+                    return collapseSection('diagram', `매뉴얼 원본 (${pages}페이지)`, '#fb923c', `<div style="max-height:600px; overflow-y:auto;">${imgs}</div>`, false);
+                })()}
+
+                <!-- 접기/펼치기: 파라미터 및 설정 -->
+                ${paramsHtml ? collapseSection('params', `파라미터 및 설정 (${paramPorts.length + (b.settings||[]).length})`, '#a78bfa', paramsHtml, false) : ''}
             </div>
         </div>
     `;
@@ -2129,11 +2283,18 @@ async function btGenerateAIData() {
     };
 
     for (const [id, b] of Object.entries(btBlockData)) {
-        aiRef.blocks[id] = {
+        const block = {
             name: b.name, category: b.category, description: b.desc,
             ports: b.ports || [], aiReference: b.ai || '',
             instanceCount: b.instances?.length || 0
         };
+        // Ovation 매뉴얼 상세 정보 포함
+        if (b.formula) block.formula = b.formula;
+        if (b.detail) block.detail = b.detail;
+        if (b.settings && b.settings.length > 0) block.settings = b.settings;
+        if (b.guidelines && b.guidelines.length > 0) block.guidelines = b.guidelines;
+        if (b.section) block.manualSection = b.section;
+        aiRef.blocks[id] = block;
     }
 
     // PyWebView API로 저장
@@ -2735,39 +2896,76 @@ function runScanElements() {
         return;
     }
 
+    // groupsData의 모든 블록을 스캔 (템플릿으로 묶인 블록 전부 포함)
     for (const [groupName, groupData] of Object.entries(groupsData)) {
         const gPorts = groupData.ports || [];
         const nameUpper = groupName.toUpperCase();
 
         let category = '';
         let autoDesc = '';
-        let type = 'OCB_BLOCK';
+        let type = groupData.type || 'OTHER';
 
         // SIGNAL 블록 판별
-        if (nameUpper.match(/^[A-Z]{2,3}\d{3,}/) && !nameUpper.startsWith('OCB') && !nameUpper.startsWith('ALG') && !nameUpper.startsWith('D0')) {
-            // 태그명 패턴 (예: SIT2681A, TIT2641 등)
+        if (type === 'SIGNAL' || (nameUpper.match(/^[A-Z]{2,3}\d{3,}/) && !nameUpper.startsWith('OCB') && !nameUpper.startsWith('ALG') && !nameUpper.startsWith('D0'))) {
             category = 'SIGNAL';
             type = 'SIGNAL';
             autoDesc = extractSignalDescription(gPorts);
-        } else if (nameUpper.match(/^D\d{2}-\d{3}-\d{2}/)) {
-            // REF_SIGNAL 패턴 (예: D03-511-03)
+        } else if (type === 'REF_SIGNAL' || nameUpper.match(/^D\d{2}-\d{3}-\d{2}/)) {
             category = 'REF_SIGNAL';
             type = 'REF_SIGNAL';
             autoDesc = extractRefSignalPageNumber(groupName);
         } else if (nameUpper.startsWith('OCB') || nameUpper.startsWith('ALG')) {
-            // 기능 블록
-            category = inferBlockCategory(groupName, gPorts);
+            // OCB/ALG 기능 블록
+            category = gPorts.length > 0 ? inferBlockCategory(groupName, gPorts) : '미분류';
             type = 'OCB_BLOCK';
             autoDesc = category;
         } else {
-            // 기타 블록
-            category = inferBlockCategory(groupName, gPorts);
-            type = 'OTHER';
-            autoDesc = category;
+            // 기타 블록 (AND, OR, NOT, MODE 등) — 포트가 있으면 포함
+            if (gPorts.length === 0) continue;
+            type = groupData.type || 'BLOCK_TYPE';
+            // blockDictionary에서 심볼 정보 확인
+            const dictEntry = typeof blockDictionary !== 'undefined' ? blockDictionary[nameUpper] || blockDictionary[groupName] : null;
+            if (dictEntry) {
+                category = dictEntry.category || 'logic';
+                autoDesc = dictEntry.desc || groupName;
+            } else {
+                category = inferBlockCategory(groupName, gPorts);
+                autoDesc = category || groupName;
+            }
         }
 
         const scanInfo = scanDescriptions[groupName];
         const userDesc = scanInfo ? (typeof scanInfo === 'string' ? scanInfo : (scanInfo.equipment || '')) : '';
+
+        // blockDictionary 연동 (모든 블록)
+        let blockType = null, blockDesc = '', blockCategory = '';
+        if (typeof identifyBlockType === 'function' && (type === 'OCB_BLOCK' || type === 'BLOCK_TYPE' || type === 'OTHER')) {
+            const typeInfo = identifyBlockType(groupName, gPorts);
+            if (typeInfo) {
+                blockType = typeInfo.type;
+                blockDesc = typeInfo.description || '';
+                blockCategory = typeInfo.category || '';
+                if (blockDesc) autoDesc = blockDesc;
+            }
+        }
+        // BLOCK_TYPE: 이름 자체가 심볼명인 경우 (AND, OR, NOT 등)
+        if (!blockType && type === 'BLOCK_TYPE') {
+            const dictEntry = typeof blockDictionary !== 'undefined' ? (blockDictionary[nameUpper] || blockDictionary[groupName]) : null;
+            if (dictEntry) {
+                blockType = dictEntry.id || groupName;
+                blockDesc = dictEntry.desc || '';
+                blockCategory = dictEntry.category || '';
+                if (blockDesc) autoDesc = blockDesc;
+            } else {
+                blockType = groupName;
+            }
+        }
+
+        // 크로스 레퍼런스 연동 (SIGNAL)
+        let crossRef = [];
+        if (type === 'SIGNAL' && typeof crossRefIndex !== 'undefined' && crossRefIndex) {
+            crossRef = crossRefIndex.filter(r => r.tag.toUpperCase() === groupName.toUpperCase());
+        }
 
         scanResults.push({
             name: groupName,
@@ -2777,92 +2975,12 @@ function runScanElements() {
             type: type,
             portCount: gPorts.length,
             cx: groupData.cx,
-            cy: groupData.cy
+            cy: groupData.cy,
+            blockType: blockType,
+            blockDesc: blockDesc,
+            blockCategory: blockCategory,
+            crossRef: crossRef
         });
-    }
-
-    // groupsData에 없는 blocks/ports도 추가
-    const addedNames = new Set(scanResults.map(r => r.name));
-
-    // blocks 배열에서 추가
-    if (typeof blocks !== 'undefined' && Array.isArray(blocks)) {
-        for (const block of blocks) {
-            if (!block.name || addedNames.has(block.name)) continue;
-            addedNames.add(block.name);
-
-            const nameUpper = block.name.toUpperCase();
-            let category = '', autoDesc = '', type = block.type || 'OTHER';
-
-            if (type === 'SIGNAL' || (nameUpper.match(/^[A-Z]{2,3}\d{3,}/) && !nameUpper.startsWith('OCB') && !nameUpper.startsWith('ALG') && !nameUpper.startsWith('D0'))) {
-                category = 'SIGNAL';
-                type = 'SIGNAL';
-                autoDesc = block.text || block.name;
-            } else if (type === 'REF_SIGNAL' || nameUpper.match(/^D\d{2}-\d{3}-\d{2}/)) {
-                category = 'REF_SIGNAL';
-                type = 'REF_SIGNAL';
-                autoDesc = extractRefSignalPageNumber(block.name);
-            } else if (nameUpper.startsWith('MODE') || nameUpper.startsWith('M/A')) {
-                category = '운전모드 (AUTO/MANUAL 전환)';
-                type = 'OTHER';
-                autoDesc = category;
-            } else if (nameUpper.startsWith('N_') || nameUpper.startsWith('NOT')) {
-                category = 'NOT (반전)';
-                type = 'BLOCK_TYPE';
-                autoDesc = category;
-            } else if (nameUpper.startsWith('AND')) {
-                category = 'AND (모두 참이면 참)';
-                type = 'BLOCK_TYPE';
-                autoDesc = category;
-            } else if (nameUpper.startsWith('OR')) {
-                category = 'OR (하나라도 참이면 참)';
-                type = 'BLOCK_TYPE';
-                autoDesc = category;
-            } else if (nameUpper.startsWith('ABS')) {
-                category = '절대값 (ABS)';
-                type = 'BLOCK_TYPE';
-                autoDesc = category;
-            } else {
-                category = block.type || '기타';
-                autoDesc = block.type || '';
-            }
-
-            const scanInfo = scanDescriptions[block.name];
-            const userDesc = scanInfo ? (typeof scanInfo === 'string' ? scanInfo : (scanInfo.equipment || '')) : '';
-
-            scanResults.push({
-                name: block.name,
-                category: category,
-                autoDesc: autoDesc,
-                userDesc: userDesc,
-                type: type,
-                portCount: 0,
-                cx: block.cx,
-                cy: block.cy
-            });
-        }
-    }
-
-    // ports 배열에서 독립 포트 추가 (parent 없는 것만)
-    if (typeof ports !== 'undefined' && Array.isArray(ports)) {
-        for (const port of ports) {
-            if (!port.name || addedNames.has(port.name)) continue;
-            // 같은 이름이 여러 개일 수 있으므로 첫 번째만
-            addedNames.add(port.name);
-
-            const scanInfo = scanDescriptions[port.name];
-            const userDesc = scanInfo ? (typeof scanInfo === 'string' ? scanInfo : (scanInfo.equipment || '')) : '';
-
-            scanResults.push({
-                name: port.name,
-                category: 'PORT',
-                autoDesc: port.type || 'PORT',
-                userDesc: userDesc,
-                type: port.type || 'PORT',
-                portCount: 0,
-                cx: port.cx,
-                cy: port.cy
-            });
-        }
     }
 
     // 카테고리별, 이름순 정렬
@@ -2947,31 +3065,338 @@ function renderScanList(filterText) {
 }
 
 function renderScanItem(item) {
-    let html = '<div style="padding:4px 6px; margin:2px 0; font-size:11px; display:flex; align-items:center; gap:6px; border-bottom:1px solid rgba(255,255,255,0.03);">';
+    const hasDesc = !!(item.userDesc || item.autoDesc);
+    const checkColor = item.userDesc ? '#4caf50' : (item.autoDesc ? '#ffb74d' : 'transparent');
+    const escapedName = item.name.replace(/'/g, "\\'");
 
-    // 블록 이름
-    html += `<span style="flex-shrink:0; min-width:90px; font-family:monospace; font-size:10px; color:var(--text-primary); cursor:pointer;" onclick="focusScanElement('${item.name}')" title="클릭하여 이동">${item.name}</span>`;
-
-    if (item.type === 'SIGNAL' && item.autoDesc) {
-        // SIGNAL: 자동 설명 표시 + 체크
-        html += `<span style="flex:1; font-size:10px; color:var(--text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${item.autoDesc}">"${item.autoDesc}"</span>`;
-        html += `<span style="color:#4caf50; flex-shrink:0; font-size:10px;" title="자동 추출">&#10003;</span>`;
-    } else {
-        // 자동 설명 라벨
-        if (item.autoDesc) {
-            html += `<span style="flex-shrink:0; font-size:9px; color:var(--text-muted); max-width:70px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${item.autoDesc}">"${item.autoDesc}"</span>`;
-        }
-        // 사용자 입력란
-        const escapedName = item.name.replace(/'/g, "\\'");
-        const escapedDesc = (item.userDesc || '').replace(/"/g, '&quot;');
-        html += `<input type="text" value="${escapedDesc}" placeholder="" onblur="saveScanDescription('${escapedName}', this.value)" style="flex:1; min-width:0; padding:2px 4px; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:3px; color:var(--text-primary); font-size:10px;">`;
-        if (item.userDesc) {
-            html += `<span style="color:#4caf50; flex-shrink:0; font-size:10px;">&#10003;</span>`;
-        }
+    // 심볼 뱃지 — 카테고리별 색상
+    const badgeCatColors = {
+        control: '#e94560', arithmetic: '#ff9800', logic: '#4fc3f7', selector: '#a78bfa',
+        limiter: '#f0a050', monitor: '#10b981', digital: '#38bdf8', sequencer: '#c084fc',
+        io: '#8b95a5', steam: '#fb923c', other: '#9ca3af', math: '#ff9800', unknown: '#9ca3af'
+    };
+    let badge = '';
+    if (item.blockType && item.blockType !== 'UNKNOWN') {
+        const dictEntry = typeof blockDictionary !== 'undefined' ? blockDictionary[item.blockType] : null;
+        const bCat = dictEntry ? dictEntry.category : (item.blockCategory || '');
+        const bColor = badgeCatColors[bCat] || '#a78bfa';
+        const isCore = dictEntry && dictEntry.core;
+        badge = `<span style="flex-shrink:0; padding:1px 4px; border-radius:3px; font-size:8px; font-weight:600; background:${bColor}22; color:${bColor}; ${isCore ? 'border:1px solid ' + bColor + '55;' : ''}">${isCore ? '★' : ''}${item.blockType}</span>`;
+    } else if (item.crossRef && item.crossRef.length > 0) {
+        const refCount = item.crossRef.reduce((sum, r) => sum + (r.drawings ? r.drawings.length : 0), 0);
+        if (refCount > 0) badge = `<span style="flex-shrink:0; padding:1px 4px; border-radius:3px; font-size:8px; font-weight:600; background:rgba(240,160,80,0.2); color:#f0a050;">${refCount}ref</span>`;
     }
+
+    let html = `<div style="padding:5px 8px; margin:1px 0; font-size:11px; display:flex; align-items:center; gap:5px; border-bottom:1px solid rgba(255,255,255,0.04); cursor:pointer;" onclick="openScanDetailPopup('${escapedName}')" title="클릭하여 상세보기">`;
+
+    // 체크 표시
+    html += `<span style="color:${checkColor}; flex-shrink:0; font-size:11px; width:14px; text-align:center;">${hasDesc ? '&#10003;' : '&#9675;'}</span>`;
+
+    // 블록/태그명
+    html += `<span style="flex:1; font-family:monospace; font-size:10px; color:var(--text-primary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</span>`;
+
+    // 심볼/참조 뱃지
+    html += badge;
+
+    // 이동 버튼
+    html += `<span onclick="event.stopPropagation(); focusScanElement('${escapedName}')" style="flex-shrink:0; font-size:10px; color:var(--accent-blue); cursor:pointer; padding:2px 4px;" title="도면에서 찾기">&#8982;</span>`;
 
     html += '</div>';
     return html;
+}
+
+function openScanDetailPopup(blockName) {
+    const item = scanResults.find(r => r.name === blockName);
+    if (!item) return;
+
+    const existing = document.getElementById('scan-detail-popup');
+    if (existing) existing.remove();
+
+    const scanInfo = scanDescriptions[blockName];
+    const equipment = scanInfo ? (typeof scanInfo === 'string' ? scanInfo : (scanInfo.equipment || '')) : '';
+    const memo = scanInfo ? (typeof scanInfo === 'object' ? (scanInfo.memo || '') : '') : '';
+    const escapedName = blockName.replace(/'/g, "\\'");
+
+    // 심볼 정보 섹션 (OCB_BLOCK)
+    let symbolSection = '';
+    const currentUserType = scanInfo && scanInfo.userType ? scanInfo.userType : '';
+    const detectedType = item.blockType && item.blockType !== 'UNKNOWN' ? item.blockType : '';
+    const effectiveType = currentUserType || detectedType;
+
+    if (effectiveType) {
+        const dictEntry = typeof blockDictionary !== 'undefined' ? blockDictionary[effectiveType] : null;
+        const desc = dictEntry ? (dictEntry.desc || '') : (item.blockDesc || '');
+        const cat = dictEntry ? (dictEntry.category || '') : (item.blockCategory || '');
+        const formula = dictEntry ? (dictEntry.formula || '') : '';
+        const detail = dictEntry ? (dictEntry.detail || '') : '';
+        const settings = dictEntry ? (dictEntry.settings || []) : [];
+        const guidelines = dictEntry ? (dictEntry.guidelines || []) : [];
+        const pdfPages = dictEntry ? (dictEntry.pdfPages || []) : [];
+
+        let extraInfo = '';
+        if (detail) extraInfo += `<div style="font-size:10px; color:rgba(255,255,255,0.5); margin-top:4px; line-height:1.4;">${detail}</div>`;
+        if (formula) extraInfo += `<div style="margin-top:6px; padding:5px 8px; background:rgba(0,0,0,0.3); border-radius:4px; font-family:monospace; font-size:10px; color:#7dd3fc;">${formula}</div>`;
+        if (settings.length > 0) {
+            const setList = settings.map(s => `<span style="padding:1px 5px; border-radius:3px; font-size:9px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.5);">${s.name}: ${(s.options || []).join('/')}</span>`).join(' ');
+            extraInfo += `<div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:4px;">${setList}</div>`;
+        }
+        if (guidelines.length > 0) {
+            const guideList = guidelines.map(g => `<li style="font-size:9px; color:rgba(255,255,255,0.4); margin-bottom:2px;">${g}</li>`).join('');
+            extraInfo += `<ul style="margin:6px 0 0 12px; padding:0;">${guideList}</ul>`;
+        }
+        if (pdfPages.length === 2 && pdfPages[0]) {
+            extraInfo += `<div style="margin-top:6px; font-size:9px; color:rgba(255,255,255,0.3);">📖 Ovation 매뉴얼 p.${pdfPages[0]}~${pdfPages[1]}</div>`;
+        }
+
+        symbolSection = `
+            <div style="margin-bottom:12px;">
+                <div style="font-size:10px; font-weight:600; color:#a78bfa; margin-bottom:4px;">심볼 정보${currentUserType ? ' (수동 지정)' : ' (자동 감지)'}</div>
+                <div style="padding:8px 10px; background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.15); border-radius:6px;">
+                    <div style="font-size:12px; font-weight:600; color:#c4b5fd;">${effectiveType}</div>
+                    <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:2px;">${desc}</div>
+                    ${cat ? `<span style="font-size:9px; color:rgba(255,255,255,0.35); margin-top:2px; display:inline-block;">${cat}</span>` : ''}
+                    ${extraInfo}
+                </div>
+            </div>`;
+    }
+
+    // 심볼 지정 드롭다운 (OCB_BLOCK일 때)
+    let symbolSelectSection = '';
+    if (item.type === 'OCB_BLOCK') {
+        const dictTypes = typeof blockDictionary !== 'undefined' ? Object.keys(blockDictionary).sort() : [];
+        const opts = dictTypes.map(t => {
+            const d = blockDictionary[t];
+            const label = d && d.desc ? `${t} - ${d.desc}` : t;
+            return `<option value="${t}" ${currentUserType === t ? 'selected' : ''}>${label}</option>`;
+        }).join('');
+        symbolSelectSection = `
+            <div style="margin-bottom:12px;">
+                <div style="font-size:10px; font-weight:600; color:#a78bfa; margin-bottom:4px;">심볼 지정</div>
+                <select id="scan-popup-symbol" style="width:100%; padding:8px 10px; background:#12121f; border:1px solid rgba(139,92,246,0.3); border-radius:6px; color:#c4b5fd; font-size:11px; outline:none;">
+                    <option value="">-- 자동 감지 (${detectedType || '미식별'}) --</option>
+                    ${opts}
+                </select>
+            </div>`;
+    }
+
+    // 포트 목록 섹션 (Ovation 매뉴얼 상세 정보 포함)
+    let portsSection = '';
+    const group = groupsData[blockName];
+    if (group && group.ports && group.ports.length > 0) {
+        // dictEntry에서 포트 상세 가져오기
+        const dictEntry2 = effectiveType && typeof blockDictionary !== 'undefined' ? blockDictionary[effectiveType] : null;
+        const dictPorts = dictEntry2 && dictEntry2.ports ? dictEntry2.ports : [];
+
+        const portList = group.ports.map(p => {
+            const pName = p.name || p.text || '?';
+            const dp = dictPorts.find(d => d.name && d.name.toUpperCase() === pName.toUpperCase());
+            if (dp && dp.description) {
+                const dirColor = dp.direction === 'output' ? '#ff9800' : '#4fc3f7';
+                const dirLabel = dp.direction === 'output' ? 'OUT' : 'IN';
+                return `<div style="display:flex; align-items:center; gap:4px; padding:2px 0;">
+                    <span style="font-size:8px; color:${dirColor}; width:22px;">${dirLabel}</span>
+                    <span style="font-size:10px; color:#e0e0e0; font-weight:600; min-width:40px;">${pName}</span>
+                    <span style="font-size:9px; color:rgba(255,255,255,0.4);">${dp.description}${dp.default !== null && dp.default !== undefined ? ` (기본:${dp.default})` : ''}</span>
+                </div>`;
+            }
+            return `<span style="padding:2px 6px; border-radius:3px; font-size:9px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.6); border:1px solid rgba(255,255,255,0.08);">${pName}</span>`;
+        }).join('');
+
+        const hasDetail = dictPorts.length > 0 && dictPorts.some(d => d.description);
+        portsSection = `
+            <div style="margin-bottom:12px;">
+                <div style="font-size:10px; font-weight:600; color:rgba(255,255,255,0.4); margin-bottom:4px;">포트 구성 (${group.ports.length})</div>
+                <div style="${hasDetail ? 'display:flex; flex-direction:column; gap:1px; max-height:150px; overflow-y:auto;' : 'display:flex; flex-wrap:wrap; gap:4px;'}">${portList}</div>
+            </div>`;
+    }
+
+    // 크로스 레퍼런스 섹션 (SIGNAL)
+    let crossRefSection = '';
+    if (item.crossRef && item.crossRef.length > 0) {
+        const allDrawings = item.crossRef.flatMap(r => r.drawings || []);
+        if (allDrawings.length > 0) {
+            const drawingList = allDrawings.map(d =>
+                `<div style="padding:4px 8px; font-size:10px; color:rgba(255,255,255,0.7); border-bottom:1px solid rgba(255,255,255,0.04);">
+                    <span style="color:#f0a050; font-weight:600;">${d.num || ''}</span>
+                    <span style="color:rgba(255,255,255,0.4); margin-left:6px;">${d.title || d.ref || ''}</span>
+                    ${d.primary ? '<span style="color:#4caf50; font-size:8px; margin-left:4px;">●주</span>' : ''}
+                </div>`
+            ).join('');
+            crossRefSection = `
+                <div style="margin-bottom:12px;">
+                    <div style="font-size:10px; font-weight:600; color:#f0a050; margin-bottom:4px;">관련 도면 (${allDrawings.length})</div>
+                    <div style="max-height:120px; overflow-y:auto; background:rgba(255,255,255,0.02); border-radius:6px; border:1px solid rgba(255,255,255,0.06);">${drawingList}</div>
+                </div>`;
+        }
+    }
+
+    const overlay = document.createElement('div');
+    overlay.id = 'scan-detail-popup';
+    overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; display:flex; align-items:center; justify-content:center;';
+
+    overlay.innerHTML = `
+        <div style="background:#1a1a2e; border:1px solid rgba(255,255,255,0.15); border-radius:12px; padding:24px; width:480px; max-width:90vw; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div style="font-size:14px; font-weight:700; color:#fff;">${blockName}</div>
+                <button onclick="document.getElementById('scan-detail-popup').remove()" style="background:none; border:none; color:rgba(255,255,255,0.5); font-size:18px; cursor:pointer; padding:4px;">&times;</button>
+            </div>
+
+            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;">
+                <span style="padding:3px 8px; border-radius:4px; font-size:10px; font-weight:600; background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.6);">${item.category}</span>
+                ${item.type ? `<span style="padding:3px 8px; border-radius:4px; font-size:10px; font-weight:600; background:rgba(79,195,247,0.15); color:#4fc3f7;">${item.type}</span>` : ''}
+                ${item.blockType && item.blockType !== 'UNKNOWN' ? `<span style="padding:3px 8px; border-radius:4px; font-size:10px; font-weight:600; background:rgba(139,92,246,0.15); color:#a78bfa;">${item.blockType}</span>` : ''}
+                ${item.portCount ? `<span style="padding:3px 8px; border-radius:4px; font-size:10px; background:rgba(255,255,255,0.05); color:rgba(255,255,255,0.5);">포트 ${item.portCount}개</span>` : ''}
+            </div>
+
+            ${symbolSection}
+            ${symbolSelectSection}
+            ${portsSection}
+            ${crossRefSection}
+
+            ${item.autoDesc && !symbolSection ? `
+            <div style="margin-bottom:12px;">
+                <div style="font-size:10px; font-weight:600; color:rgba(255,255,255,0.4); margin-bottom:4px;">자동 분류</div>
+                <div style="padding:8px 10px; background:rgba(255,255,255,0.04); border-radius:6px; font-size:11px; color:rgba(255,255,255,0.7);">${item.autoDesc}</div>
+            </div>` : ''}
+
+            <div style="margin-bottom:12px;">
+                <div style="font-size:10px; font-weight:600; color:rgba(79,195,247,0.8); margin-bottom:4px;">설비정보</div>
+                <input id="scan-popup-equipment" type="text" value="${equipment.replace(/"/g, '&quot;')}" placeholder="설비정보를 입력하세요"
+                    style="width:100%; padding:8px 10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:#fff; font-size:12px; outline:none; box-sizing:border-box;">
+            </div>
+
+            <div style="margin-bottom:20px;">
+                <div style="font-size:10px; font-weight:600; color:rgba(79,195,247,0.8); margin-bottom:4px;">메모</div>
+                <input id="scan-popup-memo" type="text" value="${memo.replace(/"/g, '&quot;')}" placeholder="메모를 입력하세요"
+                    style="width:100%; padding:8px 10px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:#fff; font-size:12px; outline:none; box-sizing:border-box;">
+            </div>
+
+            <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button onclick="focusScanElement('${escapedName}'); document.getElementById('scan-detail-popup').remove();"
+                    style="padding:8px 16px; border:1px solid rgba(255,255,255,0.1); border-radius:6px; background:transparent; color:rgba(255,255,255,0.7); font-size:12px; cursor:pointer;">도면에서 찾기</button>
+                <button onclick="saveScanPopup('${escapedName}')"
+                    style="padding:8px 16px; border:none; border-radius:6px; background:rgba(16,185,129,0.2); color:#10b981; font-size:12px; font-weight:600; cursor:pointer;">저장</button>
+            </div>
+        </div>
+    `;
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+    document.getElementById('scan-popup-equipment').focus();
+
+    // ESC 닫기
+    const onKey = (e) => { if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', onKey); } };
+    document.addEventListener('keydown', onKey);
+}
+
+function saveScanPopup(blockName) {
+    const equipment = document.getElementById('scan-popup-equipment').value;
+    const memo = document.getElementById('scan-popup-memo').value;
+    const symbolSelect = document.getElementById('scan-popup-symbol');
+    const userType = symbolSelect ? symbolSelect.value : '';
+
+    if (!scanDescriptions[blockName] || typeof scanDescriptions[blockName] === 'string') {
+        scanDescriptions[blockName] = { equipment: equipment, memo: memo };
+    } else {
+        scanDescriptions[blockName].equipment = equipment;
+        scanDescriptions[blockName].memo = memo;
+    }
+
+    // 심볼 지정 저장
+    if (userType) {
+        scanDescriptions[blockName].userType = userType;
+        // 심볼 지정 시 설비명이 비어있으면 심볼 기본설명으로 자동 입력
+        if (!equipment && typeof blockDictionary !== 'undefined' && blockDictionary[userType]) {
+            const autoEquip = blockDictionary[userType].desc || userType;
+            scanDescriptions[blockName].equipment = autoEquip;
+            document.getElementById('scan-popup-equipment').value = autoEquip;
+        }
+    } else if (scanDescriptions[blockName].userType) {
+        delete scanDescriptions[blockName].userType;
+    }
+
+    const item = scanResults.find(r => r.name === blockName);
+    if (item) {
+        item.userDesc = scanDescriptions[blockName].equipment || equipment;
+        // 심볼 타입 업데이트 (다음 스캔 없이 즉시 반영)
+        if (userType && typeof blockDictionary !== 'undefined' && blockDictionary[userType]) {
+            item.blockType = userType;
+            item.blockDesc = blockDictionary[userType].desc || userType;
+            item.blockCategory = blockDictionary[userType].category || '';
+            item.autoDesc = item.blockDesc;
+        }
+    }
+
+    localStorage.setItem('scan_dictionary', JSON.stringify(scanDescriptions));
+
+    // blockInfo에도 동기화 — 모든 정보 반영
+    const blockInfo = JSON.parse(localStorage.getItem('blockInfo') || '{}');
+    if (!blockInfo[blockName]) blockInfo[blockName] = {};
+    const bi = blockInfo[blockName];
+    bi.equipment = equipment;
+    bi.memo = memo;
+    if (userType) bi.symbolType = userType;
+    // 스캔 결과에서 추가 정보 반영
+    const scanItem = scanResults.find(r => r.name === blockName);
+    if (scanItem) {
+        bi.type = scanItem.type;
+        bi.category = scanItem.category;
+        bi.autoDesc = scanItem.autoDesc;
+        bi.portCount = scanItem.portCount;
+        bi.blockDesc = scanItem.blockDesc || '';
+        if (scanItem.crossRef) bi.crossRef = scanItem.crossRef;
+    }
+    // 포트 목록 + 심볼사전 포트 설명 매핑
+    const group = groupsData[blockName];
+    if (group && group.ports) {
+        const symType = userType || bi.symbolType || '';
+        const dictEntry = symType && typeof blockDictionary !== 'undefined' ? blockDictionary[symType] : null;
+        const dictPorts = dictEntry && dictEntry.ports ? dictEntry.ports : [];
+
+        bi.portsDetail = group.ports.map(p => {
+            const pName = p.name || p.text || '';
+            const dp = dictPorts.find(d => d.name && d.name.toUpperCase() === pName.toUpperCase());
+            return {
+                name: pName,
+                description: dp ? (dp.description || '') : '',
+                direction: dp ? (dp.direction || '') : ''
+            };
+        }).filter(p => p.name);
+        bi.ports = bi.portsDetail.map(p => p.name);
+    }
+
+    // 연결 정보 추가 (inputFrom / outputTo)
+    bi.inputFrom = [];
+    bi.outputTo = [];
+    const allConns = [...(typeof autoConnectResults !== 'undefined' && autoConnectResults ? autoConnectResults : []), ...(customConnections || [])];
+    for (const c of allConns) {
+        const fg = c.fromGroup || c.fromParent || '';
+        const tg = c.toGroup || c.toParent || '';
+        if (tg === blockName) {
+            bi.inputFrom.push({ fromBlock: fg, fromPort: c.fromName || '', toPort: c.toName || '' });
+        }
+        if (fg === blockName) {
+            bi.outputTo.push({ toBlock: tg, fromPort: c.fromName || '', toPort: c.toName || '' });
+        }
+    }
+
+    // 도면 정보
+    if (typeof currentDrawingNumber !== 'undefined' && currentDrawingNumber) {
+        if (!bi.drawings) bi.drawings = [];
+        const dk = `${currentDrawingNumber}-${currentPageNumber || ''}`;
+        if (!bi.drawings.includes(dk)) bi.drawings.push(dk);
+    }
+    localStorage.setItem('blockInfo', JSON.stringify(blockInfo));
+    if (typeof renderBlockList === 'function') renderBlockList();
+
+    updateScanStats();
+
+    const searchEl = document.getElementById('scan-search');
+    const filterText = searchEl ? searchEl.value.trim() : '';
+    renderScanList(filterText || undefined);
+
+    document.getElementById('scan-detail-popup').remove();
+    showToast(`${blockName} 저장 완료`, 'success');
 }
 
 function toggleScanCategory(cat) {
@@ -3073,20 +3498,408 @@ function saveScanAll() {
         if (typeof desc === 'string') {
             scanDescriptions[item.name] = { equipment: desc, memo: '' };
         }
-        // autoDesc는 자동분류 칼럼에만 표시, equipment는 사용자 입력만
-        // 타입/카테고리 정보도 저장
-        scanDescriptions[item.name].type = item.type || '';
-        scanDescriptions[item.name].category = item.category || '';
-        scanDescriptions[item.name].autoDesc = item.autoDesc || '';
+        const sd = scanDescriptions[item.name];
+        sd.type = item.type || '';
+        sd.category = item.category || '';
+        sd.autoDesc = item.autoDesc || '';
+
+        // 설비정보 자동 입력 (비어있을 때만)
+        if (!sd.equipment) {
+            if (item.type === 'SIGNAL' && item.autoDesc) {
+                sd.equipment = item.autoDesc;
+            } else if (item.type === 'REF_SIGNAL' && item.autoDesc) {
+                sd.equipment = item.autoDesc;
+            } else if ((item.type === 'OCB_BLOCK' || item.type === 'ALG_BLOCK') && item.blockType) {
+                const dictEntry = typeof blockDictionary !== 'undefined' ? blockDictionary[item.blockType] : null;
+                if (dictEntry && dictEntry.desc) {
+                    sd.equipment = dictEntry.desc;
+                }
+            }
+        }
     }
 
     const pageKey = 'scan_dictionary';
     localStorage.setItem(pageKey, JSON.stringify(scanDescriptions));
-    showToast(`스캔 저장 완료 (${Object.keys(scanDescriptions).length}개)`, 'success');
+
+    // blockInfo에도 저장 — scanDescriptions의 모든 정보를 반영
+    const blockInfo = JSON.parse(localStorage.getItem('blockInfo') || '{}');
+    for (const item of scanResults) {
+        if (!blockInfo[item.name]) blockInfo[item.name] = {};
+        const bi = blockInfo[item.name];
+        const sd = scanDescriptions[item.name] || {};
+
+        // 스캔 결과 정보
+        bi.type = item.type;
+        bi.symbolType = item.blockType || sd.userType || '';
+        bi.category = item.category;
+        bi.autoDesc = item.autoDesc;
+        bi.portCount = item.portCount;
+        bi.blockDesc = item.blockDesc || '';
+        bi.blockCategory = item.blockCategory || '';
+
+        // scanDescriptions에서 사용자 입력 정보 반영
+        if (sd.equipment) bi.equipment = sd.equipment;
+        if (sd.memo) bi.memo = sd.memo;
+        if (sd.userType) bi.symbolType = sd.userType;
+
+        // 설비정보 자동 입력 (비어있을 때만)
+        if (!bi.equipment) {
+            if (item.type === 'SIGNAL' && item.autoDesc) {
+                // SIGNAL: autoDesc(태그 설명)를 설비정보로
+                bi.equipment = item.autoDesc;
+            } else if (item.type === 'REF_SIGNAL' && item.autoDesc) {
+                // REF_SIGNAL: 참조 도면 번호
+                bi.equipment = item.autoDesc;
+            } else if ((item.type === 'OCB_BLOCK' || item.type === 'ALG_BLOCK') && item.blockType) {
+                // OCB/ALG: 심볼사전의 기본설명
+                const dictEntry = typeof blockDictionary !== 'undefined' ? blockDictionary[item.blockType] : null;
+                if (dictEntry && dictEntry.desc) {
+                    bi.equipment = dictEntry.desc;
+                }
+            }
+        }
+
+        // 포트 목록
+        const group = groupsData[item.name];
+        if (group && group.ports) {
+            bi.ports = group.ports.map(p => p.name || p.text || '').filter(Boolean);
+        }
+
+        // 크로스 레퍼런스
+        if (item.crossRef && item.crossRef.length > 0) {
+            bi.crossRef = item.crossRef;
+        }
+
+        // 도면 정보 추가
+        if (typeof currentDrawingNumber !== 'undefined' && currentDrawingNumber) {
+            if (!bi.drawings) bi.drawings = [];
+            const drawingKey = `${currentDrawingNumber}-${currentPageNumber || ''}`;
+            if (!bi.drawings.includes(drawingKey)) bi.drawings.push(drawingKey);
+        }
+    }
+    localStorage.setItem('blockInfo', JSON.stringify(blockInfo));
+    console.log('[SaveScan] blockInfo 저장:', Object.keys(blockInfo).length, '개 블록');
+    // 블록 탭 갱신
+    if (typeof renderBlockList === 'function') renderBlockList();
+
+    showToast(`스캔 저장 완료 (${Object.keys(blockInfo).length}개 블록)`, 'success');
 }
 
 function filterScanList() {
     const searchEl = document.getElementById('scan-search');
     const filterText = searchEl ? searchEl.value.trim() : '';
     renderScanList(filterText || undefined);
+}
+
+// ============ 블록 탭 렌더링 ============
+
+function renderBlockList() {
+    const listEl = document.getElementById('block-list');
+    if (!listEl) return;
+
+    const search = (document.getElementById('block-search')?.value || '').toLowerCase();
+
+    // blockInfo (localStorage 'blockInfo') 또는 scanDescriptions에서 데이터 로드
+    const blockInfoData = JSON.parse(localStorage.getItem('blockInfo') || '{}');
+
+    // 타입별 그룹화
+    const groups = {};
+    for (const [name, info] of Object.entries(blockInfoData)) {
+        const type = info.symbolType || info.type || '미분류';
+        if (search && !name.toLowerCase().includes(search) && !type.toLowerCase().includes(search) && !(info.equipment || '').toLowerCase().includes(search)) continue;
+        if (!groups[type]) groups[type] = [];
+        groups[type].push({ name, ...info });
+    }
+
+    let html = '';
+    for (const [type, items] of Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]))) {
+        html += `<div style="margin-bottom:6px;">`;
+        html += `<div style="padding:5px 8px; background:rgba(255,255,255,0.05); border-radius:4px; font-size:10px; font-weight:600; color:var(--text-primary); display:flex; justify-content:space-between;">`;
+        html += `<span>${type}</span><span style="color:var(--text-muted);">${items.length}개</span></div>`;
+        for (const item of items) {
+            const equipName = item.equipment || '';
+            html += `<div style="padding:4px 8px 4px 16px; font-size:10px; color:var(--text-secondary); cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.03);" onclick="openScanDetailPopup('${item.name.replace(/'/g, "\\'")}')">`;
+            html += `<span style="font-family:monospace; color:var(--text-primary);">${item.name}</span>`;
+            if (equipName) html += ` <span style="color:rgba(255,255,255,0.4);">— ${equipName}</span>`;
+            html += `</div>`;
+        }
+        html += `</div>`;
+    }
+
+    if (!html) html = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:11px;">스캔 저장 후 블록 목록이 표시됩니다.</div>';
+    listEl.innerHTML = html;
+}
+
+function filterBlockList() { renderBlockList(); }
+
+// ============ 블록정보 메인탭 (심볼사전 형식) ============
+
+let biData = {};
+let biCurrentType = 'all';
+let biSelectedBlock = null;
+
+function biInit() {
+    biData = JSON.parse(localStorage.getItem('blockInfo') || '{}');
+    biRenderFilters();
+    biRenderList();
+    biUpdateStats();
+}
+
+function biUpdateStats() {
+    const blocks = Object.values(biData);
+    const types = new Set(blocks.map(b => b.symbolType || b.type || '미분류'));
+    const withEquip = blocks.filter(b => b.equipment).length;
+    const el1 = document.getElementById('biStatBlocks');
+    const el2 = document.getElementById('biStatTypes');
+    const el3 = document.getElementById('biStatEquip');
+    if (el1) el1.textContent = blocks.length;
+    if (el2) el2.textContent = types.size;
+    if (el3) el3.textContent = blocks.length ? Math.round(withEquip / blocks.length * 100) + '%' : '0%';
+}
+
+function biRenderFilters() {
+    const container = document.getElementById('biFilterChips');
+    if (!container) return;
+    const types = new Set();
+    for (const v of Object.values(biData)) {
+        types.add(v.symbolType || v.type || '미분류');
+    }
+    let html = `<button class="bt-filter-chip ${biCurrentType === 'all' ? 'active' : ''}" onclick="biSetType('all')">전체</button>`;
+    for (const t of [...types].sort()) {
+        html += `<button class="bt-filter-chip ${biCurrentType === t ? 'active' : ''}" onclick="biSetType('${t}')">${t}</button>`;
+    }
+    container.innerHTML = html;
+}
+
+function biSetType(t) {
+    biCurrentType = t;
+    biRenderFilters();
+    biRenderList();
+}
+
+function biFilterList() { biRenderList(); }
+
+const biCatColors = {
+    control: '#e94560', arithmetic: '#ff9800', logic: '#4fc3f7', selector: '#a78bfa',
+    limiter: '#f0a050', monitor: '#10b981', digital: '#38bdf8', sequencer: '#c084fc',
+    io: '#8b95a5', steam: '#fb923c', other: '#9ca3af', SIGNAL: '#00ff88', REF_SIGNAL: '#00bcd4',
+    OCB_BLOCK: '#e94560', ALG_BLOCK: '#ff9800'
+};
+
+function biRenderList() {
+    const list = document.getElementById('biBlockList');
+    if (!list) return;
+    const search = (document.getElementById('biSearchInput')?.value || '').toLowerCase();
+
+    const filtered = Object.entries(biData).filter(([name, info]) => {
+        const type = info.symbolType || info.type || '미분류';
+        if (biCurrentType !== 'all' && type !== biCurrentType) return false;
+        if (search) {
+            const haystack = `${name} ${info.equipment || ''} ${info.memo || ''} ${type} ${info.autoDesc || ''} ${info.category || ''}`.toLowerCase();
+            if (!haystack.includes(search)) return false;
+        }
+        return true;
+    });
+
+    // 카테고리별 그룹화
+    const groups = {};
+    for (const [name, info] of filtered) {
+        const cat = info.symbolType || info.type || '미분류';
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push([name, info]);
+    }
+
+    // 카테고리 정렬 (SIGNAL, REF_SIGNAL 먼저, 나머지 알파벳)
+    const catOrder = ['SIGNAL', 'REF_SIGNAL'];
+    const sortedCats = Object.keys(groups).sort((a, b) => {
+        const ai = catOrder.indexOf(a);
+        const bi = catOrder.indexOf(b);
+        if (ai >= 0 && bi >= 0) return ai - bi;
+        if (ai >= 0) return -1;
+        if (bi >= 0) return 1;
+        return a.localeCompare(b);
+    });
+
+    let html = '';
+    for (const cat of sortedCats) {
+        const items = groups[cat].sort((a, b) => a[0].localeCompare(b[0]));
+        const cc = biCatColors[cat] || biCatColors[items[0]?.[1]?.blockCategory] || '#6b7280';
+        const dictEntry = typeof blockDictionary !== 'undefined' ? blockDictionary[cat] : null;
+        const catDesc = dictEntry ? dictEntry.desc : '';
+
+        html += `<div style="margin-bottom:2px;">`;
+        html += `<div style="padding:6px 12px; background:rgba(255,255,255,0.03); font-size:10px; font-weight:600; color:${cc}; display:flex; justify-content:space-between; align-items:center; cursor:default;">`;
+        html += `<span>${cat}${catDesc ? ' — ' + catDesc : ''}</span><span style="color:rgba(255,255,255,0.3);">${items.length}</span></div>`;
+
+        for (const [name, info] of items) {
+            const equip = info.equipment || '';
+            const isActive = biSelectedBlock === name;
+            html += `<div class="bt-block-item ${isActive ? 'active' : ''}" onclick="biSelectBlock('${name.replace(/'/g, "\\'")}')" style="padding-left:16px; ${equip ? '' : 'opacity:0.6;'}">
+                <div style="flex:1; min-width:0;">
+                    <div style="font-size:11px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${equip || name}</div>
+                    <div style="font-size:9px; color:rgba(255,255,255,0.35);">${equip ? name : ''}</div>
+                </div>
+            </div>`;
+        }
+        html += `</div>`;
+    }
+
+    if (!html) html = '<div style="padding:20px; text-align:center; color:rgba(255,255,255,0.3); font-size:12px;">블록 정보가 없습니다.<br>도면에서 스캔 저장 후 표시됩니다.</div>';
+    list.innerHTML = html;
+}
+
+function biSelectBlock(name) {
+    biSelectedBlock = name;
+    biRenderList();
+    biRenderDetail();
+}
+
+function biRenderDetail() {
+    const content = document.getElementById('biContent');
+    const b = biData[biSelectedBlock];
+    if (!b) {
+        content.innerHTML = '<div style="display:flex; align-items:center; justify-content:center; height:100%; color:rgba(255,255,255,0.3); font-size:13px;">좌측에서 블록을 선택하세요</div>';
+        return;
+    }
+
+    const name = biSelectedBlock;
+    const type = b.symbolType || b.type || '미분류';
+    const equip = b.equipment || '';
+    const memo = b.memo || '';
+    const cc = biCatColors[b.blockCategory || b.type] || '#6b7280';
+    const ports = b.ports || [];
+    const drawings = b.drawings || [];
+    const escapedName = name.replace(/'/g, "\\'");
+
+    // blockDictionary에서 심볼 상세 가져오기
+    const dictEntry = typeof blockDictionary !== 'undefined' ? blockDictionary[type] : null;
+    const symbolDesc = dictEntry ? (dictEntry.desc || '') : (b.blockDesc || b.autoDesc || '');
+
+    content.innerHTML = `
+        <div style="padding:24px;">
+            <!-- 헤더 -->
+            <div style="display:flex; align-items:center; gap:14px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                <div style="width:48px; height:48px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; background:${cc}22; color:${cc}; flex-shrink:0;">${(type || '?').slice(0, 3)}</div>
+                <div style="flex:1;">
+                    <div style="font-size:18px; font-weight:700; color:#fff;">${equip || name}</div>
+                    <div style="font-size:12px; color:rgba(255,255,255,0.4);">${equip ? name + ' · ' : ''}${type}${symbolDesc ? ' — ' + symbolDesc : ''}${drawings.length ? ' · ' + drawings.join(', ') : ''}</div>
+                </div>
+            </div>
+
+            <!-- 설비정보 편집 -->
+            <div style="margin-bottom:16px;">
+                <div style="font-size:10px; font-weight:600; color:#4fc3f7; margin-bottom:6px;">설비정보</div>
+                <input type="text" value="${equip.replace(/"/g, '&quot;')}" placeholder="설비명 / 역할을 입력하세요 (예: 소각로 온도 PID 제어기)"
+                    onblur="biSaveField('${escapedName}', 'equipment', this.value)"
+                    style="width:100%; padding:10px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; font-size:13px; outline:none; box-sizing:border-box;">
+            </div>
+
+            <div style="margin-bottom:16px;">
+                <div style="font-size:10px; font-weight:600; color:#4fc3f7; margin-bottom:6px;">메모</div>
+                <input type="text" value="${memo.replace(/"/g, '&quot;')}" placeholder="메모 입력..."
+                    onblur="biSaveField('${escapedName}', 'memo', this.value)"
+                    style="width:100%; padding:10px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:#fff; font-size:13px; outline:none; box-sizing:border-box;">
+            </div>
+
+            <!-- 심볼 타입 지정 -->
+            <div style="margin-bottom:16px;">
+                <div style="font-size:10px; font-weight:600; color:#a78bfa; margin-bottom:6px;">심볼 타입</div>
+                <select onchange="biSaveField('${escapedName}', 'symbolType', this.value)"
+                    style="width:100%; padding:10px 12px; background:rgba(0,0,0,0.3); border:1px solid rgba(139,92,246,0.3); border-radius:8px; color:#c4b5fd; font-size:12px; outline:none;">
+                    <option value="">-- 자동 (${b.type || '?'}) --</option>
+                    ${typeof blockDictionary !== 'undefined' ? Object.keys(blockDictionary).sort().map(t => {
+                        const d = blockDictionary[t];
+                        return `<option value="${t}" ${type === t ? 'selected' : ''}>${t}${d && d.desc ? ' — ' + d.desc : ''}</option>`;
+                    }).join('') : ''}
+                </select>
+            </div>
+
+            ${ports.length ? `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:10px; font-weight:600; color:rgba(255,255,255,0.4); margin-bottom:6px;">포트 구성 (${ports.length})</div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                    ${ports.map(p => `<span style="padding:3px 8px; border-radius:4px; font-size:10px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.6); border:1px solid rgba(255,255,255,0.08);">${p}</span>`).join('')}
+                </div>
+            </div>` : ''}
+
+            ${drawings.length ? `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:10px; font-weight:600; color:#fb923c; margin-bottom:6px;">관련 도면</div>
+                <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                    ${drawings.map(d => `<span style="padding:3px 8px; border-radius:4px; font-size:10px; background:rgba(251,146,60,0.1); color:#fb923c; border:1px solid rgba(251,146,60,0.2);">${d}</span>`).join('')}
+                </div>
+            </div>` : ''}
+
+            ${b.crossRef && b.crossRef.length ? `
+            <div style="margin-bottom:16px;">
+                <div style="font-size:10px; font-weight:600; color:#f0a050; margin-bottom:6px;">크로스 레퍼런스</div>
+                ${b.crossRef.flatMap(r => r.drawings || []).map(d => `<div style="font-size:10px; color:rgba(255,255,255,0.6); padding:2px 0;">${d.num || ''} — ${d.title || d.ref || ''}</div>`).join('')}
+            </div>` : ''}
+
+            <div style="display:flex; gap:8px; margin-top:20px;">
+                <button onclick="biDeleteBlock('${escapedName}')" style="padding:8px 16px; border:1px solid rgba(239,68,68,0.3); border-radius:6px; background:transparent; color:#f87171; font-size:12px; cursor:pointer;">삭제</button>
+            </div>
+        </div>
+    `;
+}
+
+function biSaveField(name, field, value) {
+    if (!biData[name]) biData[name] = {};
+    biData[name][field] = value;
+    localStorage.setItem('blockInfo', JSON.stringify(biData));
+    // scanDescriptions에도 동기화
+    if (typeof scanDescriptions !== 'undefined' && scanDescriptions[name]) {
+        if (field === 'equipment' || field === 'memo') {
+            scanDescriptions[name][field] = value;
+        } else if (field === 'symbolType') {
+            scanDescriptions[name].userType = value;
+        }
+        localStorage.setItem('scan_dictionary', JSON.stringify(scanDescriptions));
+    }
+    biRenderList();
+    biUpdateStats();
+}
+
+async function biDeleteBlock(name) {
+    if (!await showConfirm(`"${name}" 블록 정보를 삭제하시겠습니까?`, { title: '블록 삭제', confirmText: '삭제', type: 'danger' })) return;
+    delete biData[name];
+    localStorage.setItem('blockInfo', JSON.stringify(biData));
+    biSelectedBlock = null;
+    biRenderList();
+    biRenderDetail();
+    biUpdateStats();
+    showToast(`${name} 삭제 완료`, 'success');
+}
+
+async function biResetAll() {
+    const count = Object.keys(biData).length;
+    if (!count) { showToast('삭제할 데이터가 없습니다.', 'info'); return; }
+    if (!await showConfirm(`블록정보 ${count}건을 모두 삭제하시겠습니까?`, { title: '블록정보 초기화', confirmText: '전체 삭제', type: 'danger' })) return;
+    biData = {};
+    localStorage.removeItem('blockInfo');
+    biSelectedBlock = null;
+    biRenderFilters();
+    biRenderList();
+    biRenderDetail();
+    biUpdateStats();
+    showToast('블록정보가 초기화되었습니다.', 'success');
+}
+
+function biExportCSV() {
+    let csv = '블록명,타입,심볼,설비정보,메모,포트,관련도면\n';
+    for (const [name, info] of Object.entries(biData).sort((a, b) => a[0].localeCompare(b[0]))) {
+        const type = (info.type || '').replace(/"/g, '""');
+        const sym = (info.symbolType || '').replace(/"/g, '""');
+        const eq = (info.equipment || '').replace(/"/g, '""');
+        const memo = (info.memo || '').replace(/"/g, '""');
+        const ports = (info.ports || []).join(';');
+        const drawings = (info.drawings || []).join(';');
+        csv += `"${name}","${type}","${sym}","${eq}","${memo}","${ports}","${drawings}"\n`;
+    }
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `블록정보_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    showToast('CSV 내보내기 완료', 'success');
 }

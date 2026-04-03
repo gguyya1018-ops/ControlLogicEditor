@@ -774,6 +774,28 @@
     "strictTolerance": false
   },
   {
+    "name": "OCB0088038",
+    "anchor": "OCB0088038",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "SIC2681C",
+        "type": "SIGNAL",
+        "dx": -126.20000000000027,
+        "dy": 111
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -162.20000000000027,
+        "dy": -10.199999999999818
+      }
+    ],
+    "priority": 1,
+    "ignoreName": true,
+    "strictTolerance": false
+  },
+  {
     "name": "ALG-011304",
     "anchor": "ALG-0113049",
     "anchorType": "ALG_BLOCK",
@@ -981,5 +1003,71 @@
     ],
     "priority": 2,
     "ignoreName": false
+  },
+  {
+    "name": "OCB0088013_1",
+    "anchor": "OCB0088013",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "SIC2681A",
+        "type": "SIGNAL",
+        "dx": -127.60000000000014,
+        "dy": 111
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -162.30000000000007,
+        "dy": -10.199999999999818
+      }
+    ],
+    "priority": 2,
+    "ignoreName": false,
+    "strictTolerance": false
+  },
+  {
+    "name": "OCB0088022",
+    "anchor": "OCB0088022",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "SIC2681B",
+        "type": "SIGNAL",
+        "dx": -127.5,
+        "dy": 91
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -162.20000000000005,
+        "dy": -10.199999999999818
+      }
+    ],
+    "priority": 2,
+    "ignoreName": true,
+    "strictTolerance": false
+  },
+  {
+    "name": "OCB008804D",
+    "anchor": "OCB008804D",
+    "anchorType": "OCB_BLOCK",
+    "ports": [
+      {
+        "name": "SIC2681D",
+        "type": "SIGNAL",
+        "dx": -112.40000000000055,
+        "dy": 111
+      },
+      {
+        "name": "IN1",
+        "type": "SIGNAL",
+        "dx": -166.5,
+        "dy": -10.199999999999818
+      }
+    ],
+    "priority": 2,
+    "ignoreName": true,
+    "strictTolerance": false
   }
 ]
