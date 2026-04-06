@@ -2033,34 +2033,21 @@ function updateRecentDrawingsList() {
         }
     }
 
-    // 초기 화면
-    const welcomeList = document.querySelector('#welcome-recent-list .recent-items');
-    if (welcomeList) {
+    // 초기 화면 — 제어 로직 최근 도면 (#home-logic-recent)
+    const homeLogicRecent = document.getElementById('home-logic-recent');
+    if (homeLogicRecent) {
         if (recentDrawings.length === 0) {
-            welcomeList.innerHTML = '<p class="text-muted" style="font-size:12px;">최근 항목 없음</p>';
+            homeLogicRecent.innerHTML = '<p class="text-muted">최근 항목 없음</p>';
         } else {
-            welcomeList.innerHTML = recentDrawings.slice(0, 4).map(d => {
+            homeLogicRecent.innerHTML = recentDrawings.slice(0, 5).map(d => {
                 const date = new Date(d.lastModified).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' });
                 return `
-                    <div class="welcome-recent-item" style="
-                        padding: 8px 12px;
-                        margin: 4px 0;
-                        background: rgba(255,255,255,0.05);
-                        border-radius: 6px;
-                        cursor: pointer;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    " onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
-                        <div onclick="loadDrawing('${d.id}')" style="flex:1;">
-                            <span style="font-size:13px;">${d.name}</span>
-                            <span style="font-size:11px; color:#888; margin-left:10px;">${date}</span>
-                        </div>
-                        <span onclick="event.stopPropagation(); removeFromRecentDrawings('${d.id}')"
-                              style="cursor:pointer; color:#666; padding:4px 8px; font-size:16px; font-weight:bold;"
-                              onmouseover="this.style.color='#ff5252'"
-                              onmouseout="this.style.color='#666'"
-                              title="목록에서 삭제">×</span>
+                    <div class="home-recent-item"
+                         onclick="loadDrawing('${d.id}')"
+                         onmouseover="this.style.background='rgba(255,255,255,0.08)'"
+                         onmouseout="this.style.background=''">
+                        <span class="home-recent-name">${d.name}</span>
+                        <span class="home-recent-date">${date}</span>
                     </div>
                 `;
             }).join('');
@@ -2110,27 +2097,21 @@ function renderRecentDrawingsUI() {
         }
     }
 
-    // 초기 화면
-    const welcomeList = document.querySelector('#welcome-recent-list .recent-items');
-    if (welcomeList) {
+    // 초기 화면 — 제어 로직 최근 도면 (#home-logic-recent)
+    const homeLogicRecent2 = document.getElementById('home-logic-recent');
+    if (homeLogicRecent2) {
         if (recentDrawings.length === 0) {
-            welcomeList.innerHTML = '<p class="text-muted" style="font-size:12px;">최근 항목 없음</p>';
+            homeLogicRecent2.innerHTML = '<p class="text-muted">최근 항목 없음</p>';
         } else {
-            welcomeList.innerHTML = recentDrawings.slice(0, 4).map(d => {
+            homeLogicRecent2.innerHTML = recentDrawings.slice(0, 5).map(d => {
                 const date = new Date(d.lastModified).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' });
                 return `
-                    <div class="welcome-recent-item" onclick="loadDrawing('${d.id}')" style="
-                        padding: 8px 12px;
-                        margin: 4px 0;
-                        background: rgba(255,255,255,0.05);
-                        border-radius: 6px;
-                        cursor: pointer;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    ">
-                        <span style="font-size: 13px;">${d.name}</span>
-                        <span style="font-size: 11px; color: #888;">${date}</span>
+                    <div class="home-recent-item"
+                         onclick="loadDrawing('${d.id}')"
+                         onmouseover="this.style.background='rgba(255,255,255,0.08)'"
+                         onmouseout="this.style.background=''">
+                        <span class="home-recent-name">${d.name}</span>
+                        <span class="home-recent-date">${date}</span>
                     </div>
                 `;
             }).join('');

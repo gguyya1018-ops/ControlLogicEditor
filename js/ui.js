@@ -135,6 +135,9 @@ if (!document.getElementById('notification-styles')) {
 
 // ============ 환영 화면 ============
 
+// 앱 초기화 완료 전에 hideWelcomeScreen이 호출되는 것을 방지
+window._appReady = false;
+
 function showWelcomeScreen() {
     document.getElementById('welcome-screen').classList.remove('hidden');
     // 도면이 없을 때 패널들 숨김
@@ -240,6 +243,12 @@ async function updateWelcomeStats() {
 }
 
 function hideWelcomeScreen() {
+    if (!window._appReady) {
+        // 스타트업 중 호출 차단 — 어디서 호출했는지 로그 기록
+        const caller = new Error().stack.split('\n').slice(1, 4).join(' | ');
+        console.warn('[hideWelcomeScreen] 앱 초기화 전 호출 차단:', caller);
+        return;
+    }
     document.getElementById('welcome-screen').classList.add('hidden');
     // 도면이 열리면 패널들 표시
     const sidebar = document.getElementById('sidebar');
@@ -1955,6 +1964,15 @@ function btRenderDetail() {
         return;
     }
 
+    // Ovation 포트 데이터 우선 적용 (한글 번역 반영)
+    const ov0 = ovationSymbols && ovationSymbols[b.id] ? ovationSymbols[b.id] : {};
+    if (ov0.ports && ov0.ports.length) {
+        b.ports = ov0.ports;
+        console.log('[DEBUG] Ovation 포트 적용:', b.id, '포트수:', ov0.ports.length, '첫포트:', ov0.ports[0]?.description);
+    } else {
+        console.log('[DEBUG] Ovation 포트 없음:', b.id, 'ovationSymbols 존재:', !!ovationSymbols, 'ov0:', Object.keys(ov0).length);
+    }
+
     const ports = b.ports || [];
     const inputs = ports.filter(p => p.direction === 'input');
     const outputs = ports.filter(p => p.direction === 'output');
@@ -1968,7 +1986,14 @@ function btRenderDetail() {
                 <span class="bt-arrow" style="font-size:9px; color:rgba(255,255,255,0.4);">${defaultOpen ? '▼' : '▶'}</span>
                 <span style="font-size:11px; font-weight:600; color:${color};">${title}</span>
             </div>
-            <div style="display:${defaultOpen ? 'block' : 'none'}; padding:12px 14px;">${content}</div>
+            <div style="display:${defaultOpen ? 'block' : 'none'}; padding:12px 14px; position:relative;">
+                ${content}
+                <button onclick="const sec=this.closest('div[style*=padding]'); sec.style.display='none'; sec.previousElementSibling.querySelector('.bt-arrow').textContent='▶';"
+                    style="position:sticky; bottom:8px; float:right; width:36px; height:36px; border-radius:50%; border:1px solid rgba(255,255,255,0.2); background:rgba(30,30,30,0.9); color:rgba(255,255,255,0.6); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; backdrop-filter:blur(8px); box-shadow:0 2px 8px rgba(0,0,0,0.3); z-index:10; margin-top:8px;"
+                    onmouseenter="this.style.background='rgba(79,195,247,0.3)'; this.style.color='#fff'; this.style.borderColor='#4fc3f7';"
+                    onmouseleave="this.style.background='rgba(30,30,30,0.9)'; this.style.color='rgba(255,255,255,0.6)'; this.style.borderColor='rgba(255,255,255,0.2)';"
+                    title="접기">✕</button>
+            </div>
         </div>`;
     };
 
@@ -2071,9 +2096,10 @@ function btRenderDetail() {
                 <!-- 통합 설명 박스 — 항상 보임 -->
                 ${(() => {
                     const ov = ovationSymbols && ovationSymbols[b.id] ? ovationSymbols[b.id] : {};
-                    if (!b.fullDesc && ov.fullDesc) b.fullDesc = ov.fullDesc;
-                    if (!b.detailFull && ov.detailFull) b.detailFull = ov.detailFull;
-                    if (!b.diagramDesc && ov.diagramDesc) b.diagramDesc = ov.diagramDesc;
+                    if (ov.fullDesc) b.fullDesc = ov.fullDesc;
+                    if (ov.detailFull) b.detailFull = ov.detailFull;
+                    if (ov.diagramDesc) b.diagramDesc = ov.diagramDesc;
+                    if (ov.ports && ov.ports.length) b.ports = ov.ports;
                     return '';
                 })()}
                 <!-- 연결 포트 (설명 앞에 표시) -->
@@ -2086,7 +2112,7 @@ function btRenderDetail() {
 
                 <!-- 접기/펼치기: 상세 설명 (PDF 원본 번역) -->
                 ${collapseSection('detailFull', '상세 설명', '#a78bfa',
-                    b.detailFull ? `<div style="font-size:12px; color:rgba(255,255,255,0.75); line-height:1.8;">${b.detailFull.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>')}</div>`
+                    b.detailFull ? `<div style="font-size:12px; color:rgba(255,255,255,0.75); line-height:1.8;">${b.detailFull.includes('<svg') || b.detailFull.includes('<table') ? b.detailFull : b.detailFull.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>')}</div>`
                     : (b.diagramDesc ? `<div style="font-size:12px; color:rgba(255,255,255,0.75); line-height:1.8;">${b.diagramDesc.replace(/\n\n/g, '<br><br>').replace(/\n/g, '<br>')}</div>` : ''), false)}
 
                 <!-- 접기/펼치기: 매뉴얼 원본 다이어그램 (전체 페이지) -->
@@ -2098,7 +2124,7 @@ function btRenderDetail() {
                             imgs += `<img src="data/symbol_images/${b.id}_p${i}.png" style="width:100%; border-radius:6px; background:#fff; margin-bottom:8px;" onerror="this.style.display='none'">`;
                         }
                     }
-                    return collapseSection('diagram', `매뉴얼 원본 (${pages}페이지)`, '#fb923c', `<div style="max-height:600px; overflow-y:auto;">${imgs}</div>`, false);
+                    return collapseSection('diagram', `매뉴얼 원본 (${pages}페이지)`, '#fb923c', `<div>${imgs}</div>`, false);
                 })()}
 
                 <!-- 접기/펼치기: 파라미터 및 설정 -->

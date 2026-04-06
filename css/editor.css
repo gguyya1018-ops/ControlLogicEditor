@@ -1385,12 +1385,14 @@ tr:hover .sd-td { background: rgba(255,255,255,0.04); }
     left: 0;
     width: 100%;
     height: 100%;
-    background: var(--bg-canvas);
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10;
+    z-index: 52;
+    overflow: hidden;
 }
+/* circuit-bg: JS에서 인라인 스타일로 처리 */
 #welcome-screen.hidden {
     display: none;
 }
@@ -2172,8 +2174,8 @@ tr:hover .sd-td { background: rgba(255,255,255,0.04); }
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--bg-canvas);
-    z-index: 50;
+    background: rgba(13, 17, 23, 0.45);
+    z-index: 52;
     overflow-x: hidden;
 }
 
@@ -2187,6 +2189,8 @@ tr:hover .sd-td { background: rgba(255,255,255,0.04); }
     flex-direction: column;
     overflow: hidden;
     align-items: stretch;
+    position: relative;
+    z-index: 1;
 }
 
 .home-sidebar-left {
@@ -2204,8 +2208,8 @@ tr:hover .sd-td { background: rgba(255,255,255,0.04); }
     justify-content: space-around;
     flex-shrink: 0;
     padding: 12px 8px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(13,17,23,0.85);
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: var(--radius-md);
     margin-bottom: 16px;
     box-sizing: border-box;
@@ -2329,39 +2333,42 @@ tr:hover .sd-td { background: rgba(255,255,255,0.04); }
     min-width: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
-    gap: 24px;
-    padding: 20px;
+    align-items: stretch;
+    gap: 16px;
+    padding: 20px 16px;
+    position: relative;
+    z-index: 1;
 }
 
 .home-card {
     flex: 1;
-    max-width: 500px;
-    min-width: 240px;
-    min-height: 380px;
-    padding: 24px;
-    background: var(--bg-secondary);
+    max-width: 380px;
+    min-width: 200px;
+    padding: 18px 20px;
+    background: #0d1117;
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255,255,255,0.10);
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
 }
 
 .home-card-logic {
-    background: linear-gradient(135deg, rgba(233,69,96,0.08) 0%, var(--bg-secondary) 40%);
+    background: linear-gradient(135deg, rgba(233,69,96,0.15) 0%, #0d1117 50%);
 }
 
 .home-card-pid {
-    background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, var(--bg-secondary) 40%);
+    background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, #0d1117 50%);
 }
 
 .home-card-header {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 10px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .home-card-icon {
@@ -2369,52 +2376,75 @@ tr:hover .sd-td { background: rgba(255,255,255,0.04); }
 }
 
 .home-card-title {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--text-primary);
+    letter-spacing: -0.3px;
 }
 
 .home-card-actions {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 24px;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-bottom: 18px;
 }
 
 .home-card-recent {
     flex: 1;
-    width: 100%;
+    min-height: 0;
     text-align: left;
+    display: flex;
+    flex-direction: column;
 }
 
 .home-card-recent h4 {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: rgba(255,255,255,0.35);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
 }
 
 .home-recent-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
+    overflow-y: auto;
+    max-height: 260px;
 }
 
 .home-recent-item {
-    padding: 8px 12px;
-    background: rgba(255,255,255,0.03);
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.06);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    font-size: 12px;
-    color: var(--text-secondary);
     transition: background 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border: 1px solid rgba(255,255,255,0.07);
 }
 
 .home-recent-item:hover {
-    background: var(--bg-tertiary);
-    color: var(--text-primary);
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.15);
+}
+
+.home-recent-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgba(255,255,255,0.85);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.home-recent-date {
+    font-size: 10px;
+    color: rgba(255,255,255,0.35);
+    white-space: nowrap;
 }
 
 /* 홈화면 숨김 - 우선순위 높임 */

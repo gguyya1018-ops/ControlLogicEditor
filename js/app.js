@@ -583,6 +583,8 @@ async function startApp() {
     }
 
     console.log('[APP] 초기화 완료 - 템플릿:', blockTemplates.length, '개');
+    // 이제부터 hideWelcomeScreen 허용
+    window._appReady = true;
 }
 
 // DOM 로드 후 초기화

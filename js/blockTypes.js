@@ -25,9 +25,9 @@ function loadBlockDictionary() {
     try {
         // Ovation 데이터 강제 갱신 (버전 체크)
         const ovVer = localStorage.getItem('ovation_merge_ver');
-        if (ovVer !== '20260327u') {
+        if (ovVer !== '20260403_rich8') {
             localStorage.removeItem('blockDictionary_v3');
-            localStorage.setItem('ovation_merge_ver', '20260327u');
+            localStorage.setItem('ovation_merge_ver', '20260403_rich8');
             console.log('[BlockDict] Ovation 버전 변경 → localStorage 초기화');
         }
         const saved = localStorage.getItem('blockDictionary_v3');
@@ -100,7 +100,7 @@ async function mergeOvationSymbols() {
                 if (sym.detailFull) existing.detailFull = sym.detailFull;
                 if (sym.core !== undefined) existing.core = sym.core;
                 if (sym.ai && sym.ai.length > (existing.ai || '').length) existing.ai = sym.ai;
-                if (sym.ports && sym.ports.length > (existing.ports || []).length) existing.ports = sym.ports;
+                if (sym.ports && sym.ports.length) existing.ports = sym.ports;
                 existing.source = 'merged';
             }
         }
@@ -126,7 +126,7 @@ async function mergeOvationSymbols() {
                     if (val.fullDesc) bt.fullDesc = val.fullDesc;
                     if (val.detailFull) bt.detailFull = val.detailFull;
                     if (val.core !== undefined) bt.core = val.core;
-                    if (val.ports && val.ports.length > (bt.ports || []).length) bt.ports = val.ports;
+                    if (val.ports && val.ports.length) bt.ports = val.ports;
                 }
             }
         }
