@@ -156,106 +156,70 @@ function saveFuncBlockMemosToStorage() {
 
 // ============ 블록 타입 식별 ============
 
-function identifyBlockType(groupName, ports) {
-    // 설비정보에 사용자 지정 타입이 있으면 우선 사용
-    if (typeof scanDescriptions !== 'undefined' && scanDescriptions[groupName]) {
-        const info = scanDescriptions[groupName];
-        if (info.userType && blockDictionary[info.userType]) {
-            const dict = blockDictionary[info.userType];
-            return { type: info.userType, category: dict.category || 'unknown', description: dict.desc || info.userType };
+/**
+ * 포트 집합 매칭으로 심볼 타입 식별
+ * 1순위: 사용자 수동 지정(userType)
+ * 2순위: blockDictionary 포트 정의와 캔버스 포트 비교 (교집합 스코어링)
+ * 3순위: 포트가 동일한 심볼이 여럿일 때 portDict 타입으로 구분
+ */
+function identifyBlockType(groupName, ports, portDictType) {
+    // 순수 포트 집합 매칭만 수행 (userType 적용은 호출부에서 처리)
+    if (!ports || ports.length === 0) return null;
+
+    const canvasPorts = new Set(ports.map(p => (p.name || p.text || '').toUpperCase()).filter(Boolean));
+    if (canvasPorts.size === 0) return null;
+
+    // 2. blockDictionary 포트 정의와 스코어링 매칭
+    const dict = (typeof blockDictionary !== 'undefined') ? blockDictionary : {};
+    let bestScore = 0, bestType = null, bestTies = [];
+
+    for (const [typeId, entry] of Object.entries(dict)) {
+        if (!entry.ports || entry.ports.length === 0) continue;
+        const symPorts = new Set(entry.ports.map(p => (p.name || '').toUpperCase()));
+
+        // 교집합: 캔버스 포트 중 심볼에 정의된 포트 수
+        let overlap = 0;
+        for (const cp of canvasPorts) {
+            if (symPorts.has(cp)) overlap++;
+        }
+        if (overlap === 0) continue;
+
+        // 스코어 = 교집합 / 캔버스 포트 수 (캔버스는 전체 포트의 부분집합)
+        // 캔버스 포트가 심볼 포트에 얼마나 포함되는지
+        const score = overlap / canvasPorts.size;
+
+        // 동점 처리: 가장 적은 심볼 포트 수를 가진 심볼 우선 (더 구체적)
+        if (score > bestScore) {
+            bestScore = score;
+            bestType = typeId;
+            bestTies = [{ typeId, score, symSize: symPorts.size }];
+        } else if (score === bestScore) {
+            bestTies.push({ typeId, score, symSize: symPorts.size });
         }
     }
 
-    const portNames = ports.map(p => (p.name || p.text || '').toUpperCase());
-    const portSet = new Set(portNames);
-    const nameUpper = groupName.toUpperCase();
+    // 스코어 임계값: 캔버스 포트의 40% 이상 + 최소 2개 매칭 (단일 포트 오매칭 방지)
+    const minOverlap = canvasPorts.size === 1 ? 1 : 2;
+    if (bestScore < 0.4 || !bestType || bestTies[0]?.score * canvasPorts.size < minOverlap) return null;
 
-    // T 블록: FLAG, NO, OUT, T, YES
-    if (portSet.has('T') && portSet.has('YES') && portSet.has('NO')) {
-        return { type: 'T', category: 'logic', description: '조건 분기 블록' };
-    }
-
-    // PID 블록
-    if (portSet.has('MV') && (portSet.has('PV') || portSet.has('SP'))) {
-        return { type: 'PID', category: 'control', description: 'PID 제어 블록' };
-    }
-
-    // NOT 블록
-    if ((portSet.has('IN') || portSet.has('N') || portSet.has('IN1')) &&
-        portSet.has('OUT') && ports.length <= 3) {
-        if (nameUpper.includes('NOT') || nameUpper.includes('INV')) {
-            return { type: 'NOT', category: 'logic', description: '논리 NOT 게이트' };
+    // 동점이 여럿일 때: portDictType으로 우선순위 결정, 없으면 심볼 포트 수 적은 것
+    if (bestTies.length > 1) {
+        if (portDictType) {
+            const pdMatch = bestTies.find(t => t.typeId.toUpperCase() === portDictType.toUpperCase());
+            if (pdMatch) bestType = pdMatch.typeId;
+        } else {
+            bestTies.sort((a, b) => a.symSize - b.symSize);
+            bestType = bestTies[0].typeId;
         }
     }
 
-    // AND/OR 블록: IN1, IN2, OUT
-    if (portSet.has('IN1') && portSet.has('IN2') && portSet.has('OUT')) {
-        if (nameUpper.includes('AND')) {
-            return { type: 'AND', category: 'logic', description: '논리 AND 게이트' };
-        }
-        if (nameUpper.includes('OR')) {
-            return { type: 'OR', category: 'logic', description: '논리 OR 게이트' };
-        }
-        if (nameUpper.includes('ADD') || groupName.includes('+')) {
-            return { type: 'ADD', category: 'math', description: '덧셈 블록' };
-        }
-        if (nameUpper.includes('SUB') || groupName.includes('-')) {
-            return { type: 'SUB', category: 'math', description: '뺄셈 블록' };
-        }
-        if (nameUpper.includes('MUL') || groupName.includes('*') || groupName.includes('×')) {
-            return { type: 'MUL', category: 'math', description: '곱셈 블록' };
-        }
-        if (nameUpper.includes('DIV') || groupName.includes('/') || groupName.includes('÷')) {
-            return { type: 'DIV', category: 'math', description: '나눗셈 블록' };
-        }
-        if (nameUpper.includes('GT') || nameUpper.includes('LT') ||
-            nameUpper.includes('GE') || nameUpper.includes('LE')) {
-            return { type: 'COMPARE', category: 'logic', description: '비교 블록' };
-        }
-        if (nameUpper.includes('MAX')) {
-            return { type: 'MAX', category: 'math', description: '최대값 블록' };
-        }
-        if (nameUpper.includes('MIN')) {
-            return { type: 'MIN', category: 'math', description: '최소값 블록' };
-        }
-        if (nameUpper.includes('SEL')) {
-            return { type: 'SEL', category: 'logic', description: '선택 블록' };
-        }
-        // OCB/ALG 블록인데 이름으로 타입 추론 불가 → 미분류
-        if (nameUpper.startsWith('OCB') || nameUpper.startsWith('ALG')) {
-            return { type: 'UNKNOWN', category: 'unknown', description: '미분류 (IN1+IN2+OUT, 수동 지정 필요)' };
-        }
-        return { type: 'LOGIC', category: 'logic', description: '논리 연산 블록' };
-    }
-
-    // M/A 블록 (Manual/Auto/Cascade 전환)
-    if (portSet.has('AUTO') || portSet.has('MAN') || nameUpper.includes('M/A')) {
-        return { type: 'M/A', category: 'control', description: '수동/자동 전환' };
-    }
-    // M/A/C 블록: T + A + I + MODE 포트 조합 (Manual/Auto/Cascade 운전 모드 전환)
-    if (portSet.has('T') && portSet.has('A') && portSet.has('I') && portSet.has('MODE')) {
-        return { type: 'M/A/C', category: 'control', description: '운전모드 전환 (Manual/Auto/Cascade)' };
-    }
-
-    // K 상수 블록
-    if (nameUpper.includes('K') && portSet.has('OUT') && ports.length <= 2) {
-        return { type: 'K', category: 'math', description: '상수 출력' };
-    }
-
-    // F(X) 함수 블록
-    if (groupName.includes('F(') || nameUpper.includes('FX') || nameUpper.includes('FUNC')) {
-        return { type: 'F', category: 'math', description: '함수 블록' };
-    }
-
-    // 수학 블록 이름으로 판단
-    const mathKeywords = ['ADD', 'SUB', 'MUL', 'DIV', 'SQRT', 'ABS', 'LIM', 'INTEG', 'DERIV'];
-    for (const kw of mathKeywords) {
-        if (nameUpper.includes(kw)) {
-            return { type: kw, category: 'math', description: `${kw} 블록` };
-        }
-    }
-
-    return null;
+    const entry = dict[bestType];
+    return {
+        type: bestType,
+        category: entry.category || 'unknown',
+        description: entry.desc || bestType,
+        confidence: bestScore >= 0.9 ? 'high' : 'medium'
+    };
 }
 
 // ============ 현재 도면 스캔 ============

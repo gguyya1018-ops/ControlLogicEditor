@@ -215,6 +215,288 @@ class Api:
         file_path = BASE_DIR / relative_path
         return file_path.exists()
 
+    def get_page_blocks(self, layout_csv_path):
+        """
+        특정 도면 레이아웃 CSV에서 블록 목록을 추출하고
+        ovation_symbols.json(심볼사전)의 포트 설명과 결합하여 반환.
+
+        반환 형식:
+        {
+          "OCB0088016": {
+            "block_type": "ABS",
+            "block_desc": "절대값 블록 — ...",
+            "ports": {
+              "IN":  { "direction": "input",  "description": "입력값",     "tag": "TIT2641", "tag_type": "온도계기" },
+              "OUT": { "direction": "output", "description": "절대값 출력", "tag": "SIT2681", "tag_type": "속도지시계" }
+            }
+          }
+        }
+        """
+        import math, re as _re
+        import_re = _re   # equipment 문자열 처리용
+
+        try:
+            # ── 1. layout CSV 로드 ──────────────────────────────────────────
+            csv_path = BASE_DIR / layout_csv_path
+            if not csv_path.exists():
+                return {'success': False, 'error': f'파일 없음: {layout_csv_path}'}
+
+            rows = []
+            with open(csv_path, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for r in reader:
+                    cleaned = {k.lstrip('\ufeff'): v for k, v in r.items()}
+                    rows.append(cleaned)
+
+            # ── 2. 요소 타입별 분류 ────────────────────────────────────────
+            ocb_blocks  = [r for r in rows if r.get('type') == 'OCB_BLOCK']
+            alg_blocks  = [r for r in rows if r.get('type') == 'ALG_BLOCK']
+            block_types = [r for r in rows if r.get('type') == 'BLOCK_TYPE']
+            ports       = [r for r in rows if r.get('type') == 'PORT']
+            ref_signals = [r for r in rows if r.get('type') == 'REF_SIGNAL']
+            all_blocks  = ocb_blocks + alg_blocks
+
+            # 공통 포트명 패턴 — SIGNAL로 잘못 분류된 경우 제외
+            # (IN1, IN2, OUT, A, G 등은 실제 계기 태그가 아님)
+            # N_1813_2211 형식은 Ovation 내부 로직 노드 참조 (NOT/AND 게이트 출력)
+            _PORT_NAMES = _re.compile(
+                r'^(IN\d*|OUT\d*|[A-G]|FLAG|YES|NO|STPT|SP|PV|MV|T|NUM|DEN|H|L|'
+                r'ENBL|INIT|RST|SET|CLR|Q|QN|CK|D|J|K|R|S|TRIG|HOLD|TRACK|MODE|'
+                r'AUTO|MAN|CAS|X|Y|Z|A\d+|B\d+|C\d+|'
+                r'[A-Z]_\d+_\d+)$', _re.IGNORECASE   # 내부 노드 (N_1813_2211 등)
+            )
+            signals = [r for r in rows
+                       if r.get('type') == 'SIGNAL'
+                       and not _PORT_NAMES.match(r.get('text', '').strip())]
+            all_signals = signals + ref_signals
+
+            def dist(a, b):
+                return math.sqrt((float(a['cx'])-float(b['cx']))**2 + (float(a['cy'])-float(b['cy']))**2)
+
+            def nearest(elem, candidates, radius=200):
+                best, bd = None, radius
+                for c in candidates:
+                    d = dist(elem, c)
+                    if d < bd:
+                        best, bd = c, d
+                return best
+
+            # BLOCK_TYPE 근접 매핑 제거 — 위치 기반 타입 추정은 오류 잦음
+            # 타입 식별은 JS identifyBlockType(canvas 포트 패턴 매칭)이 담당
+            block_type_map = {blk['text']: '' for blk in all_blocks}
+
+            # ── 4. PORT → 가장 가까운 SIGNAL 매핑 ─────────────────────────
+            #   우선순위: x오차 <40px인 것 중 가장 가까운 것
+            def match_signal(port):
+                px, py = float(port['cx']), float(port['cy'])
+                best_x, bxd = None, 9999
+                best_a, bad = None, 9999
+                for s in all_signals:
+                    sx, sy = float(s['cx']), float(s['cy'])
+                    dx = abs(px - sx)
+                    d  = math.sqrt((px-sx)**2 + (py-sy)**2)
+                    if dx < 40 and d < bxd:
+                        best_x, bxd = s, d
+                    if d < bad:
+                        best_a, bad = s, d
+                result = best_x if best_x else (best_a if bad <= 120 else None)
+                return result
+
+            # PORT → SIGNAL 매핑 테이블
+            port_signal = {}   # port element id → (port_name, signal_entry)
+            for p in ports:
+                sig = match_signal(p)
+                if not sig:
+                    continue
+                tag = sig['text']
+                sig_type = sig.get('type', 'SIGNAL')
+                entry = {'tag': tag, 'sig_type': sig_type}
+                if sig_type == 'REF_SIGNAL':
+                    import re
+                    m = re.match(r'^D0*(\d+)-(\d+)-(\d+)$', tag, re.I)
+                    if m:
+                        entry['ref_drawing'] = f"{m.group(1)}-{m.group(2)}"
+                        entry['ref_index']   = m.group(3)
+                port_signal[id(p)] = (p['text'], entry, p)
+
+            # ── 5. PORT를 가장 가까운 블록에 귀속 ────────────────────────
+            block_port_map = {}   # block_name → {port_name: signal_entry}
+            for pid_val, (pname, sig_entry, port) in port_signal.items():
+                blk = nearest(port, all_blocks, radius=300)
+                bname = blk['text'] if blk else '__unassigned__'
+                block_port_map.setdefault(bname, {})[pname] = sig_entry
+
+            # ── 6. 심볼사전 + 태그 컨텍스트 로드 ───────────────────────
+            sym_path = DATA_DIR / 'ovation_symbols.json'
+            ovation = {}
+            if sym_path.exists():
+                with open(sym_path, 'r', encoding='utf-8') as f:
+                    ovation = json.load(f)
+
+            tag_ctx_path = DATA_DIR / 'tag_context.json'
+            tag_ctx = {}
+            if tag_ctx_path.exists():
+                with open(tag_ctx_path, 'r', encoding='utf-8') as f:
+                    tag_ctx = json.load(f)
+
+            # 태그 타입 추론 (ISA 접두사)
+            ISA_PREFIX = {
+                'TIT':'온도계기','TI':'온도지시','TT':'온도송신','TC':'온도제어','TE':'온도요소',
+                'PIT':'압력계기','PI':'압력지시','PT':'압력송신','PC':'압력제어','PDI':'차압지시',
+                'FIT':'유량계기','FI':'유량지시','FT':'유량송신','FC':'유량제어','FCV':'유량제어밸브',
+                'LIT':'레벨계기','LI':'레벨지시','LT':'레벨송신','LC':'레벨제어',
+                'AIT':'분석계기','AI':'분석지시','AT':'분석송신',
+                'SIT':'속도계기','SI':'속도지시','ST':'속도송신',
+                'XV':'차단밸브','HV':'핸드밸브','PV':'공정밸브','CV':'제어밸브',
+                'HS':'핸드스위치','HIC':'핸드지시제어',
+                'ZI':'위치지시','ZT':'위치송신',
+            }
+            def tag_type(tag):
+                m = _re.match(r'^([A-Z]+)', tag.upper())
+                if not m: return ''
+                prefix = m.group(1)
+                for l in [4, 3, 2, 1]:
+                    if prefix[:l] in ISA_PREFIX:
+                        return ISA_PREFIX[prefix[:l]]
+                return ''
+
+            # ── 7. 최종 결합 ──────────────────────────────────────────────
+            result = {}
+            for blk in all_blocks:
+                bname = blk['text']
+                btype = block_type_map.get(bname, '')
+                sym   = ovation.get(btype, {})
+
+                # 심볼사전 포트 설명을 딕셔너리로 정리
+                sym_ports = {}
+                for p in sym.get('ports', []):
+                    sym_ports[p['name']] = {
+                        'direction':   p.get('direction', ''),
+                        'description': p.get('description', ''),
+                    }
+
+                # 신호 컨텍스트 병합
+                connected = block_port_map.get(bname, {})
+                merged_ports = {}
+
+                # 심볼사전에 정의된 포트 기준으로 먼저 채우기
+                for pname, pinfo in sym_ports.items():
+                    entry = dict(pinfo)
+                    if pname in connected:
+                        sig = connected[pname]
+                        entry['tag'] = sig['tag']
+                        if sig.get('sig_type') == 'SIGNAL':
+                            tt = tag_type(sig['tag'])
+                            if tt: entry['tag_type'] = tt
+                        elif sig.get('sig_type') == 'REF_SIGNAL':
+                            entry['ref_drawing'] = sig.get('ref_drawing','')
+                            entry['ref_index']   = sig.get('ref_index','')
+                    merged_ports[pname] = entry
+
+                # 도면에는 있으나 심볼사전에 없는 포트도 추가
+                for pname, sig in connected.items():
+                    if pname not in merged_ports:
+                        entry = {'direction': '', 'description': '', 'tag': sig['tag']}
+                        if sig.get('sig_type') == 'SIGNAL':
+                            tt = tag_type(sig['tag'])
+                            if tt: entry['tag_type'] = tt
+                        elif sig.get('sig_type') == 'REF_SIGNAL':
+                            entry['ref_drawing'] = sig.get('ref_drawing','')
+                            entry['ref_index']   = sig.get('ref_index','')
+                        merged_ports[pname] = entry
+
+                # tag_context로 포트 설비명 보강
+                equipments, ttypes = [], set()
+                for pinfo in merged_ports.values():
+                    t = pinfo.get('tag', '')
+                    if not t:
+                        continue
+                    ctx = tag_ctx.get(t, {})
+                    if ctx.get('equipment'):
+                        pinfo['equipment'] = ctx['equipment']
+                        short = import_re.sub(r'\(\d+\)\s*$', '', ctx['equipment']).strip()
+                        if short not in equipments:
+                            equipments.append(short)
+                    if ctx.get('primary_drawing'):
+                        pinfo['src_drawing'] = ctx['primary_drawing']
+                    if not pinfo.get('tag_type') and ctx.get('tag_type'):
+                        pinfo['tag_type'] = ctx['tag_type']
+                    tt = pinfo.get('tag_type', '')
+                    if tt:
+                        ttypes.add(tt)
+
+                # 블록 역할 추론
+                ROLE_TMPL = {
+                    'AND': '{} 조건 AND', 'OR': '{} 조건 OR', 'N': '{} 조건 반전',
+                    'H': '{} H값 선택', 'L': '{} L값 선택', 'T': '{} 신호 전달',
+                    'K': '{} 게인 조정', 'X': '{} 신호 승산', 'SUM': '{} 합산', 'ABS': '{} 절대값',
+                }
+                subj = ' / '.join(equipments[:2]) if equipments else (' / '.join(list(ttypes)[:1]) if ttypes else '')
+                tmpl = ROLE_TMPL.get(btype, '')
+                block_role = tmpl.format(subj) if (tmpl and subj) else (f'{subj}' if subj else '')
+
+                if btype or merged_ports:
+                    result[bname] = {
+                        'block_type':     btype,
+                        'block_raw_type': blk.get('type', ''),
+                        'block_desc':     sym.get('desc', '') if sym else '',
+                        'block_role':     block_role,
+                        'ports':          merged_ports,
+                    }
+
+            return {'success': True, 'blocks': result, 'total': len(result)}
+
+        except Exception as e:
+            import traceback
+            return {'success': False, 'error': str(e), 'trace': traceback.format_exc()}
+
+    def load_port_dict(self):
+        """포트사전 로드 (data/block_port_dict.json)"""
+        try:
+            path = DATA_DIR / 'block_port_dict.json'
+            if not path.exists():
+                return {'success': True, 'data': {}}
+            with open(path, 'r', encoding='utf-8') as f:
+                return {'success': True, 'data': json.load(f)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def save_port_dict(self, data):
+        """포트사전 저장 (data/block_port_dict.json) — 기존 데이터에 병합"""
+        try:
+            path = DATA_DIR / 'block_port_dict.json'
+            existing = {}
+            if path.exists():
+                with open(path, 'r', encoding='utf-8') as f:
+                    existing = json.load(f)
+            existing.update(data)   # 병합 (동일 블록은 덮어쓰기)
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(existing, f, ensure_ascii=False, indent=2)
+            return {'success': True, 'total': len(existing)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def load_tag_context(self):
+        """태그 컨텍스트 로드 (data/tag_context.json) — 계기태그별 설비명/타입/도면"""
+        try:
+            path = DATA_DIR / 'tag_context.json'
+            if not path.exists():
+                return {'success': True, 'data': {}}
+            with open(path, 'r', encoding='utf-8') as f:
+                return {'success': True, 'data': json.load(f)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def save_port_dict_full(self, data):
+        """포트사전 전체 저장 (덮어쓰기 — 삭제/초기화용)"""
+        try:
+            path = DATA_DIR / 'block_port_dict.json'
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return {'success': True, 'total': len(data)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
     def scan_all_drawings(self):
         """모든 도면에서 기능 블록 타입 수집 (layout.csv 파일 파싱)"""
         try:

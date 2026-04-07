@@ -1,0 +1,6069 @@
+{
+  "ALG-0159011": {
+    "drawing": "10-002",
+    "signals": {
+      "D04-078-01": {
+        "ref_drawing": "4-078",
+        "ref_index": "01",
+        "equipment": "NO.1 BLR LOSS OF FUEL"
+      },
+      "D04-076-02": {
+        "ref_drawing": "4-076",
+        "ref_index": "02",
+        "equipment": "ALL BNR MAIN FLM FAIL ALL LNG SOV CLS"
+      },
+      "D04-002-01": {
+        "ref_drawing": "4-002",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND & MFT"
+      }
+    }
+  },
+  "ALG-001A011": {
+    "drawing": "10-002",
+    "signals": {
+      "D05-078-01": {
+        "ref_drawing": "5-078",
+        "ref_index": "01",
+        "equipment": "NO.1 BLR LOSS OF FUEL"
+      },
+      "D05-076-02": {
+        "ref_drawing": "5-076",
+        "ref_index": "02",
+        "equipment": "ALL BNR MAIN FLM FAIL ALL LNG SOV CLS"
+      },
+      "D05-002-01": {
+        "ref_drawing": "5-002",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND & MFT"
+      }
+    }
+  },
+  "ALG-005D026": {
+    "drawing": "10-002",
+    "signals": {
+      "D02-002-01": {
+        "ref_drawing": "2-002",
+        "ref_index": "01",
+        "equipment": "STEAM TURBINE MASTER TRIP"
+      }
+    }
+  },
+  "ALG-000F021": {
+    "drawing": "10-004",
+    "signals": {
+      "D03-004-02": {
+        "ref_drawing": "3-004",
+        "ref_index": "02",
+        "equipment": "DH HEATER #1 INLET  3WAY MOV(HV2602)"
+      }
+    }
+  },
+  "ALG-005E002": {
+    "drawing": "10-004",
+    "signals": {
+      "D02-002-01": {
+        "ref_drawing": "2-002",
+        "ref_index": "01",
+        "equipment": "STEAM TURBINE MASTER TRIP"
+      }
+    }
+  },
+  "OCB02A5037": {
+    "drawing": "10-004",
+    "signals": {
+      "HS3025": {
+        "tag_type": "핸드스위치",
+        "equipment": "TURBINE DIGITAL OUTPUT KEYBOARD",
+        "src_drawing": "2-004"
+      }
+    }
+  },
+  "ALG-0014021": {
+    "drawing": "10-006",
+    "signals": {
+      "D03-006-02": {
+        "ref_drawing": "3-006",
+        "ref_index": "02",
+        "equipment": "DH HEATER #2 OUTLET MOV(HV2603)"
+      }
+    }
+  },
+  "ALG-0163004": {
+    "drawing": "10-006",
+    "signals": {
+      "D04-004-04": {
+        "ref_drawing": "4-004",
+        "ref_index": "04",
+        "equipment": "BLR PURGE PERMISSIVE"
+      },
+      "D04-002-01": {
+        "ref_drawing": "4-002",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND & MFT"
+      }
+    }
+  },
+  "ALG-0163023": {
+    "drawing": "10-006",
+    "signals": {
+      "D04-002-01": {
+        "ref_drawing": "4-002",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND & MFT"
+      }
+    }
+  },
+  "ALG-001C004": {
+    "drawing": "10-006",
+    "signals": {
+      "D05-004-04": {
+        "ref_drawing": "5-004",
+        "ref_index": "04",
+        "equipment": "BLR PURGE PERMISSIVE"
+      },
+      "D05-002-01": {
+        "ref_drawing": "5-002",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND & MFT"
+      }
+    }
+  },
+  "ALG-001C023": {
+    "drawing": "10-006",
+    "signals": {
+      "D05-002-01": {
+        "ref_drawing": "5-002",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND & MFT"
+      }
+    }
+  },
+  "ALG-006001A": {
+    "drawing": "10-006",
+    "signals": {
+      "D06-006-02": {
+        "ref_drawing": "6-006",
+        "ref_index": "02",
+        "equipment": "TBN BYPASS STM SHUT OFF MOV(HV1503)"
+      }
+    }
+  },
+  "ALG-0019021": {
+    "drawing": "10-008",
+    "signals": {
+      "D03-008-02": {
+        "ref_drawing": "3-008",
+        "ref_index": "02",
+        "equipment": "TBN BYPASS HEATER INLET MOV(HV2604)"
+      }
+    }
+  },
+  "ALG-006101D": {
+    "drawing": "10-008",
+    "signals": {
+      "D06-008-02": {
+        "ref_drawing": "6-008",
+        "ref_index": "02",
+        "equipment": "TBN BYPASS STM SHUTOFF MOV(HV1504)"
+      }
+    }
+  },
+  "ALG-00C601D": {
+    "drawing": "10-009",
+    "signals": {
+      "D01-502-08": {
+        "ref_drawing": "1-502",
+        "ref_index": "08",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D1-502-08": {
+        "ref_drawing": "1-502",
+        "ref_index": "08"
+      }
+    }
+  },
+  "ALG-00C6047": {
+    "drawing": "10-009",
+    "signals": {
+      "D01-502-10": {
+        "ref_drawing": "1-502",
+        "ref_index": "10",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D1-502-10": {
+        "ref_drawing": "1-502",
+        "ref_index": "10"
+      }
+    }
+  },
+  "ALG-001E021": {
+    "drawing": "10-010",
+    "signals": {
+      "D03-010-02": {
+        "ref_drawing": "3-010",
+        "ref_index": "02",
+        "equipment": "TBN BYPASS HEATER OUTLET MOV(HV2605)"
+      }
+    }
+  },
+  "ALG-016D008": {
+    "drawing": "10-010",
+    "signals": {
+      "D04-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-001F008": {
+    "drawing": "10-010",
+    "signals": {
+      "D05-006-03": {
+        "ref_drawing": "5-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      }
+    }
+  },
+  "ALG-0062022": {
+    "drawing": "10-010",
+    "signals": {
+      "D06-010-02": {
+        "ref_drawing": "6-010",
+        "ref_index": "02",
+        "equipment": "MAIN STM TO BK HD SHUT OFF OMV(HV1505)"
+      }
+    }
+  },
+  "ALG-044C01A": {
+    "drawing": "10-012",
+    "signals": {
+      "D08-012-02": {
+        "ref_drawing": "8-012",
+        "ref_index": "02",
+        "equipment": "MUD SEPARATOR INLET MOV (HV8609)"
+      }
+    }
+  },
+  "ALG-045101D": {
+    "drawing": "10-014",
+    "signals": {
+      "D08-014-02": {
+        "ref_drawing": "8-014",
+        "ref_index": "02",
+        "equipment": "INCIN. RETURN PP OUTLET MOV (HV8610)"
+      }
+    }
+  },
+  "ALG-0066034": {
+    "drawing": "10-016",
+    "signals": {
+      "D02-002-01": {
+        "ref_drawing": "2-002",
+        "ref_index": "01",
+        "equipment": "STEAM TURBINE MASTER TRIP"
+      }
+    }
+  },
+  "ALG-010B001": {
+    "drawing": "10-017",
+    "signals": {
+      "PZH1561": {
+        "tag_type": "펌프",
+        "equipment": "ANALOG LOOP2",
+        "src_drawing": "1-502"
+      }
+    }
+  },
+  "ALG-018100D": {
+    "drawing": "10-018",
+    "signals": {
+      "D04-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-002400D": {
+    "drawing": "10-018",
+    "signals": {
+      "D05-006-03": {
+        "ref_drawing": "5-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      }
+    }
+  },
+  "ALG-006701D": {
+    "drawing": "10-018",
+    "signals": {
+      "D02-002-01": {
+        "ref_drawing": "2-002",
+        "ref_index": "01",
+        "equipment": "STEAM TURBINE MASTER TRIP"
+      }
+    }
+  },
+  "ALG-0037020": {
+    "drawing": "10-020",
+    "signals": {
+      "D03-506-01": {
+        "ref_drawing": "3-506",
+        "ref_index": "01",
+        "equipment": "DISTRICT HEATING COOLER LINE"
+      }
+    }
+  },
+  "ALG-006801D": {
+    "drawing": "10-020",
+    "signals": {
+      "D02-002-01": {
+        "ref_drawing": "2-002",
+        "ref_index": "01",
+        "equipment": "STEAM TURBINE MASTER TRIP"
+      }
+    }
+  },
+  "ALG-025D00D": {
+    "drawing": "10-106",
+    "signals": {
+      "D04-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03"
+      }
+    }
+  },
+  "OCB024000B": {
+    "drawing": "10-108",
+    "signals": {
+      "TIT9604": {
+        "tag_type": "온도지시계기",
+        "equipment": "TES H/E THERMAL ENERGY",
+        "src_drawing": "10-105"
+      }
+    }
+  },
+  "OCB024000A": {
+    "drawing": "10-108",
+    "signals": {
+      "TCV9604A": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB0240007": {
+    "drawing": "10-108",
+    "signals": {
+      "TCV9604B": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "ALG-016B005": {
+    "drawing": "10-108",
+    "signals": {
+      "TCV9604A": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "ALG-016B008": {
+    "drawing": "10-108",
+    "signals": {
+      "TCV9604B": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "ALG-026C015": {
+    "drawing": "10-112",
+    "signals": {
+      "D04-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03"
+      }
+    }
+  },
+  "OCB024B00D": {
+    "drawing": "10-121",
+    "signals": {
+      "SIC9606": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB023E003": {
+    "drawing": "10-122",
+    "signals": {
+      "SIC9607": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB0241003": {
+    "drawing": "10-123",
+    "signals": {
+      "SIC9608": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB0232002": {
+    "drawing": "10-201",
+    "signals": {
+      "OT10": {},
+      "OT11": {},
+      "OT12": {},
+      "OT13": {},
+      "OT14": {},
+      "OT15": {},
+      "OT16": {}
+    }
+  },
+  "OCB022A001": {
+    "drawing": "10-202",
+    "signals": {
+      "OT10": {},
+      "OT11": {},
+      "OT12": {},
+      "OT13": {},
+      "OT14": {},
+      "OT15": {},
+      "OT16": {}
+    }
+  },
+  "OCB022E002": {
+    "drawing": "10-203",
+    "signals": {
+      "OT10": {},
+      "OT11": {},
+      "OT12": {},
+      "OT13": {},
+      "OT14": {},
+      "OT15": {},
+      "OT16": {}
+    }
+  },
+  "OCB0233002": {
+    "drawing": "10-204",
+    "signals": {
+      "OT10": {},
+      "OT11": {},
+      "OT12": {},
+      "OT13": {},
+      "OT14": {},
+      "OT15": {},
+      "OT16": {}
+    }
+  },
+  "OCB0231002": {
+    "drawing": "10-205",
+    "signals": {
+      "OT10": {},
+      "OT11": {},
+      "OT12": {},
+      "OT13": {},
+      "OT14": {},
+      "OT15": {},
+      "OT16": {}
+    }
+  },
+  "OCB022B002": {
+    "drawing": "10-206",
+    "signals": {
+      "OT10": {},
+      "OT11": {},
+      "OT12": {},
+      "OT13": {},
+      "OT14": {},
+      "OT15": {},
+      "OT16": {}
+    }
+  },
+  "OCB022C002": {
+    "drawing": "10-207",
+    "signals": {
+      "OT10": {},
+      "OT11": {},
+      "OT12": {},
+      "OT13": {},
+      "OT14": {},
+      "OT15": {},
+      "OT16": {}
+    }
+  },
+  "OCB022D002": {
+    "drawing": "10-208",
+    "signals": {
+      "OT10": {},
+      "OT11": {},
+      "OT12": {},
+      "OT13": {},
+      "OT14": {},
+      "OT15": {},
+      "OT16": {}
+    }
+  },
+  "OCB0246002": {
+    "drawing": "10-209",
+    "signals": {
+      "OT10": {},
+      "OT11": {},
+      "OT12": {},
+      "OT13": {},
+      "OT14": {},
+      "OT15": {},
+      "OT16": {}
+    }
+  },
+  "OCB023500B": {
+    "drawing": "10-210",
+    "signals": {
+      "OT10": {},
+      "OT11": {},
+      "OT12": {},
+      "OT13": {},
+      "OT14": {},
+      "OT15": {},
+      "OT16": {}
+    }
+  },
+  "OCB024200B": {
+    "drawing": "10-211",
+    "signals": {
+      "OT10": {},
+      "OT11": {},
+      "OT12": {},
+      "OT13": {},
+      "OT14": {},
+      "OT15": {},
+      "OT16": {}
+    }
+  },
+  "OCB004D002": {
+    "drawing": "11-001",
+    "signals": {
+      "HJ2": {
+        "equipment": "TEST",
+        "src_drawing": "3-001"
+      }
+    }
+  },
+  "OCB0001011": {
+    "drawing": "11-001",
+    "signals": {
+      "EQ8601": {
+        "tag_type": "열교환기",
+        "equipment": "INCIN. RETURN SYSTEM (2/2)",
+        "src_drawing": "8-504"
+      }
+    }
+  },
+  "ALG-0258012": {
+    "drawing": "11-104",
+    "signals": {
+      "D04-104-01": {
+        "ref_drawing": "4-104",
+        "ref_index": "01",
+        "equipment": "NO.2 BNR START PERMISSIVE & READY"
+      }
+    }
+  },
+  "ALG-011B01A": {
+    "drawing": "1-311",
+    "signals": {
+      "D01-311-02": {
+        "ref_drawing": "1-311",
+        "ref_index": "02",
+        "equipment": "CONT. BLOWDOWN TK INLET(HV1581A)"
+      }
+    }
+  },
+  "OCB0017017": {
+    "drawing": "1-501",
+    "signals": {
+      "D01-502-04": {
+        "ref_drawing": "1-502",
+        "ref_index": "04",
+        "equipment": "ANALOG LOOP2"
+      }
+    }
+  },
+  "OCB0017031": {
+    "drawing": "1-501",
+    "signals": {
+      "FI1551": {
+        "tag_type": "유량지시계",
+        "equipment": "ANALOG LOOP 1",
+        "src_drawing": "1-501"
+      },
+      "FCV1551": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB0033011": {
+    "drawing": "1-503",
+    "signals": {
+      "TCV1562": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB0033044": {
+    "drawing": "1-503",
+    "signals": {
+      "TCV1561": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB003800C": {
+    "drawing": "1-509",
+    "signals": {
+      "D01-505-02": {
+        "ref_drawing": "1-505",
+        "ref_index": "02",
+        "equipment": "ANALOG LOOP 5"
+      }
+    }
+  },
+  "OCB0038014": {
+    "drawing": "1-509",
+    "signals": {
+      "D01-509-03": {
+        "ref_drawing": "1-509",
+        "ref_index": "03",
+        "equipment": "ANALOG LOOP 9"
+      }
+    }
+  },
+  "OCB003801F": {
+    "drawing": "1-509",
+    "signals": {
+      "PZL1254": {
+        "tag_type": "펌프",
+        "equipment": "ANALOG LOOP 9",
+        "src_drawing": "1-509"
+      }
+    }
+  },
+  "OCB0038020": {
+    "drawing": "1-509",
+    "signals": {
+      "PZL1254": {
+        "tag_type": "펌프",
+        "equipment": "ANALOG LOOP 9",
+        "src_drawing": "1-509"
+      }
+    }
+  },
+  "OCB0038013": {
+    "drawing": "1-509",
+    "signals": {
+      "FCD1251": {
+        "tag_type": "유량제어기"
+      }
+    }
+  },
+  "ALG-00F6012": {
+    "drawing": "1-509",
+    "signals": {
+      "D01-012-01": {
+        "ref_drawing": "1-012",
+        "ref_index": "01",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB0088009": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-068-02": {
+        "ref_drawing": "3-068",
+        "ref_index": "02",
+        "equipment": "PARALLER OPERATION MODE"
+      }
+    }
+  },
+  "OCB0088007": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-524-01": {
+        "ref_drawing": "3-524",
+        "ref_index": "01",
+        "equipment": "DH 순환라인(8)"
+      }
+    }
+  },
+  "OCB0088014": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-066-01": {
+        "ref_drawing": "3-066",
+        "ref_index": "01",
+        "equipment": "OPERATION MODE"
+      },
+      "D03-511-12": {
+        "ref_drawing": "3-511",
+        "ref_index": "12",
+        "equipment": "PP252001/002/003/004 M/A/C"
+      }
+    }
+  },
+  "OCB008800D": {
+    "drawing": "3-510",
+    "signals": {
+      "SIT2681A": {
+        "tag_type": "속도지시계기",
+        "equipment": "DH 순환펌프 A(2)",
+        "src_drawing": "3-512"
+      },
+      "D03-062-01": {
+        "ref_drawing": "3-062",
+        "ref_index": "01",
+        "equipment": "HEAT CONSUMPTION OPERATION MODE"
+      },
+      "D03-522-02": {
+        "ref_drawing": "3-522",
+        "ref_index": "02",
+        "equipment": "DH 순환라인(7)"
+      },
+      "D3-062-01": {
+        "ref_drawing": "3-062",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB008801C": {
+    "drawing": "3-510",
+    "signals": {
+      "SIT2681B": {
+        "tag_type": "속도지시계기",
+        "equipment": "DH 순환펌프 B(3)",
+        "src_drawing": "3-514"
+      },
+      "D03-062-02": {
+        "ref_drawing": "3-062",
+        "ref_index": "02",
+        "equipment": "HEAT CONSUMPTION OPERATION MODE"
+      },
+      "D3-062-02": {
+        "ref_drawing": "3-062",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB008802A": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-062-03": {
+        "ref_drawing": "3-062",
+        "ref_index": "03",
+        "equipment": "HEAT CONSUMPTION OPERATION MODE"
+      },
+      "D3-062-03": {
+        "ref_drawing": "3-062",
+        "ref_index": "03"
+      }
+    }
+  },
+  "OCB0088008": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-522-02": {
+        "ref_drawing": "3-522",
+        "ref_index": "02",
+        "equipment": "DH 순환라인(7)"
+      },
+      "D3-062-02": {
+        "ref_drawing": "3-062",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB008801A": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-062-02": {
+        "ref_drawing": "3-062",
+        "ref_index": "02",
+        "equipment": "HEAT CONSUMPTION OPERATION MODE"
+      },
+      "D3-062-03": {
+        "ref_drawing": "3-062",
+        "ref_index": "03"
+      }
+    }
+  },
+  "OCB0088010": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-522-02": {
+        "ref_drawing": "3-522",
+        "ref_index": "02",
+        "equipment": "DH 순환라인(7)"
+      },
+      "D3-511-06": {
+        "ref_drawing": "3-511",
+        "ref_index": "06"
+      }
+    }
+  },
+  "OCB008801E": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-511-05": {
+        "ref_drawing": "3-511",
+        "ref_index": "05",
+        "equipment": "PP252001/002/003/004 M/A/C"
+      },
+      "D3-511-09": {
+        "ref_drawing": "3-511",
+        "ref_index": "09"
+      },
+      "D3-511-08": {
+        "ref_drawing": "3-511",
+        "ref_index": "08"
+      },
+      "D3-511-07": {
+        "ref_drawing": "3-511",
+        "ref_index": "07"
+      }
+    }
+  },
+  "OCB0088012": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-024-01": {
+        "ref_drawing": "3-024",
+        "ref_index": "01",
+        "equipment": "DH CIRCU.PP-A INTERLOCK(252-M-PP-001)"
+      },
+      "D3-024-01": {
+        "ref_drawing": "3-024",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB0088023": {
+    "drawing": "3-510",
+    "signals": {
+      "SIC2681B": {
+        "tag_type": "속도지시제어기"
+      },
+      "D03-030-01": {
+        "ref_drawing": "3-030",
+        "ref_index": "01",
+        "equipment": "DH CIRCU. PP-B INTERLOCK(252-M-PP-002)"
+      },
+      "D3-030-01": {
+        "ref_drawing": "3-030",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB0088036": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-036-01": {
+        "ref_drawing": "3-036",
+        "ref_index": "01",
+        "equipment": "DH CIRCU. PP-C INTERLOCK(252-M-PP-003)"
+      },
+      "D3-036-01": {
+        "ref_drawing": "3-036",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB008804C": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-042-01": {
+        "ref_drawing": "3-042",
+        "ref_index": "01",
+        "equipment": "ACCUMULATION PP INTRLOCK(252-M-PP-004)"
+      },
+      "D3-042-01": {
+        "ref_drawing": "3-042",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB008800F": {
+    "drawing": "3-510",
+    "signals": {
+      "SIC2681A": {
+        "tag_type": "속도지시제어기"
+      },
+      "D03-024-01": {
+        "ref_drawing": "3-024",
+        "ref_index": "01",
+        "equipment": "DH CIRCU.PP-A INTERLOCK(252-M-PP-001)"
+      },
+      "D3-030-01": {
+        "ref_drawing": "3-030",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB0088021": {
+    "drawing": "3-510",
+    "signals": {
+      "SIC2681B": {
+        "tag_type": "속도지시제어기"
+      },
+      "D03-030-01": {
+        "ref_drawing": "3-030",
+        "ref_index": "01",
+        "equipment": "DH CIRCU. PP-B INTERLOCK(252-M-PP-002)"
+      },
+      "D3-036-01": {
+        "ref_drawing": "3-036",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB0088035": {
+    "drawing": "3-510",
+    "signals": {
+      "SIC2681C": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB008804A": {
+    "drawing": "3-510",
+    "signals": {
+      "SIC2681D": {
+        "tag_type": "속도지시제어기"
+      },
+      "D03-042-01": {
+        "ref_drawing": "3-042",
+        "ref_index": "01",
+        "equipment": "ACCUMULATION PP INTRLOCK(252-M-PP-004)"
+      }
+    }
+  },
+  "OCB0088013": {
+    "drawing": "3-510",
+    "signals": {
+      "SIC2681A": {
+        "tag_type": "속도지시제어기"
+      },
+      "D3-030-01": {
+        "ref_drawing": "3-030",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB0088022": {
+    "drawing": "3-510",
+    "signals": {
+      "SIC2681B": {
+        "tag_type": "속도지시제어기"
+      },
+      "D3-036-01": {
+        "ref_drawing": "3-036",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB0088038": {
+    "drawing": "3-510",
+    "signals": {
+      "SIC2681C": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB008804D": {
+    "drawing": "3-510",
+    "signals": {
+      "SIC2681D": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "ALG-0113011": {
+    "drawing": "3-510",
+    "signals": {
+      "SIT2681A": {
+        "tag_type": "속도지시계기",
+        "equipment": "DH 순환펌프 A(2)",
+        "src_drawing": "3-512"
+      },
+      "D03-511-03": {
+        "ref_drawing": "3-511",
+        "ref_index": "03",
+        "equipment": "PP252001/002/003/004 M/A/C"
+      }
+    }
+  },
+  "ALG-0113033": {
+    "drawing": "3-510",
+    "signals": {
+      "SIT2681C": {
+        "tag_type": "속도지시계기",
+        "equipment": "DH 순환펌프 C(4)",
+        "src_drawing": "3-516"
+      },
+      "D03-511-09": {
+        "ref_drawing": "3-511",
+        "ref_index": "09",
+        "equipment": "PP252001/002/003/004 M/A/C"
+      },
+      "D3-511-09": {
+        "ref_drawing": "3-511",
+        "ref_index": "09"
+      }
+    }
+  },
+  "ALG-011305D": {
+    "drawing": "3-510",
+    "signals": {
+      "SIT2681B": {
+        "tag_type": "속도지시계기",
+        "equipment": "DH 순환펌프 B(3)",
+        "src_drawing": "3-514"
+      },
+      "D03-511-06": {
+        "ref_drawing": "3-511",
+        "ref_index": "06",
+        "equipment": "PP252001/002/003/004 M/A/C"
+      },
+      "D03-511-04": {
+        "ref_drawing": "3-511",
+        "ref_index": "04",
+        "equipment": "PP252001/002/003/004 M/A/C"
+      },
+      "D03-511-05": {
+        "ref_drawing": "3-511",
+        "ref_index": "05",
+        "equipment": "PP252001/002/003/004 M/A/C"
+      },
+      "D3-511-04": {
+        "ref_drawing": "3-511",
+        "ref_index": "04"
+      },
+      "D3-511-06": {
+        "ref_drawing": "3-511",
+        "ref_index": "06"
+      }
+    }
+  },
+  "ALG-011300C": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-024-01": {
+        "ref_drawing": "3-024",
+        "ref_index": "01",
+        "equipment": "DH CIRCU.PP-A INTERLOCK(252-M-PP-001)"
+      },
+      "D3-511-05": {
+        "ref_drawing": "3-511",
+        "ref_index": "05"
+      },
+      "D3-030-01": {
+        "ref_drawing": "3-030",
+        "ref_index": "01"
+      }
+    }
+  },
+  "ALG-0113020": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-030-01": {
+        "ref_drawing": "3-030",
+        "ref_index": "01",
+        "equipment": "DH CIRCU. PP-B INTERLOCK(252-M-PP-002)"
+      },
+      "D3-036-01": {
+        "ref_drawing": "3-036",
+        "ref_index": "01"
+      },
+      "D3-511-08": {
+        "ref_drawing": "3-511",
+        "ref_index": "08"
+      }
+    }
+  },
+  "ALG-0113049": {
+    "drawing": "3-510",
+    "signals": {
+      "D03-042-01": {
+        "ref_drawing": "3-042",
+        "ref_index": "01",
+        "equipment": "ACCUMULATION PP INTRLOCK(252-M-PP-004)"
+      }
+    }
+  },
+  "ALG-028A02C": {
+    "drawing": "4-124",
+    "signals": {
+      "D04-080-01": {
+        "ref_drawing": "4-080",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND"
+      },
+      "D04-128-03": {
+        "ref_drawing": "4-128",
+        "ref_index": "03",
+        "equipment": "NO.1 BNR SOV(HV4303A,4A,5A)"
+      },
+      "D04-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-028A002": {
+    "drawing": "4-124",
+    "signals": {
+      "D04-128-02": {
+        "ref_drawing": "4-128",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR LNG MAIN LINE LEAK TEST"
+      },
+      "D04-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-02AD022": {
+    "drawing": "4-138",
+    "signals": {
+      "D04-142-02": {
+        "ref_drawing": "4-142",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR IGN LINE LEAK TEST"
+      },
+      "D04-124-02": {
+        "ref_drawing": "4-124",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR LNG LEAK TEST START"
+      },
+      "D04-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      }
+    }
+  },
+  "ALG-02D0021": {
+    "drawing": "4-152",
+    "signals": {
+      "D04-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D04-154-06": {
+        "ref_drawing": "4-154",
+        "ref_index": "06",
+        "equipment": "ALL BNR MAIN FLM FAIL ALL LNG SOV CLS"
+      },
+      "D4-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-02D0006": {
+    "drawing": "4-152",
+    "signals": {
+      "D04-154-05": {
+        "ref_drawing": "4-154",
+        "ref_index": "05",
+        "equipment": "ALL BNR MAIN FLM FAIL ALL LNG SOV CLS"
+      },
+      "D04-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-02F800F": {
+    "drawing": "4-312",
+    "signals": {
+      "D04-312-02": {
+        "ref_drawing": "4-312",
+        "ref_index": "02",
+        "equipment": "BLR FLUE GAS DAMPER HV4211"
+      }
+    }
+  },
+  "ALG-02FD001": {
+    "drawing": "4-314",
+    "signals": {
+      "D04-314-02": {
+        "ref_drawing": "4-314",
+        "ref_index": "02",
+        "equipment": "BLR DH WTR RETURN HV4601"
+      }
+    }
+  },
+  "ALG-0307001": {
+    "drawing": "4-318",
+    "signals": {
+      "D04-318-02": {
+        "ref_drawing": "4-318",
+        "ref_index": "02",
+        "equipment": "D.H WATER SUPPLY MOV FV3601"
+      }
+    }
+  },
+  "ALG-030C017": {
+    "drawing": "4-320",
+    "signals": {
+      "D04-320-02": {
+        "ref_drawing": "4-320",
+        "ref_index": "02",
+        "equipment": "D.H WATER SUPPLY MOV FV4601"
+      }
+    }
+  },
+  "OCB009E00B": {
+    "drawing": "4-540",
+    "signals": {
+      "D03-066-01": {
+        "ref_drawing": "3-066",
+        "ref_index": "01",
+        "equipment": "OPERATION MODE"
+      }
+    }
+  },
+  "OCB009E00F": {
+    "drawing": "4-540",
+    "signals": {
+      "FV2632": {}
+    }
+  },
+  "OCB009E005": {
+    "drawing": "4-540",
+    "signals": {
+      "D03-066-01": {
+        "ref_drawing": "3-066",
+        "ref_index": "01",
+        "equipment": "OPERATION MODE"
+      }
+    }
+  },
+  "OCB009E00E": {
+    "drawing": "4-540",
+    "signals": {
+      "FV2631": {}
+    }
+  },
+  "OCB0101015": {
+    "drawing": "4-540",
+    "signals": {
+      "D04-540-01": {
+        "ref_drawing": "4-540",
+        "ref_index": "01",
+        "equipment": "BOILER COM CONTROL"
+      }
+    }
+  },
+  "OCB0101011": {
+    "drawing": "4-540",
+    "signals": {
+      "TCV4602": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB010100B": {
+    "drawing": "4-540",
+    "signals": {
+      "PCZ4201": {
+        "tag_type": "압력제어기"
+      }
+    }
+  },
+  "OCB0101001": {
+    "drawing": "4-540",
+    "signals": {
+      "PCZ4201": {
+        "tag_type": "압력제어기"
+      }
+    }
+  },
+  "ALG-0366018": {
+    "drawing": "4-540",
+    "signals": {
+      "D04-540-01": {
+        "ref_drawing": "4-540",
+        "ref_index": "01",
+        "equipment": "BOILER COM CONTROL"
+      }
+    }
+  },
+  "ALG-0154012": {
+    "drawing": "4-542",
+    "signals": {
+      "PP252001": {
+        "tag_type": "펌프"
+      }
+    }
+  },
+  "OCB0118012": {
+    "drawing": "4-542",
+    "signals": {
+      "PIT4311H": {
+        "tag_type": "압력지시계기",
+        "equipment": "BLR DH WATER RETURN FLOW",
+        "src_drawing": "4-542"
+      }
+    }
+  },
+  "OCB011800B": {
+    "drawing": "4-542",
+    "signals": {
+      "D04-542-01": {
+        "ref_drawing": "4-542",
+        "ref_index": "01",
+        "equipment": "BLR DH WATER RETURN FLOW"
+      }
+    }
+  },
+  "OCB0118002": {
+    "drawing": "4-542",
+    "signals": {
+      "D04-542-02": {
+        "ref_drawing": "4-542",
+        "ref_index": "02",
+        "equipment": "BLR DH WATER RETURN FLOW"
+      }
+    }
+  },
+  "OCB0118013": {
+    "drawing": "4-542",
+    "signals": {
+      "PIT4311L": {
+        "tag_type": "압력지시계기",
+        "equipment": "BLR DH WATER RETURN FLOW",
+        "src_drawing": "4-542"
+      }
+    }
+  },
+  "OCB010D007": {
+    "drawing": "4-546",
+    "signals": {
+      "D04-546-01": {
+        "ref_drawing": "4-546",
+        "ref_index": "01",
+        "equipment": "BOILER MEASUREMENT"
+      }
+    }
+  },
+  "ALG-02E4001": {
+    "drawing": "5-304",
+    "signals": {
+      "D04-304-02": {
+        "ref_drawing": "4-304",
+        "ref_index": "02",
+        "equipment": "BLR FLUE GAS DAMPER HV3211"
+      }
+    }
+  },
+  "ALG-0057001": {
+    "drawing": "5-304",
+    "signals": {
+      "D05-304-02": {
+        "ref_drawing": "5-304",
+        "ref_index": "02",
+        "equipment": "BLR FLUE GAS DAMPER HV3211"
+      }
+    }
+  },
+  "ALG-02E900F": {
+    "drawing": "5-306",
+    "signals": {
+      "D04-306-02": {
+        "ref_drawing": "4-306",
+        "ref_index": "02",
+        "equipment": "BLR DH WTR RETRUN HV3601"
+      }
+    }
+  },
+  "ALG-005800F": {
+    "drawing": "5-306",
+    "signals": {
+      "D05-306-02": {
+        "ref_drawing": "5-306",
+        "ref_index": "02",
+        "equipment": "BLR DH WTR RETRUN HV3601"
+      }
+    }
+  },
+  "ALG-00C3030": {
+    "drawing": "6-074",
+    "signals": {
+      "D03-532-01": {
+        "ref_drawing": "3-532",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "ALG-020D022": {
+    "drawing": "6-074",
+    "signals": {
+      "D04-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D04-076-05": {
+        "ref_drawing": "4-076",
+        "ref_index": "05",
+        "equipment": "ALL BNR MAIN FLM FAIL ALL LNG SOV CLS"
+      },
+      "D4-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-020D004": {
+    "drawing": "6-074",
+    "signals": {
+      "D04-076-07": {
+        "ref_drawing": "4-076",
+        "ref_index": "07",
+        "equipment": "ALL BNR MAIN FLM FAIL ALL LNG SOV CLS"
+      },
+      "D04-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-0047022": {
+    "drawing": "6-074",
+    "signals": {
+      "D05-006-03": {
+        "ref_drawing": "5-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D05-076-05": {
+        "ref_drawing": "5-076",
+        "ref_index": "05",
+        "equipment": "ALL BNR MAIN FLM FAIL ALL LNG SOV CLS"
+      }
+    }
+  },
+  "ALG-0047004": {
+    "drawing": "6-074",
+    "signals": {
+      "D05-076-07": {
+        "ref_drawing": "5-076",
+        "ref_index": "07",
+        "equipment": "ALL BNR MAIN FLM FAIL ALL LNG SOV CLS"
+      },
+      "D05-006-03": {
+        "ref_drawing": "5-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      }
+    }
+  },
+  "ALG-00C8030": {
+    "drawing": "6-076",
+    "signals": {
+      "D03-060-03": {
+        "ref_drawing": "3-060",
+        "ref_index": "03",
+        "equipment": "OPERATION MODE SELECTION"
+      }
+    }
+  },
+  "ALG-00D2030": {
+    "drawing": "6-080",
+    "signals": {
+      "D03-060-02": {
+        "ref_drawing": "3-060",
+        "ref_index": "02",
+        "equipment": "OPERATION MODE SELECTION"
+      }
+    }
+  },
+  "ALG-021C023": {
+    "drawing": "6-080",
+    "signals": {
+      "D04-156-01": {
+        "ref_drawing": "4-156",
+        "ref_index": "01",
+        "equipment": "NO.1 BLR LOSS OF FUEL"
+      },
+      "D04-154-02": {
+        "ref_drawing": "4-154",
+        "ref_index": "02",
+        "equipment": "ALL BNR MAIN FLM FAIL ALL LNG SOV CLS"
+      },
+      "D04-080-01": {
+        "ref_drawing": "4-080",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND"
+      }
+    }
+  },
+  "ALG-021C01A": {
+    "drawing": "6-080",
+    "signals": {
+      "D04-080-01": {
+        "ref_drawing": "4-080",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND"
+      },
+      "D04-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D04-154-03": {
+        "ref_drawing": "4-154",
+        "ref_index": "03",
+        "equipment": "ALL BNR MAIN FLM FAIL ALL LNG SOV CLS"
+      },
+      "D4-080-01": {
+        "ref_drawing": "4-080",
+        "ref_index": "01"
+      },
+      "D4-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-00D7030": {
+    "drawing": "6-082",
+    "signals": {
+      "D03-060-03": {
+        "ref_drawing": "3-060",
+        "ref_index": "03",
+        "equipment": "OPERATION MODE SELECTION"
+      }
+    }
+  },
+  "ALG-00DC021": {
+    "drawing": "6-084",
+    "signals": {
+      "D03-084-02": {
+        "ref_drawing": "3-084",
+        "ref_index": "02",
+        "equipment": "PRESS HOLDING PP SUCTION MOV(HV2656)"
+      }
+    }
+  },
+  "ALG-0226023": {
+    "drawing": "6-084",
+    "signals": {
+      "D04-080-01": {
+        "ref_drawing": "4-080",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND"
+      },
+      "D04-082-03": {
+        "ref_drawing": "4-082",
+        "ref_index": "03",
+        "equipment": "BLR PURGE PERMISSIVE"
+      }
+    }
+  },
+  "ALG-0226007": {
+    "drawing": "6-084",
+    "signals": {
+      "D04-080-01": {
+        "ref_drawing": "4-080",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND"
+      }
+    }
+  },
+  "ALG-009000D": {
+    "drawing": "6-084",
+    "signals": {
+      "D06-502-01": {
+        "ref_drawing": "6-502",
+        "ref_index": "01",
+        "equipment": "MAIN STEAM LINE"
+      }
+    }
+  },
+  "ALG-00E101E": {
+    "drawing": "6-086",
+    "signals": {
+      "D03-538-01": {
+        "ref_drawing": "3-538",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      },
+      "D03-538-02": {
+        "ref_drawing": "3-538",
+        "ref_index": "02",
+        "equipment": "DH REGENERATION LINE"
+      },
+      "D3-538-01": {
+        "ref_drawing": "3-538",
+        "ref_index": "01"
+      }
+    }
+  },
+  "ALG-009201D": {
+    "drawing": "6-086",
+    "signals": {
+      "D06-086-02": {
+        "ref_drawing": "6-086",
+        "ref_index": "02",
+        "equipment": "TBN BYPASS LOOP MOV(HV1451)"
+      }
+    }
+  },
+  "ALG-0230033": {
+    "drawing": "6-088",
+    "signals": {
+      "D04-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-009301D": {
+    "drawing": "6-088",
+    "signals": {
+      "D06-088-02": {
+        "ref_drawing": "6-088",
+        "ref_index": "02",
+        "equipment": "DH HEATER BALANCEING MOV(HV2606)"
+      }
+    }
+  },
+  "ALG-0244022": {
+    "drawing": "6-096",
+    "signals": {
+      "D04-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-084-03": {
+        "ref_drawing": "4-084",
+        "ref_index": "03"
+      }
+    }
+  },
+  "OCB019100E": {
+    "drawing": "6-232",
+    "signals": {
+      "FCV0901": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB019100D": {
+    "drawing": "6-232",
+    "signals": {
+      "FCV0902": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB008E00F": {
+    "drawing": "6-536",
+    "signals": {
+      "D03-536-01": {
+        "ref_drawing": "3-536",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB008E005": {
+    "drawing": "6-536",
+    "signals": {
+      "D03-536-01": {
+        "ref_drawing": "3-536",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB008E01C": {
+    "drawing": "6-536",
+    "signals": {
+      "D3-536-01": {
+        "ref_drawing": "3-536",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB008E00B": {
+    "drawing": "6-536",
+    "signals": {
+      "D03-536-03": {
+        "ref_drawing": "3-536",
+        "ref_index": "03",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB008E00E": {
+    "drawing": "6-536",
+    "signals": {
+      "PCV2655": {
+        "tag_type": "압력제어기"
+      }
+    }
+  },
+  "OCB008E023": {
+    "drawing": "6-536",
+    "signals": {
+      "D3-536-03": {
+        "ref_drawing": "3-536",
+        "ref_index": "03"
+      }
+    }
+  },
+  "OCB008E021": {
+    "drawing": "6-536",
+    "signals": {
+      "PCV2656": {
+        "tag_type": "압력제어기"
+      }
+    }
+  },
+  "OCB008E004": {
+    "drawing": "6-536",
+    "signals": {
+      "LCV2651": {
+        "tag_type": "레벨제어기"
+      }
+    }
+  },
+  "ALG-014500C": {
+    "drawing": "6-536",
+    "signals": {
+      "D03-536-03": {
+        "ref_drawing": "3-536",
+        "ref_index": "03",
+        "equipment": "DH REGENERATION LINE"
+      },
+      "D3-536-03": {
+        "ref_drawing": "3-536",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-014500D": {
+    "drawing": "6-536",
+    "signals": {
+      "D03-536-03": {
+        "ref_drawing": "3-536",
+        "ref_index": "03",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "ALG-0145020": {
+    "drawing": "6-536",
+    "signals": {
+      "D3-536-03": {
+        "ref_drawing": "3-536",
+        "ref_index": "03"
+      }
+    }
+  },
+  "OCB0100020": {
+    "drawing": "6-536",
+    "signals": {
+      "D04-534-01": {
+        "ref_drawing": "4-534",
+        "ref_index": "01",
+        "equipment": "NO.2 BNR BLR LOAD CONTROL"
+      }
+    }
+  },
+  "OCB0100010": {
+    "drawing": "6-536",
+    "signals": {
+      "D04-108-01": {
+        "ref_drawing": "4-108",
+        "ref_index": "01",
+        "equipment": "NO.2 BNR IGN SOV(HV4313B,4B,5B)"
+      },
+      "D04-092-02": {
+        "ref_drawing": "4-092",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      }
+    }
+  },
+  "OCB0100013": {
+    "drawing": "6-536",
+    "signals": {
+      "D04-092-02": {
+        "ref_drawing": "4-092",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      }
+    }
+  },
+  "OCB0100015": {
+    "drawing": "6-536",
+    "signals": {
+      "FCZ4202B": {
+        "tag_type": "유량제어기"
+      }
+    }
+  },
+  "OCB01AB005": {
+    "drawing": "6-536",
+    "signals": {
+      "FCV1441": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB01AB008": {
+    "drawing": "6-536",
+    "signals": {
+      "LCV1441": {
+        "tag_type": "레벨제어기"
+      }
+    }
+  },
+  "OCB008F020": {
+    "drawing": "6-538",
+    "signals": {
+      "D03-538-02": {
+        "ref_drawing": "3-538",
+        "ref_index": "02",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB008F021": {
+    "drawing": "6-538",
+    "signals": {
+      "D03-538-01": {
+        "ref_drawing": "3-538",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB008F022": {
+    "drawing": "6-538",
+    "signals": {
+      "D03-538-04": {
+        "ref_drawing": "3-538",
+        "ref_index": "04",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB008F023": {
+    "drawing": "6-538",
+    "signals": {
+      "D03-538-03": {
+        "ref_drawing": "3-538",
+        "ref_index": "03",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB008F014": {
+    "drawing": "6-538",
+    "signals": {
+      "PV2651": {
+        "tag_type": "펌프"
+      }
+    }
+  },
+  "OCB008F015": {
+    "drawing": "6-538",
+    "signals": {
+      "PV2652": {
+        "tag_type": "펌프"
+      }
+    }
+  },
+  "OCB008F01A": {
+    "drawing": "6-538",
+    "signals": {
+      "PV2653": {
+        "tag_type": "펌프"
+      }
+    }
+  },
+  "OCB008F01B": {
+    "drawing": "6-538",
+    "signals": {
+      "PV2654": {
+        "tag_type": "펌프"
+      }
+    }
+  },
+  "ALG-014A010": {
+    "drawing": "6-538",
+    "signals": {
+      "PIC2651": {
+        "tag_type": "압력지시계",
+        "equipment": "DH REGENERATION LINE",
+        "src_drawing": "3-538"
+      }
+    }
+  },
+  "OCB010C008": {
+    "drawing": "6-538",
+    "signals": {
+      "D04-538-02": {
+        "ref_drawing": "4-538",
+        "ref_index": "02",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB010C00A": {
+    "drawing": "6-538",
+    "signals": {
+      "D04-538-02": {
+        "ref_drawing": "4-538",
+        "ref_index": "02",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      },
+      "D04-538-01": {
+        "ref_drawing": "4-538",
+        "ref_index": "01",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB010C003": {
+    "drawing": "6-538",
+    "signals": {
+      "D04-538-04": {
+        "ref_drawing": "4-538",
+        "ref_index": "04",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB01A7008": {
+    "drawing": "6-538",
+    "signals": {
+      "LCV1451": {
+        "tag_type": "레벨제어기"
+      }
+    }
+  },
+  "OCB01A7005": {
+    "drawing": "6-538",
+    "signals": {
+      "FCV1451": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB01B2004": {
+    "drawing": "6-550",
+    "signals": {
+      "PCV0411": {
+        "tag_type": "압력제어기"
+      }
+    }
+  },
+  "OCB0106019": {
+    "drawing": "6-552",
+    "signals": {
+      "TE3611": {
+        "tag_type": "온도요소",
+        "equipment": "BLR OUT WTR TEMP CONTROL",
+        "src_drawing": "4-502"
+      }
+    }
+  },
+  "OCB010601E": {
+    "drawing": "6-552",
+    "signals": {
+      "TE3601": {
+        "tag_type": "온도요소",
+        "equipment": "BLR DH WATER RETURN FLOW",
+        "src_drawing": "4-518"
+      }
+    }
+  },
+  "OCB010600F": {
+    "drawing": "6-552",
+    "signals": {
+      "FIT3601": {
+        "tag_type": "유량지시계기",
+        "equipment": "FLOW SUM",
+        "src_drawing": "1-003"
+      }
+    }
+  },
+  "OCB0106024": {
+    "drawing": "6-552",
+    "signals": {
+      "FIT3301A": {
+        "tag_type": "유량지시계기",
+        "equipment": "RESET SUM",
+        "src_drawing": "4-402"
+      }
+    }
+  },
+  "OCB0107016": {
+    "drawing": "6-554",
+    "signals": {
+      "TE4611": {
+        "tag_type": "온도요소",
+        "equipment": "BLR OUT WTR TEMP CONTROL",
+        "src_drawing": "4-526"
+      }
+    }
+  },
+  "OCB010701C": {
+    "drawing": "6-554",
+    "signals": {
+      "FIT4601": {
+        "tag_type": "유량지시계기",
+        "equipment": "FLOW SUM",
+        "src_drawing": "1-003"
+      }
+    }
+  },
+  "OCB010700B": {
+    "drawing": "6-554",
+    "signals": {
+      "TE4601": {
+        "tag_type": "온도요소",
+        "equipment": "BLR DH WATER RETURN FLOW",
+        "src_drawing": "4-542"
+      }
+    }
+  },
+  "OCB0107004": {
+    "drawing": "6-554",
+    "signals": {
+      "FIT4301A": {
+        "tag_type": "유량지시계기",
+        "equipment": "RESET SUM",
+        "src_drawing": "4-402"
+      }
+    }
+  },
+  "OCB01A2004": {
+    "drawing": "6-554",
+    "signals": {
+      "TCV0471": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB01A3010": {
+    "drawing": "6-558",
+    "signals": {
+      "PIT0303H": {
+        "tag_type": "압력지시계기",
+        "equipment": "LIQUEFIED NATURE GAS FEED LINE",
+        "src_drawing": "6-558"
+      },
+      "PIT0303L": {
+        "tag_type": "압력지시계기",
+        "equipment": "LIQUEFIED NATURE GAS FEED LINE",
+        "src_drawing": "6-558"
+      }
+    }
+  },
+  "OCB01A3011": {
+    "drawing": "6-558",
+    "signals": {
+      "PIT0303L": {
+        "tag_type": "압력지시계기",
+        "equipment": "LIQUEFIED NATURE GAS FEED LINE",
+        "src_drawing": "6-558"
+      }
+    }
+  },
+  "OCB01B5003": {
+    "drawing": "6-568",
+    "signals": {
+      "LCV1591": {
+        "tag_type": "레벨제어기"
+      }
+    }
+  },
+  "OCB001D024": {
+    "drawing": "7-031",
+    "signals": {
+      "D01-006-01": {
+        "ref_drawing": "1-006",
+        "ref_index": "01",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB02BD024": {
+    "drawing": "7-037",
+    "signals": {
+      "GOV505": {
+        "equipment": "TURBINE DIGITAL OUTPUT KEYBOARD",
+        "src_drawing": "2-004"
+      }
+    }
+  },
+  "OCB02BD002": {
+    "drawing": "7-037",
+    "signals": {
+      "ZY3002": {
+        "equipment": "(GOV) MW CONTROL",
+        "src_drawing": "2-037"
+      }
+    }
+  },
+  "ALG-0124019": {
+    "drawing": "7-037",
+    "signals": {
+      "PIA3015": {
+        "tag_type": "압력지시계",
+        "equipment": "TURBINE DIGITAL OUTPUT KEYBOARD",
+        "src_drawing": "2-004"
+      },
+      "TIT2602": {
+        "tag_type": "온도지시계기",
+        "equipment": "(GOV) MW CONTROL",
+        "src_drawing": "2-037"
+      }
+    }
+  },
+  "ALG-006B010": {
+    "drawing": "8-024",
+    "signals": {
+      "D06-504-01": {
+        "ref_drawing": "6-504",
+        "ref_index": "01",
+        "equipment": "#1 EXT STEAM LINE"
+      }
+    }
+  },
+  "ALG-0195012": {
+    "drawing": "8-026",
+    "signals": {
+      "D04-026-01": {
+        "ref_drawing": "4-026",
+        "ref_index": "01",
+        "equipment": "NO.2 BNR START PERMISSIVE&READY"
+      }
+    }
+  },
+  "ALG-0029012": {
+    "drawing": "8-026",
+    "signals": {
+      "D05-026-01": {
+        "ref_drawing": "5-026",
+        "ref_index": "01",
+        "equipment": "NO.2 BNR START PERMISSIVE&READY"
+      }
+    }
+  },
+  "ALG-019A033": {
+    "drawing": "8-028",
+    "signals": {
+      "D04-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-002A033": {
+    "drawing": "8-028",
+    "signals": {
+      "D05-006-03": {
+        "ref_drawing": "5-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      }
+    }
+  },
+  "ALG-047401D": {
+    "drawing": "8-028",
+    "signals": {
+      "D08-028-02": {
+        "ref_drawing": "8-028",
+        "ref_index": "02",
+        "equipment": "INCIN. SUPPLY PP INLET MOV (HV8611)"
+      }
+    }
+  },
+  "OCB001303B": {
+    "drawing": "8-030",
+    "signals": {
+      "D01-006-01": {
+        "ref_drawing": "1-006",
+        "ref_index": "01",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB01BE030": {
+    "drawing": "8-030",
+    "signals": {
+      "PIT8613": {
+        "tag_type": "압력지시계기",
+        "equipment": "ERG INTERFACE",
+        "src_drawing": "7-030"
+      },
+      "PIT8614": {
+        "tag_type": "압력지시계기",
+        "equipment": "ERG INTERFACE",
+        "src_drawing": "7-030"
+      }
+    }
+  },
+  "OCB01BE031": {
+    "drawing": "8-030",
+    "signals": {
+      "PIT8614": {
+        "tag_type": "압력지시계기",
+        "equipment": "ERG INTERFACE",
+        "src_drawing": "7-030"
+      }
+    }
+  },
+  "ALG-047901D": {
+    "drawing": "8-030",
+    "signals": {
+      "D08-030-02": {
+        "ref_drawing": "8-030",
+        "ref_index": "02",
+        "equipment": "INCIN. SUPPLY PP BYPASS MOV (HV8612)"
+      }
+    }
+  },
+  "ALG-005F017": {
+    "drawing": "8-034",
+    "signals": {
+      "D03-025-01": {
+        "ref_drawing": "3-025",
+        "ref_index": "01",
+        "equipment": "OPERATE MODE TRIP"
+      }
+    }
+  },
+  "ALG-01A9022": {
+    "drawing": "8-034",
+    "signals": {
+      "D04-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-002E022": {
+    "drawing": "8-034",
+    "signals": {
+      "D05-006-03": {
+        "ref_drawing": "5-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      }
+    }
+  },
+  "ALG-007D016": {
+    "drawing": "8-046",
+    "signals": {
+      "D03-025-07": {
+        "ref_drawing": "3-025",
+        "ref_index": "07",
+        "equipment": "OPERATE MODE TRIP"
+      },
+      "D03-025-09": {
+        "ref_drawing": "3-025",
+        "ref_index": "09",
+        "equipment": "OPERATE MODE TRIP"
+      }
+    }
+  },
+  "ALG-01C7003": {
+    "drawing": "8-046",
+    "signals": {
+      "D04-042-02": {
+        "ref_drawing": "4-042",
+        "ref_index": "02",
+        "equipment": "BOILER PRESS & TEMP"
+      },
+      "D04-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D04-050-03": {
+        "ref_drawing": "4-050",
+        "ref_index": "03",
+        "equipment": "NO.1 BNR SOV(HV3303A,4A,5A)"
+      },
+      "D04-002-01": {
+        "ref_drawing": "4-002",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND & MFT"
+      },
+      "D4-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-01C701C": {
+    "drawing": "8-046",
+    "signals": {
+      "D04-050-02": {
+        "ref_drawing": "4-050",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR LNG MAIN LINE LEAK TEST"
+      },
+      "D04-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D4-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-0035003": {
+    "drawing": "8-046",
+    "signals": {
+      "D05-042-02": {
+        "ref_drawing": "5-042",
+        "ref_index": "02",
+        "equipment": "BOILER PRESS & TEMP"
+      },
+      "D05-006-03": {
+        "ref_drawing": "5-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D05-050-03": {
+        "ref_drawing": "5-050",
+        "ref_index": "03",
+        "equipment": "NO.1 BNR SOV(HV5303A,4A,5A)"
+      },
+      "D05-002-01": {
+        "ref_drawing": "5-002",
+        "ref_index": "01",
+        "equipment": "BLR TRIP COMMAND & MFT"
+      }
+    }
+  },
+  "ALG-003501C": {
+    "drawing": "8-046",
+    "signals": {
+      "D05-050-02": {
+        "ref_drawing": "5-050",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR LNG MAIN LINE LEAK TEST"
+      },
+      "D05-006-03": {
+        "ref_drawing": "5-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      }
+    }
+  },
+  "ALG-0082009": {
+    "drawing": "8-048",
+    "signals": {
+      "D03-025-09": {
+        "ref_drawing": "3-025",
+        "ref_index": "09",
+        "equipment": "OPERATE MODE TRIP"
+      },
+      "D03-025-07": {
+        "ref_drawing": "3-025",
+        "ref_index": "07",
+        "equipment": "OPERATE MODE TRIP"
+      }
+    }
+  },
+  "ALG-0087021": {
+    "drawing": "8-050",
+    "signals": {
+      "D03-025-08": {
+        "ref_drawing": "3-025",
+        "ref_index": "08",
+        "equipment": "OPERATE MODE TRIP"
+      },
+      "D03-025-10": {
+        "ref_drawing": "3-025",
+        "ref_index": "10",
+        "equipment": "OPERATE MODE TRIP"
+      }
+    }
+  },
+  "ALG-007B01D": {
+    "drawing": "8-050",
+    "signals": {
+      "D06-018-04": {
+        "ref_drawing": "6-018",
+        "ref_index": "04",
+        "equipment": "HP HTR #1 STEAM INLET MOV(HV1522)"
+      },
+      "D06-016-04": {
+        "ref_drawing": "6-016",
+        "ref_index": "04",
+        "equipment": "HP HTR #2 STM INLET MOV(HV1521)"
+      }
+    }
+  },
+  "ALG-008C021": {
+    "drawing": "8-052",
+    "signals": {
+      "D03-025-08": {
+        "ref_drawing": "3-025",
+        "ref_index": "08",
+        "equipment": "OPERATE MODE TRIP"
+      },
+      "D03-025-10": {
+        "ref_drawing": "3-025",
+        "ref_index": "10",
+        "equipment": "OPERATE MODE TRIP"
+      }
+    }
+  },
+  "ALG-007C035": {
+    "drawing": "8-052",
+    "signals": {
+      "D06-016-04": {
+        "ref_drawing": "6-016",
+        "ref_index": "04",
+        "equipment": "HP HTR #2 STM INLET MOV(HV1521)"
+      },
+      "D06-018-04": {
+        "ref_drawing": "6-018",
+        "ref_index": "04",
+        "equipment": "HP HTR #1 STEAM INLET MOV(HV1522)"
+      }
+    }
+  },
+  "ALG-04B001A": {
+    "drawing": "8-052",
+    "signals": {
+      "D08-052-02": {
+        "ref_drawing": "8-052",
+        "ref_index": "02",
+        "equipment": "YONSU BOOSTING PP INLET MOV (HV8614)"
+      }
+    }
+  },
+  "ALG-0091021": {
+    "drawing": "8-054",
+    "signals": {
+      "D03-025-06": {
+        "ref_drawing": "3-025",
+        "ref_index": "06",
+        "equipment": "OPERATE MODE TRIP"
+      },
+      "D03-025-04": {
+        "ref_drawing": "3-025",
+        "ref_index": "04",
+        "equipment": "OPERATE MODE TRIP"
+      }
+    }
+  },
+  "ALG-04B501A": {
+    "drawing": "8-054",
+    "signals": {
+      "D08-054-02": {
+        "ref_drawing": "8-054",
+        "ref_index": "02",
+        "equipment": "YONSU BOOSTING PP OUTLET MOV (HV8615)"
+      }
+    }
+  },
+  "ALG-0096021": {
+    "drawing": "8-056",
+    "signals": {
+      "D03-060-02": {
+        "ref_drawing": "3-060",
+        "ref_index": "02",
+        "equipment": "OPERATION MODE SELECTION"
+      },
+      "D03-060-03": {
+        "ref_drawing": "3-060",
+        "ref_index": "03",
+        "equipment": "OPERATION MODE SELECTION"
+      }
+    }
+  },
+  "ALG-009B021": {
+    "drawing": "8-058",
+    "signals": {
+      "D03-058-02": {
+        "ref_drawing": "3-058",
+        "ref_index": "02",
+        "equipment": "DH SUPPLY MOV TO DH COLER(HV2641)"
+      }
+    }
+  },
+  "ALG-01EA004": {
+    "drawing": "8-060",
+    "signals": {
+      "D04-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D04-046-02": {
+        "ref_drawing": "4-046",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR LNG LEAK TEST START"
+      },
+      "D04-064-02": {
+        "ref_drawing": "4-064",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR IGN LINE LEAK TEST"
+      },
+      "D4-006-03": {
+        "ref_drawing": "4-006",
+        "ref_index": "03"
+      }
+    }
+  },
+  "ALG-003E004": {
+    "drawing": "8-060",
+    "signals": {
+      "D05-006-03": {
+        "ref_drawing": "5-006",
+        "ref_index": "03",
+        "equipment": "BOILER PURGE"
+      },
+      "D05-046-02": {
+        "ref_drawing": "5-046",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR LNG LEAK TEST START"
+      },
+      "D05-064-02": {
+        "ref_drawing": "5-064",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR IGN LINE LEAK TEST"
+      }
+    }
+  },
+  "OCB007D023": {
+    "drawing": "8-402",
+    "signals": {
+      "EI2651": {
+        "tag_type": "열교환기",
+        "equipment": "RESET SUM",
+        "src_drawing": "3-402"
+      }
+    }
+  },
+  "OCB007D026": {
+    "drawing": "8-402",
+    "signals": {
+      "EI2651": {
+        "tag_type": "열교환기",
+        "equipment": "RESET SUM",
+        "src_drawing": "3-402"
+      }
+    }
+  },
+  "OCB01CA009": {
+    "drawing": "8-402",
+    "signals": {
+      "EQ3901X": {
+        "tag_type": "열교환기",
+        "equipment": "RESET SUM",
+        "src_drawing": "7-402"
+      }
+    }
+  },
+  "OCB01CA00C": {
+    "drawing": "8-402",
+    "signals": {
+      "EQ3901X": {
+        "tag_type": "열교환기",
+        "equipment": "RESET SUM",
+        "src_drawing": "7-402"
+      }
+    }
+  },
+  "OCB01CA005": {
+    "drawing": "8-402",
+    "signals": {
+      "EQ3901X": {
+        "tag_type": "열교환기",
+        "equipment": "RESET SUM",
+        "src_drawing": "7-402"
+      }
+    }
+  },
+  "OCB008602B": {
+    "drawing": "8-502",
+    "signals": {
+      "FV2602": {}
+    }
+  },
+  "OCB0086031": {
+    "drawing": "8-502",
+    "signals": {
+      "FV2601": {}
+    }
+  },
+  "OCB0109006": {
+    "drawing": "8-502",
+    "signals": {
+      "D04-504-01": {
+        "ref_drawing": "4-504",
+        "ref_index": "01",
+        "equipment": "BOILER DISTRIBUTED"
+      }
+    }
+  },
+  "ALG-031100B": {
+    "drawing": "8-502",
+    "signals": {
+      "TE3611": {
+        "tag_type": "온도요소",
+        "equipment": "BLR OUT WTR TEMP CONTROL",
+        "src_drawing": "4-502"
+      }
+    }
+  },
+  "OCB0138006": {
+    "drawing": "8-502",
+    "signals": {
+      "D05-504-01": {
+        "ref_drawing": "5-504",
+        "ref_index": "01",
+        "equipment": "BOILER DISTRIBUTED"
+      }
+    }
+  },
+  "OCB019C006": {
+    "drawing": "8-502",
+    "signals": {
+      "D06-502-11": {
+        "ref_drawing": "6-502",
+        "ref_index": "11",
+        "equipment": "MAIN STEAM LINE"
+      }
+    }
+  },
+  "OCB019C021": {
+    "drawing": "8-502",
+    "signals": {
+      "TCV1505": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB019C029": {
+    "drawing": "8-502",
+    "signals": {
+      "XS3060": {
+        "equipment": "MAIN STEAM LINE",
+        "src_drawing": "6-502"
+      },
+      "XS3061": {
+        "equipment": "STEAM TURBINE MASTER TRIP",
+        "src_drawing": "2-002"
+      }
+    }
+  },
+  "OCB019C02A": {
+    "drawing": "8-502",
+    "signals": {
+      "XS3061": {
+        "equipment": "STEAM TURBINE MASTER TRIP",
+        "src_drawing": "2-002"
+      }
+    }
+  },
+  "OCB019C013": {
+    "drawing": "8-502",
+    "signals": {
+      "PCV1505": {
+        "tag_type": "압력제어기"
+      }
+    }
+  },
+  "OCB019C027": {
+    "drawing": "8-502",
+    "signals": {
+      "D06-502-01": {
+        "ref_drawing": "6-502",
+        "ref_index": "01",
+        "equipment": "MAIN STEAM LINE"
+      }
+    }
+  },
+  "ALG-009401F": {
+    "drawing": "8-502",
+    "signals": {
+      "FQ1505": {
+        "equipment": "MAIN STEAM LINE",
+        "src_drawing": "6-502"
+      }
+    }
+  },
+  "OCB0032006": {
+    "drawing": "8-502",
+    "signals": {
+      "PZH1561": {
+        "tag_type": "펌프",
+        "equipment": "ANALOG LOOP2",
+        "src_drawing": "1-502"
+      }
+    }
+  },
+  "OCB0032014": {
+    "drawing": "8-502",
+    "signals": {
+      "D1-502-11": {
+        "ref_drawing": "1-502",
+        "ref_index": "11"
+      },
+      "D1-502-10": {
+        "ref_drawing": "1-502",
+        "ref_index": "10"
+      },
+      "D1-502-09": {
+        "ref_drawing": "1-502",
+        "ref_index": "09"
+      },
+      "D1-502-08": {
+        "ref_drawing": "1-502",
+        "ref_index": "08"
+      },
+      "D1-502-07": {
+        "ref_drawing": "1-502",
+        "ref_index": "07"
+      }
+    }
+  },
+  "OCB003203B": {
+    "drawing": "8-502",
+    "signals": {
+      "D01-502-12": {
+        "ref_drawing": "1-502",
+        "ref_index": "12",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-11": {
+        "ref_drawing": "1-502",
+        "ref_index": "11",
+        "equipment": "ANALOG LOOP2"
+      }
+    }
+  },
+  "OCB003203A": {
+    "drawing": "8-502",
+    "signals": {
+      "D01-502-12": {
+        "ref_drawing": "1-502",
+        "ref_index": "12",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-11": {
+        "ref_drawing": "1-502",
+        "ref_index": "11",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-10": {
+        "ref_drawing": "1-502",
+        "ref_index": "10",
+        "equipment": "ANALOG LOOP2"
+      }
+    }
+  },
+  "OCB0032039": {
+    "drawing": "8-502",
+    "signals": {
+      "D01-502-12": {
+        "ref_drawing": "1-502",
+        "ref_index": "12",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-11": {
+        "ref_drawing": "1-502",
+        "ref_index": "11",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-10": {
+        "ref_drawing": "1-502",
+        "ref_index": "10",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-09": {
+        "ref_drawing": "1-502",
+        "ref_index": "09",
+        "equipment": "ANALOG LOOP2"
+      }
+    }
+  },
+  "OCB0032038": {
+    "drawing": "8-502",
+    "signals": {
+      "D01-502-12": {
+        "ref_drawing": "1-502",
+        "ref_index": "12",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-11": {
+        "ref_drawing": "1-502",
+        "ref_index": "11",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-10": {
+        "ref_drawing": "1-502",
+        "ref_index": "10",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-09": {
+        "ref_drawing": "1-502",
+        "ref_index": "09",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-08": {
+        "ref_drawing": "1-502",
+        "ref_index": "08",
+        "equipment": "ANALOG LOOP2"
+      }
+    }
+  },
+  "OCB0032037": {
+    "drawing": "8-502",
+    "signals": {
+      "D01-502-12": {
+        "ref_drawing": "1-502",
+        "ref_index": "12",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-11": {
+        "ref_drawing": "1-502",
+        "ref_index": "11",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-10": {
+        "ref_drawing": "1-502",
+        "ref_index": "10",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-09": {
+        "ref_drawing": "1-502",
+        "ref_index": "09",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-08": {
+        "ref_drawing": "1-502",
+        "ref_index": "08",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-07": {
+        "ref_drawing": "1-502",
+        "ref_index": "07",
+        "equipment": "ANALOG LOOP2"
+      }
+    }
+  },
+  "OCB0032036": {
+    "drawing": "8-502",
+    "signals": {
+      "D01-502-11": {
+        "ref_drawing": "1-502",
+        "ref_index": "11",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-10": {
+        "ref_drawing": "1-502",
+        "ref_index": "10",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-09": {
+        "ref_drawing": "1-502",
+        "ref_index": "09",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-08": {
+        "ref_drawing": "1-502",
+        "ref_index": "08",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-07": {
+        "ref_drawing": "1-502",
+        "ref_index": "07",
+        "equipment": "ANALOG LOOP2"
+      }
+    }
+  },
+  "OCB0032035": {
+    "drawing": "8-502",
+    "signals": {
+      "D01-502-10": {
+        "ref_drawing": "1-502",
+        "ref_index": "10",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-09": {
+        "ref_drawing": "1-502",
+        "ref_index": "09",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-08": {
+        "ref_drawing": "1-502",
+        "ref_index": "08",
+        "equipment": "ANALOG LOOP2"
+      },
+      "D01-502-07": {
+        "ref_drawing": "1-502",
+        "ref_index": "07",
+        "equipment": "ANALOG LOOP2"
+      }
+    }
+  },
+  "OCB0032030": {
+    "drawing": "8-502",
+    "signals": {
+      "D01-502-06": {
+        "ref_drawing": "1-502",
+        "ref_index": "06",
+        "equipment": "ANALOG LOOP2"
+      }
+    }
+  },
+  "ALG-00ED01D": {
+    "drawing": "8-502",
+    "signals": {
+      "D01-502-04": {
+        "ref_drawing": "1-502",
+        "ref_index": "04",
+        "equipment": "ANALOG LOOP2"
+      }
+    }
+  },
+  "OCB01AF006": {
+    "drawing": "8-504",
+    "signals": {
+      "PCV1511": {
+        "tag_type": "압력제어기"
+      }
+    }
+  },
+  "OCB01AF007": {
+    "drawing": "8-504",
+    "signals": {
+      "TCV1511": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB01AF024": {
+    "drawing": "8-504",
+    "signals": {
+      "D06-504-02": {
+        "ref_drawing": "6-504",
+        "ref_index": "02",
+        "equipment": "#1 EXT STEAM LINE"
+      }
+    }
+  },
+  "OCB01AF025": {
+    "drawing": "8-504",
+    "signals": {
+      "D06-504-02": {
+        "ref_drawing": "6-504",
+        "ref_index": "02",
+        "equipment": "#1 EXT STEAM LINE"
+      },
+      "D06-504-03": {
+        "ref_drawing": "6-504",
+        "ref_index": "03",
+        "equipment": "#1 EXT STEAM LINE"
+      }
+    }
+  },
+  "OCB01AF026": {
+    "drawing": "8-504",
+    "signals": {
+      "D06-504-02": {
+        "ref_drawing": "6-504",
+        "ref_index": "02",
+        "equipment": "#1 EXT STEAM LINE"
+      },
+      "D06-504-03": {
+        "ref_drawing": "6-504",
+        "ref_index": "03",
+        "equipment": "#1 EXT STEAM LINE"
+      }
+    }
+  },
+  "OCB01AF019": {
+    "drawing": "8-504",
+    "signals": {
+      "D06-502-02": {
+        "ref_drawing": "6-502",
+        "ref_index": "02",
+        "equipment": "MAIN STEAM LINE"
+      },
+      "D6-502-02": {
+        "ref_drawing": "6-502",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB01AF011": {
+    "drawing": "8-504",
+    "signals": {
+      "TCV1512": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB01AF01D": {
+    "drawing": "8-504",
+    "signals": {
+      "D06-504-01": {
+        "ref_drawing": "6-504",
+        "ref_index": "01",
+        "equipment": "#1 EXT STEAM LINE"
+      }
+    }
+  },
+  "ALG-0095012": {
+    "drawing": "8-504",
+    "signals": {
+      "D06-502-02": {
+        "ref_drawing": "6-502",
+        "ref_index": "02",
+        "equipment": "MAIN STEAM LINE"
+      }
+    }
+  },
+  "OCB01FF019": {
+    "drawing": "8-504",
+    "signals": {
+      "D08-504-01": {
+        "ref_drawing": "8-504",
+        "ref_index": "01",
+        "equipment": "INCIN. RETURN SYSTEM (2/2)"
+      }
+    }
+  },
+  "OCB01FF005": {
+    "drawing": "8-504",
+    "signals": {
+      "TRK01": {},
+      "TRK02": {},
+      "D08-502-01": {
+        "ref_drawing": "8-502",
+        "ref_index": "01",
+        "equipment": "INCIN. RETURN SYSTEM(1/2)"
+      }
+    }
+  },
+  "OCB01FF026": {
+    "drawing": "8-504",
+    "signals": {
+      "TRK01": {},
+      "TRK02": {}
+    }
+  },
+  "OCB01FF01A": {
+    "drawing": "8-504",
+    "signals": {
+      "D08-505-06": {
+        "ref_drawing": "8-505",
+        "ref_index": "06",
+        "equipment": "PP252011/012 AU MAN CAS"
+      },
+      "D8-505-06": {
+        "ref_drawing": "8-505",
+        "ref_index": "06"
+      }
+    }
+  },
+  "OCB01FF02E": {
+    "drawing": "8-504",
+    "signals": {
+      "D8-505-02": {
+        "ref_drawing": "8-505",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB01FF009": {
+    "drawing": "8-504",
+    "signals": {
+      "D8-505-02": {
+        "ref_drawing": "8-505",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB01FF00F": {
+    "drawing": "8-504",
+    "signals": {
+      "D08-002-01": {
+        "ref_drawing": "8-002",
+        "ref_index": "01",
+        "equipment": "INCIN RETURN PP INTERLOCK(PP252011)"
+      }
+    }
+  },
+  "OCB01FF00C": {
+    "drawing": "8-504",
+    "signals": {
+      "SIC8601": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB01FF00D": {
+    "drawing": "8-504",
+    "signals": {
+      "SIC8601": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB01FF015": {
+    "drawing": "8-504",
+    "signals": {
+      "D08-505-02": {
+        "ref_drawing": "8-505",
+        "ref_index": "02",
+        "equipment": "PP252011/012 AU MAN CAS"
+      },
+      "D08-008-01": {
+        "ref_drawing": "8-008",
+        "ref_index": "01",
+        "equipment": "INCIN. RETURN PP INTERLOCK(PP252012)"
+      }
+    }
+  },
+  "OCB01FF013": {
+    "drawing": "8-504",
+    "signals": {
+      "SIC8602": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB01FF014": {
+    "drawing": "8-504",
+    "signals": {
+      "SIC8602": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "ALG-04CE020": {
+    "drawing": "8-504",
+    "signals": {
+      "FIT8601": {
+        "tag_type": "유량지시계기",
+        "equipment": "FLOW SUM",
+        "src_drawing": "1-003"
+      }
+    }
+  },
+  "ALG-04CE027": {
+    "drawing": "8-504",
+    "signals": {
+      "D08-502-01": {
+        "ref_drawing": "8-502",
+        "ref_index": "01",
+        "equipment": "INCIN. RETURN SYSTEM(1/2)"
+      },
+      "D08-504-01": {
+        "ref_drawing": "8-504",
+        "ref_index": "01",
+        "equipment": "INCIN. RETURN SYSTEM (2/2)"
+      },
+      "D8-502-01": {
+        "ref_drawing": "8-502",
+        "ref_index": "01"
+      }
+    }
+  },
+  "ALG-04CE035": {
+    "drawing": "8-504",
+    "signals": {
+      "SIT8601": {
+        "tag_type": "속도지시계기",
+        "equipment": "INCIN. RETURN SYSTEM (2/2)",
+        "src_drawing": "8-504"
+      },
+      "D08-505-06": {
+        "ref_drawing": "8-505",
+        "ref_index": "06",
+        "equipment": "PP252011/012 AU MAN CAS"
+      }
+    }
+  },
+  "ALG-04CE00B": {
+    "drawing": "8-504",
+    "signals": {
+      "D8-505-02": {
+        "ref_drawing": "8-505",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB0045005": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-008-01": {
+        "ref_drawing": "1-008",
+        "ref_index": "01",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB0045018": {
+    "drawing": "8-505",
+    "signals": {
+      "D1-505-03": {
+        "ref_drawing": "1-505",
+        "ref_index": "03"
+      }
+    }
+  },
+  "OCB0045004": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-008-01": {
+        "ref_drawing": "1-008",
+        "ref_index": "01",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB0045006": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-008-01": {
+        "ref_drawing": "1-008",
+        "ref_index": "01",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB0045008": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-008-02": {
+        "ref_drawing": "1-008",
+        "ref_index": "02",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB0045009": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-008-02": {
+        "ref_drawing": "1-008",
+        "ref_index": "02",
+        "equipment": "BMS LOGIC"
+      },
+      "D01-009-01": {
+        "ref_drawing": "1-009",
+        "ref_index": "01",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB004500B": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-008-02": {
+        "ref_drawing": "1-008",
+        "ref_index": "02",
+        "equipment": "BMS LOGIC"
+      },
+      "D01-009-01": {
+        "ref_drawing": "1-009",
+        "ref_index": "01",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB0045015": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-009-01": {
+        "ref_drawing": "1-009",
+        "ref_index": "01",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB004502A": {
+    "drawing": "8-505",
+    "signals": {
+      "BE1301A": {
+        "equipment": "BMS LOGIC",
+        "src_drawing": "1-010"
+      }
+    }
+  },
+  "OCB0045014": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-009-01": {
+        "ref_drawing": "1-009",
+        "ref_index": "01",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB004500E": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-009-01": {
+        "ref_drawing": "1-009",
+        "ref_index": "01",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB0045012": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-009-02": {
+        "ref_drawing": "1-009",
+        "ref_index": "02",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB0045011": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-009-02": {
+        "ref_drawing": "1-009",
+        "ref_index": "02",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB004500F": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-009-02": {
+        "ref_drawing": "1-009",
+        "ref_index": "02",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB0045002": {
+    "drawing": "8-505",
+    "signals": {
+      "D01-505-03": {
+        "ref_drawing": "1-505",
+        "ref_index": "03",
+        "equipment": "ANALOG LOOP 5"
+      }
+    }
+  },
+  "OCB004502C": {
+    "drawing": "8-505",
+    "signals": {
+      "FCV1301": {
+        "tag_type": "유량제어밸브"
+      },
+      "D01-505-02": {
+        "ref_drawing": "1-505",
+        "ref_index": "02",
+        "equipment": "ANALOG LOOP 5"
+      }
+    }
+  },
+  "OCB004502F": {
+    "drawing": "8-505",
+    "signals": {
+      "FCV1301": {
+        "tag_type": "유량제어밸브"
+      },
+      "D01-505-02": {
+        "ref_drawing": "1-505",
+        "ref_index": "02",
+        "equipment": "ANALOG LOOP 5"
+      }
+    }
+  },
+  "OCB008701D": {
+    "drawing": "8-506",
+    "signals": {
+      "EI2611": {
+        "tag_type": "열교환기",
+        "equipment": "DISTRICT HEATING COOLER LINE",
+        "src_drawing": "3-506"
+      },
+      "FV2611": {}
+    }
+  },
+  "OCB0087014": {
+    "drawing": "8-506",
+    "signals": {
+      "TV2611": {}
+    }
+  },
+  "OCB008700D": {
+    "drawing": "8-506",
+    "signals": {
+      "TV2612": {}
+    }
+  },
+  "OCB0104019": {
+    "drawing": "8-506",
+    "signals": {
+      "D04-502-02": {
+        "ref_drawing": "4-502",
+        "ref_index": "02",
+        "equipment": "BLR OUT WTR TEMP CONTROL"
+      }
+    }
+  },
+  "OCB010402A": {
+    "drawing": "8-506",
+    "signals": {
+      "D04-508-01": {
+        "ref_drawing": "4-508",
+        "ref_index": "01",
+        "equipment": "BO.1 BNR COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB0104004": {
+    "drawing": "8-506",
+    "signals": {
+      "D04-506-02": {
+        "ref_drawing": "4-506",
+        "ref_index": "02",
+        "equipment": "NO.1 BOILER LOAD CONTROL"
+      }
+    }
+  },
+  "OCB0104006": {
+    "drawing": "8-506",
+    "signals": {
+      "D04-506-04": {
+        "ref_drawing": "4-506",
+        "ref_index": "04",
+        "equipment": "NO.1 BOILER LOAD CONTROL"
+      }
+    }
+  },
+  "OCB0104017": {
+    "drawing": "8-506",
+    "signals": {
+      "FCV3301A": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB010401F": {
+    "drawing": "8-506",
+    "signals": {
+      "D04-506-03": {
+        "ref_drawing": "4-506",
+        "ref_index": "03",
+        "equipment": "NO.1 BOILER LOAD CONTROL"
+      }
+    }
+  },
+  "OCB013A004": {
+    "drawing": "8-506",
+    "signals": {
+      "D05-506-02": {
+        "ref_drawing": "5-506",
+        "ref_index": "02",
+        "equipment": "NO.1 BOILER LOAD CONTROL"
+      }
+    }
+  },
+  "OCB013A01F": {
+    "drawing": "8-506",
+    "signals": {
+      "D05-506-03": {
+        "ref_drawing": "5-506",
+        "ref_index": "03",
+        "equipment": "NO.1 BOILER LOAD CONTROL"
+      }
+    }
+  },
+  "OCB013A006": {
+    "drawing": "8-506",
+    "signals": {
+      "D05-506-04": {
+        "ref_drawing": "5-506",
+        "ref_index": "04",
+        "equipment": "NO.1 BOILER LOAD CONTROL"
+      }
+    }
+  },
+  "OCB013A02A": {
+    "drawing": "8-506",
+    "signals": {
+      "D05-508-01": {
+        "ref_drawing": "5-508",
+        "ref_index": "01",
+        "equipment": "BO.1 BNR COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB013A019": {
+    "drawing": "8-506",
+    "signals": {
+      "D05-502-02": {
+        "ref_drawing": "5-502",
+        "ref_index": "02",
+        "equipment": "BLR OUT WTR TEMP CONTROL"
+      }
+    }
+  },
+  "OCB013A017": {
+    "drawing": "8-506",
+    "signals": {
+      "FCV5301A": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB0203016": {
+    "drawing": "8-506",
+    "signals": {
+      "D8-506-02": {
+        "ref_drawing": "8-506",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB0018004": {
+    "drawing": "8-506",
+    "signals": {
+      "PZH1301B": {
+        "tag_type": "펌프",
+        "equipment": "ANALOG LOOP 6",
+        "src_drawing": "1-506"
+      }
+    }
+  },
+  "OCB001800B": {
+    "drawing": "8-506",
+    "signals": {
+      "PZL1311": {
+        "tag_type": "펌프",
+        "equipment": "ANALOG LOOP 6",
+        "src_drawing": "1-506"
+      }
+    }
+  },
+  "OCB010202C": {
+    "drawing": "8-508",
+    "signals": {
+      "D04-506-04": {
+        "ref_drawing": "4-506",
+        "ref_index": "04",
+        "equipment": "NO.1 BOILER LOAD CONTROL"
+      }
+    }
+  },
+  "OCB010201A": {
+    "drawing": "8-508",
+    "signals": {
+      "D04-514-03": {
+        "ref_drawing": "4-514",
+        "ref_index": "03",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB0102009": {
+    "drawing": "8-508",
+    "signals": {
+      "D04-502-02": {
+        "ref_drawing": "4-502",
+        "ref_index": "02",
+        "equipment": "BLR OUT WTR TEMP CONTROL"
+      }
+    }
+  },
+  "OCB010200C": {
+    "drawing": "8-508",
+    "signals": {
+      "D04-502-02": {
+        "ref_drawing": "4-502",
+        "ref_index": "02",
+        "equipment": "BLR OUT WTR TEMP CONTROL"
+      }
+    }
+  },
+  "OCB0102010": {
+    "drawing": "8-508",
+    "signals": {
+      "D04-014-03": {
+        "ref_drawing": "4-014",
+        "ref_index": "03",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      },
+      "D04-014-02": {
+        "ref_drawing": "4-014",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      }
+    }
+  },
+  "OCB010200F": {
+    "drawing": "8-508",
+    "signals": {
+      "D04-014-02": {
+        "ref_drawing": "4-014",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      }
+    }
+  },
+  "OCB0102014": {
+    "drawing": "8-508",
+    "signals": {
+      "FCZ3202A": {
+        "tag_type": "유량제어기"
+      }
+    }
+  },
+  "OCB013B01A": {
+    "drawing": "8-508",
+    "signals": {
+      "D05-514-03": {
+        "ref_drawing": "5-514",
+        "ref_index": "03",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB013B009": {
+    "drawing": "8-508",
+    "signals": {
+      "D05-502-02": {
+        "ref_drawing": "5-502",
+        "ref_index": "02",
+        "equipment": "BLR OUT WTR TEMP CONTROL"
+      }
+    }
+  },
+  "OCB013B02C": {
+    "drawing": "8-508",
+    "signals": {
+      "D05-506-04": {
+        "ref_drawing": "5-506",
+        "ref_index": "04",
+        "equipment": "NO.1 BOILER LOAD CONTROL"
+      }
+    }
+  },
+  "OCB013B00C": {
+    "drawing": "8-508",
+    "signals": {
+      "D05-502-02": {
+        "ref_drawing": "5-502",
+        "ref_index": "02",
+        "equipment": "BLR OUT WTR TEMP CONTROL"
+      }
+    }
+  },
+  "OCB013B010": {
+    "drawing": "8-508",
+    "signals": {
+      "D05-014-03": {
+        "ref_drawing": "5-014",
+        "ref_index": "03",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      },
+      "D05-014-02": {
+        "ref_drawing": "5-014",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      }
+    }
+  },
+  "OCB013B00F": {
+    "drawing": "8-508",
+    "signals": {
+      "D05-014-02": {
+        "ref_drawing": "5-014",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      }
+    }
+  },
+  "OCB013B014": {
+    "drawing": "8-508",
+    "signals": {
+      "FCZ5202A": {
+        "tag_type": "유량제어기"
+      }
+    }
+  },
+  "OCB020601B": {
+    "drawing": "8-508",
+    "signals": {
+      "D8-508-02": {
+        "ref_drawing": "8-508",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB003700B": {
+    "drawing": "8-508",
+    "signals": {
+      "TCV1591": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB008802C": {
+    "drawing": "8-510",
+    "signals": {
+      "D3-066-01": {
+        "ref_drawing": "3-066",
+        "ref_index": "01"
+      },
+      "D3-511-12": {
+        "ref_drawing": "3-511",
+        "ref_index": "12"
+      }
+    }
+  },
+  "OCB0088005": {
+    "drawing": "8-510",
+    "signals": {
+      "D3-064-01": {
+        "ref_drawing": "3-064",
+        "ref_index": "01"
+      },
+      "D3-066-01": {
+        "ref_drawing": "3-066",
+        "ref_index": "01"
+      },
+      "D3-068-01": {
+        "ref_drawing": "3-068",
+        "ref_index": "01"
+      },
+      "D3-526-01": {
+        "ref_drawing": "3-526",
+        "ref_index": "01"
+      },
+      "D3-511-12": {
+        "ref_drawing": "3-511",
+        "ref_index": "12"
+      }
+    }
+  },
+  "OCB0088031": {
+    "drawing": "8-510",
+    "signals": {
+      "D3-064-01": {
+        "ref_drawing": "3-064",
+        "ref_index": "01"
+      },
+      "D3-068-01": {
+        "ref_drawing": "3-068",
+        "ref_index": "01"
+      },
+      "D3-526-01": {
+        "ref_drawing": "3-526",
+        "ref_index": "01"
+      },
+      "D3-511-12": {
+        "ref_drawing": "3-511",
+        "ref_index": "12"
+      }
+    }
+  },
+  "OCB0088002": {
+    "drawing": "8-510",
+    "signals": {
+      "D3-511-05": {
+        "ref_drawing": "3-511",
+        "ref_index": "05"
+      },
+      "D3-511-04": {
+        "ref_drawing": "3-511",
+        "ref_index": "04"
+      },
+      "D3-511-06": {
+        "ref_drawing": "3-511",
+        "ref_index": "06"
+      }
+    }
+  },
+  "OCB008800E": {
+    "drawing": "8-510",
+    "signals": {
+      "D3-511-05": {
+        "ref_drawing": "3-511",
+        "ref_index": "05"
+      },
+      "D3-511-04": {
+        "ref_drawing": "3-511",
+        "ref_index": "04"
+      },
+      "D3-511-06": {
+        "ref_drawing": "3-511",
+        "ref_index": "06"
+      }
+    }
+  },
+  "OCB008805E": {
+    "drawing": "8-510",
+    "signals": {
+      "D3-511-09": {
+        "ref_drawing": "3-511",
+        "ref_index": "09"
+      }
+    }
+  },
+  "OCB008802F": {
+    "drawing": "8-510",
+    "signals": {
+      "D3-526-01": {
+        "ref_drawing": "3-526",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB0088032": {
+    "drawing": "8-510",
+    "signals": {
+      "D3-511-11": {
+        "ref_drawing": "3-511",
+        "ref_index": "11"
+      },
+      "D3-511-10": {
+        "ref_drawing": "3-511",
+        "ref_index": "10"
+      }
+    }
+  },
+  "ALG-0113034": {
+    "drawing": "8-510",
+    "signals": {
+      "D3-511-11": {
+        "ref_drawing": "3-511",
+        "ref_index": "11"
+      }
+    }
+  },
+  "OCB00F5024": {
+    "drawing": "8-510",
+    "signals": {
+      "D04-502-02": {
+        "ref_drawing": "4-502",
+        "ref_index": "02",
+        "equipment": "BLR OUT WTR TEMP CONTROL"
+      }
+    }
+  },
+  "OCB00F5019": {
+    "drawing": "8-510",
+    "signals": {
+      "D04-510-02": {
+        "ref_drawing": "4-510",
+        "ref_index": "02",
+        "equipment": "NO.2 BNR BLR LOAD CONTROL"
+      }
+    }
+  },
+  "OCB00F501B": {
+    "drawing": "8-510",
+    "signals": {
+      "D04-510-01": {
+        "ref_drawing": "4-510",
+        "ref_index": "01",
+        "equipment": "NO.2 BNR BLR LOAD CONTROL"
+      }
+    }
+  },
+  "OCB00F500E": {
+    "drawing": "8-510",
+    "signals": {
+      "FCV3301B": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB013D024": {
+    "drawing": "8-510",
+    "signals": {
+      "D05-502-02": {
+        "ref_drawing": "5-502",
+        "ref_index": "02",
+        "equipment": "BLR OUT WTR TEMP CONTROL"
+      }
+    }
+  },
+  "OCB013D019": {
+    "drawing": "8-510",
+    "signals": {
+      "D05-510-02": {
+        "ref_drawing": "5-510",
+        "ref_index": "02",
+        "equipment": "NO.2 BNR BLR LOAD CONTROL"
+      }
+    }
+  },
+  "OCB013D01B": {
+    "drawing": "8-510",
+    "signals": {
+      "D05-510-01": {
+        "ref_drawing": "5-510",
+        "ref_index": "01",
+        "equipment": "NO.2 BNR BLR LOAD CONTROL"
+      }
+    }
+  },
+  "OCB013D00E": {
+    "drawing": "8-510",
+    "signals": {
+      "FCV5301B": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB01A9001": {
+    "drawing": "8-510",
+    "signals": {
+      "PCV1401": {
+        "tag_type": "압력제어기"
+      }
+    }
+  },
+  "OCB01A9005": {
+    "drawing": "8-510",
+    "signals": {
+      "LCV1401": {
+        "tag_type": "레벨제어기"
+      }
+    }
+  },
+  "OCB0049013": {
+    "drawing": "8-510",
+    "signals": {
+      "D01-509-03": {
+        "ref_drawing": "1-509",
+        "ref_index": "03",
+        "equipment": "ANALOG LOOP 9"
+      }
+    }
+  },
+  "OCB0049029": {
+    "drawing": "8-510",
+    "signals": {
+      "FI1251A": {
+        "tag_type": "유량지시계",
+        "equipment": "RESET SUM",
+        "src_drawing": "1-516"
+      }
+    }
+  },
+  "OCB004902A": {
+    "drawing": "8-510",
+    "signals": {
+      "FI1251B": {
+        "tag_type": "유량지시계",
+        "equipment": "RESET SUM",
+        "src_drawing": "1-516"
+      }
+    }
+  },
+  "OCB004900A": {
+    "drawing": "8-510",
+    "signals": {
+      "FI1251A": {
+        "tag_type": "유량지시계",
+        "equipment": "RESET SUM",
+        "src_drawing": "1-516"
+      }
+    }
+  },
+  "OCB004900F": {
+    "drawing": "8-510",
+    "signals": {
+      "D01-505-02": {
+        "ref_drawing": "1-505",
+        "ref_index": "02",
+        "equipment": "ANALOG LOOP 5"
+      },
+      "D01-505-03": {
+        "ref_drawing": "1-505",
+        "ref_index": "03",
+        "equipment": "ANALOG LOOP 5"
+      }
+    }
+  },
+  "OCB0049010": {
+    "drawing": "8-510",
+    "signals": {
+      "D01-505-03": {
+        "ref_drawing": "1-505",
+        "ref_index": "03",
+        "equipment": "ANALOG LOOP 5"
+      }
+    }
+  },
+  "OCB004901C": {
+    "drawing": "8-510",
+    "signals": {
+      "D01-014-03": {
+        "ref_drawing": "1-014",
+        "ref_index": "03",
+        "equipment": "BMS LOGIC"
+      },
+      "D01-014-02": {
+        "ref_drawing": "1-014",
+        "ref_index": "02",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB0049019": {
+    "drawing": "8-510",
+    "signals": {
+      "D01-014-03": {
+        "ref_drawing": "1-014",
+        "ref_index": "03",
+        "equipment": "BMS LOGIC"
+      },
+      "D01-014-02": {
+        "ref_drawing": "1-014",
+        "ref_index": "02",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB004901B": {
+    "drawing": "8-510",
+    "signals": {
+      "D01-014-02": {
+        "ref_drawing": "1-014",
+        "ref_index": "02",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB004901A": {
+    "drawing": "8-510",
+    "signals": {
+      "FCD1252": {
+        "tag_type": "유량제어기"
+      },
+      "D01-014-02": {
+        "ref_drawing": "1-014",
+        "ref_index": "02",
+        "equipment": "BMS LOGIC"
+      }
+    }
+  },
+  "OCB0049020": {
+    "drawing": "8-510",
+    "signals": {
+      "FCD1252": {
+        "tag_type": "유량제어기"
+      }
+    }
+  },
+  "ALG-00F7017": {
+    "drawing": "8-510",
+    "signals": {
+      "D01-510-01": {
+        "ref_drawing": "1-510",
+        "ref_index": "01",
+        "equipment": "ANALOG LOOP 10"
+      }
+    }
+  },
+  "OCB008900B": {
+    "drawing": "8-512",
+    "signals": {
+      "D03-512-08": {
+        "ref_drawing": "3-512",
+        "ref_index": "08",
+        "equipment": "DH 순환펌프 A(2)"
+      }
+    }
+  },
+  "OCB0089038": {
+    "drawing": "8-512",
+    "signals": {
+      "D03-512-08": {
+        "ref_drawing": "3-512",
+        "ref_index": "08",
+        "equipment": "DH 순환펌프 A(2)"
+      },
+      "D3-512-08": {
+        "ref_drawing": "3-512",
+        "ref_index": "08"
+      }
+    }
+  },
+  "OCB0089044": {
+    "drawing": "8-512",
+    "signals": {
+      "D03-512-12": {
+        "ref_drawing": "3-512",
+        "ref_index": "12",
+        "equipment": "DH 순환펌프 A(2)"
+      }
+    }
+  },
+  "OCB00F700D": {
+    "drawing": "8-512",
+    "signals": {
+      "D04-510-02": {
+        "ref_drawing": "4-510",
+        "ref_index": "02",
+        "equipment": "NO.2 BNR BLR LOAD CONTROL"
+      }
+    }
+  },
+  "OCB00F701C": {
+    "drawing": "8-512",
+    "signals": {
+      "D04-014-02": {
+        "ref_drawing": "4-014",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      },
+      "D04-030-01": {
+        "ref_drawing": "4-030",
+        "ref_index": "01",
+        "equipment": "NO.2 BNR IGN SOV"
+      }
+    }
+  },
+  "OCB00F701D": {
+    "drawing": "8-512",
+    "signals": {
+      "D04-014-02": {
+        "ref_drawing": "4-014",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      }
+    }
+  },
+  "OCB00F7018": {
+    "drawing": "8-512",
+    "signals": {
+      "FCZ3202B": {
+        "tag_type": "유량제어기"
+      }
+    }
+  },
+  "OCB00F7016": {
+    "drawing": "8-512",
+    "signals": {
+      "FCZ3202B": {
+        "tag_type": "유량제어기"
+      }
+    }
+  },
+  "OCB015000D": {
+    "drawing": "8-512",
+    "signals": {
+      "D05-510-02": {
+        "ref_drawing": "5-510",
+        "ref_index": "02",
+        "equipment": "NO.2 BNR BLR LOAD CONTROL"
+      }
+    }
+  },
+  "OCB015001C": {
+    "drawing": "8-512",
+    "signals": {
+      "D05-014-02": {
+        "ref_drawing": "5-014",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      },
+      "D05-030-01": {
+        "ref_drawing": "5-030",
+        "ref_index": "01",
+        "equipment": "NO.2 BNR IGN SOV"
+      }
+    }
+  },
+  "OCB015001D": {
+    "drawing": "8-512",
+    "signals": {
+      "D05-014-02": {
+        "ref_drawing": "5-014",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      }
+    }
+  },
+  "OCB0150018": {
+    "drawing": "8-512",
+    "signals": {
+      "FCZ5202B": {
+        "tag_type": "유량제어기"
+      }
+    }
+  },
+  "OCB0150016": {
+    "drawing": "8-512",
+    "signals": {
+      "FCZ5202B": {
+        "tag_type": "유량제어기"
+      }
+    }
+  },
+  "OCB0210001": {
+    "drawing": "8-512",
+    "signals": {
+      "TRK01": {},
+      "TRK02": {}
+    }
+  },
+  "OCB021000F": {
+    "drawing": "8-512",
+    "signals": {
+      "D08-512-01": {
+        "ref_drawing": "8-512",
+        "ref_index": "01",
+        "equipment": "INCIN. SPLY SYSTEM(2/2)"
+      }
+    }
+  },
+  "OCB0210021": {
+    "drawing": "8-512",
+    "signals": {
+      "D08-018-01": {
+        "ref_drawing": "8-018",
+        "ref_index": "01",
+        "equipment": "INCIN. SUPPLY PP INTERLOCK(PP252015)"
+      }
+    }
+  },
+  "OCB021001D": {
+    "drawing": "8-512",
+    "signals": {
+      "SIC8605": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB0210022": {
+    "drawing": "8-512",
+    "signals": {
+      "SIC8605": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB021001E": {
+    "drawing": "8-512",
+    "signals": {
+      "D08-024-01": {
+        "ref_drawing": "8-024",
+        "ref_index": "01",
+        "equipment": "INCIN. SUPPLY PP INTERLOCK(PP252016)"
+      }
+    }
+  },
+  "OCB021001B": {
+    "drawing": "8-512",
+    "signals": {
+      "SIC8606": {
+        "tag_type": "속도지시제어기"
+      },
+      "D08-024-01": {
+        "ref_drawing": "8-024",
+        "ref_index": "01",
+        "equipment": "INCIN. SUPPLY PP INTERLOCK(PP252016)"
+      }
+    }
+  },
+  "OCB021001F": {
+    "drawing": "8-512",
+    "signals": {
+      "SIC8606": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "ALG-04E2026": {
+    "drawing": "8-512",
+    "signals": {
+      "TRK01": {},
+      "TRK02": {}
+    }
+  },
+  "ALG-04E2007": {
+    "drawing": "8-512",
+    "signals": {
+      "SIT8605": {
+        "tag_type": "속도지시계기",
+        "equipment": "INCIN. SUPPLY PP INTERLOCK(PP252015)",
+        "src_drawing": "8-018"
+      },
+      "D08-513-03": {
+        "ref_drawing": "8-513",
+        "ref_index": "03",
+        "equipment": "PP252015/016"
+      }
+    }
+  },
+  "ALG-04E2009": {
+    "drawing": "8-512",
+    "signals": {
+      "SIT8606": {
+        "tag_type": "속도지시계기",
+        "equipment": "INCIN. SPLY SYSTEM(2/2)",
+        "src_drawing": "8-512"
+      },
+      "D08-513-06": {
+        "ref_drawing": "8-513",
+        "ref_index": "06",
+        "equipment": "PP252015/016"
+      }
+    }
+  },
+  "ALG-04E2020": {
+    "drawing": "8-512",
+    "signals": {
+      "D08-024-01": {
+        "ref_drawing": "8-024",
+        "ref_index": "01",
+        "equipment": "INCIN. SUPPLY PP INTERLOCK(PP252016)"
+      }
+    }
+  },
+  "OCB0098035": {
+    "drawing": "8-514",
+    "signals": {
+      "D03-514-08": {
+        "ref_drawing": "3-514",
+        "ref_index": "08",
+        "equipment": "DH 순환펌프 B(3)"
+      }
+    }
+  },
+  "OCB0098006": {
+    "drawing": "8-514",
+    "signals": {
+      "D3-514-08": {
+        "ref_drawing": "3-514",
+        "ref_index": "08"
+      }
+    }
+  },
+  "OCB0098005": {
+    "drawing": "8-514",
+    "signals": {
+      "D03-514-12": {
+        "ref_drawing": "3-514",
+        "ref_index": "12",
+        "equipment": "DH 순환펌프 B(3)"
+      }
+    }
+  },
+  "OCB00F9005": {
+    "drawing": "8-514",
+    "signals": {
+      "D04-514-02": {
+        "ref_drawing": "4-514",
+        "ref_index": "02",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB00F9004": {
+    "drawing": "8-514",
+    "signals": {
+      "D04-514-01": {
+        "ref_drawing": "4-514",
+        "ref_index": "01",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      },
+      "D04-514-02": {
+        "ref_drawing": "4-514",
+        "ref_index": "02",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB00F900B": {
+    "drawing": "8-514",
+    "signals": {
+      "D04-514-04": {
+        "ref_drawing": "4-514",
+        "ref_index": "04",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB013E005": {
+    "drawing": "8-514",
+    "signals": {
+      "D05-514-02": {
+        "ref_drawing": "5-514",
+        "ref_index": "02",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB013E004": {
+    "drawing": "8-514",
+    "signals": {
+      "D05-514-01": {
+        "ref_drawing": "5-514",
+        "ref_index": "01",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      },
+      "D05-514-02": {
+        "ref_drawing": "5-514",
+        "ref_index": "02",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB013E00B": {
+    "drawing": "8-514",
+    "signals": {
+      "D05-514-04": {
+        "ref_drawing": "5-514",
+        "ref_index": "04",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB01AA007": {
+    "drawing": "8-514",
+    "signals": {
+      "LCV1411": {
+        "tag_type": "레벨제어기"
+      }
+    }
+  },
+  "OCB01AA00B": {
+    "drawing": "8-514",
+    "signals": {
+      "LCV1412": {
+        "tag_type": "레벨제어기"
+      }
+    }
+  },
+  "OCB01AA012": {
+    "drawing": "8-514",
+    "signals": {
+      "LCV1413": {
+        "tag_type": "레벨제어기"
+      }
+    }
+  },
+  "OCB020801B": {
+    "drawing": "8-514",
+    "signals": {
+      "D8-514-02": {
+        "ref_drawing": "8-514",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB0043039": {
+    "drawing": "8-514",
+    "signals": {
+      "D01-514-01": {
+        "ref_drawing": "1-514",
+        "ref_index": "01",
+        "equipment": "ANALOG LOOP 14"
+      }
+    }
+  },
+  "OCB0043027": {
+    "drawing": "8-514",
+    "signals": {
+      "D01-514-01": {
+        "ref_drawing": "1-514",
+        "ref_index": "01",
+        "equipment": "ANALOG LOOP 14"
+      }
+    }
+  },
+  "OCB0043025": {
+    "drawing": "8-514",
+    "signals": {
+      "D01-514-01": {
+        "ref_drawing": "1-514",
+        "ref_index": "01",
+        "equipment": "ANALOG LOOP 14"
+      }
+    }
+  },
+  "OCB008B035": {
+    "drawing": "8-516",
+    "signals": {
+      "D03-516-08": {
+        "ref_drawing": "3-516",
+        "ref_index": "08",
+        "equipment": "DH 순환펌프 C(4)"
+      }
+    }
+  },
+  "OCB008B006": {
+    "drawing": "8-516",
+    "signals": {
+      "D3-516-08": {
+        "ref_drawing": "3-516",
+        "ref_index": "08"
+      }
+    }
+  },
+  "OCB008B005": {
+    "drawing": "8-516",
+    "signals": {
+      "D03-516-12": {
+        "ref_drawing": "3-516",
+        "ref_index": "12",
+        "equipment": "DH 순환펌프 C(4)"
+      }
+    }
+  },
+  "OCB0103002": {
+    "drawing": "8-516",
+    "signals": {
+      "D04-516-01": {
+        "ref_drawing": "4-516",
+        "ref_index": "01",
+        "equipment": "BOILER COM CONTROL"
+      }
+    }
+  },
+  "OCB0103007": {
+    "drawing": "8-516",
+    "signals": {
+      "TCV3602": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB0103017": {
+    "drawing": "8-516",
+    "signals": {
+      "PCZ3201": {
+        "tag_type": "압력제어기"
+      }
+    }
+  },
+  "OCB013F002": {
+    "drawing": "8-516",
+    "signals": {
+      "D05-516-01": {
+        "ref_drawing": "5-516",
+        "ref_index": "01",
+        "equipment": "BOILER COM CONTROL"
+      }
+    }
+  },
+  "OCB013F007": {
+    "drawing": "8-516",
+    "signals": {
+      "TCV5602": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB013F017": {
+    "drawing": "8-516",
+    "signals": {
+      "PCZ5201": {
+        "tag_type": "압력제어기"
+      }
+    }
+  },
+  "OCB020401B": {
+    "drawing": "8-516",
+    "signals": {
+      "D8-516-02": {
+        "ref_drawing": "8-516",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB00A2035": {
+    "drawing": "8-518",
+    "signals": {
+      "D03-518-08": {
+        "ref_drawing": "3-518",
+        "ref_index": "08",
+        "equipment": "DH 순환펌프 D(5)"
+      }
+    }
+  },
+  "OCB00A2006": {
+    "drawing": "8-518",
+    "signals": {
+      "D3-518-08": {
+        "ref_drawing": "3-518",
+        "ref_index": "08"
+      }
+    }
+  },
+  "OCB00A2005": {
+    "drawing": "8-518",
+    "signals": {
+      "D03-518-12": {
+        "ref_drawing": "3-518",
+        "ref_index": "12",
+        "equipment": "DH 순환펌프 D(5)"
+      }
+    }
+  },
+  "OCB00FA012": {
+    "drawing": "8-518",
+    "signals": {
+      "PIT3311H": {
+        "tag_type": "압력지시계기",
+        "equipment": "BLR DH WATER RETURN FLOW",
+        "src_drawing": "4-518"
+      }
+    }
+  },
+  "OCB00FA007": {
+    "drawing": "8-518",
+    "signals": {
+      "D04-518-01": {
+        "ref_drawing": "4-518",
+        "ref_index": "01",
+        "equipment": "BLR DH WATER RETURN FLOW"
+      }
+    }
+  },
+  "OCB00FA00F": {
+    "drawing": "8-518",
+    "signals": {
+      "D04-518-02": {
+        "ref_drawing": "4-518",
+        "ref_index": "02",
+        "equipment": "BLR DH WATER RETURN FLOW"
+      }
+    }
+  },
+  "OCB00FA013": {
+    "drawing": "8-518",
+    "signals": {
+      "PIT3311L": {
+        "tag_type": "압력지시계기",
+        "equipment": "BLR DH WATER RETURN FLOW",
+        "src_drawing": "4-518"
+      }
+    }
+  },
+  "OCB0140012": {
+    "drawing": "8-518",
+    "signals": {
+      "PIT5311H": {
+        "tag_type": "압력지시계기",
+        "equipment": "BLR DH WATER RETURN FLOW",
+        "src_drawing": "5-518"
+      }
+    }
+  },
+  "OCB0140007": {
+    "drawing": "8-518",
+    "signals": {
+      "D05-518-01": {
+        "ref_drawing": "5-518",
+        "ref_index": "01",
+        "equipment": "BLR DH WATER RETURN FLOW"
+      }
+    }
+  },
+  "OCB014000F": {
+    "drawing": "8-518",
+    "signals": {
+      "D05-518-02": {
+        "ref_drawing": "5-518",
+        "ref_index": "02",
+        "equipment": "BLR DH WATER RETURN FLOW"
+      }
+    }
+  },
+  "OCB0140013": {
+    "drawing": "8-518",
+    "signals": {
+      "PIT5311L": {
+        "tag_type": "압력지시계기",
+        "equipment": "BLR DH WATER RETURN FLOW",
+        "src_drawing": "5-518"
+      }
+    }
+  },
+  "OCB014000C": {
+    "drawing": "8-518",
+    "signals": {
+      "FV5601": {}
+    }
+  },
+  "OCB01A801A": {
+    "drawing": "8-518",
+    "signals": {
+      "D6-518-01": {
+        "ref_drawing": "6-518",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB01A800F": {
+    "drawing": "8-518",
+    "signals": {
+      "D6-518-02": {
+        "ref_drawing": "6-518",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB020E007": {
+    "drawing": "8-518",
+    "signals": {
+      "FV8613": {}
+    }
+  },
+  "OCB020E005": {
+    "drawing": "8-518",
+    "signals": {
+      "TV2642": {}
+    }
+  },
+  "OCB019D00E": {
+    "drawing": "8-520",
+    "signals": {
+      "D06-520-02": {
+        "ref_drawing": "6-520",
+        "ref_index": "02",
+        "equipment": "MAIN BLR SPLY WTR(6) BFP PP-A H/C"
+      }
+    }
+  },
+  "OCB0046002": {
+    "drawing": "8-520",
+    "signals": {
+      "FIT1571": {
+        "tag_type": "유량지시계기",
+        "equipment": "ANALOG LOOP 1",
+        "src_drawing": "1-501"
+      }
+    }
+  },
+  "OCB0046013": {
+    "drawing": "8-520",
+    "signals": {
+      "FIT1581": {
+        "tag_type": "유량지시계기",
+        "equipment": "ANALOG LOOP 12",
+        "src_drawing": "1-512"
+      }
+    }
+  },
+  "OCB0099003": {
+    "drawing": "8-522",
+    "signals": {
+      "D03-522-01": {
+        "ref_drawing": "3-522",
+        "ref_index": "01",
+        "equipment": "DH 순환라인(7)"
+      },
+      "D03-522-02": {
+        "ref_drawing": "3-522",
+        "ref_index": "02",
+        "equipment": "DH 순환라인(7)"
+      }
+    }
+  },
+  "OCB0099004": {
+    "drawing": "8-522",
+    "signals": {
+      "D03-522-02": {
+        "ref_drawing": "3-522",
+        "ref_index": "02",
+        "equipment": "DH 순환라인(7)"
+      }
+    }
+  },
+  "OCB00FB002": {
+    "drawing": "8-522",
+    "signals": {
+      "D04-522-01": {
+        "ref_drawing": "4-522",
+        "ref_index": "01",
+        "equipment": "BOILER MEASUREMENT"
+      }
+    }
+  },
+  "OCB0149002": {
+    "drawing": "8-522",
+    "signals": {
+      "D05-522-01": {
+        "ref_drawing": "5-522",
+        "ref_index": "01",
+        "equipment": "BOILER MEASUREMENT"
+      }
+    }
+  },
+  "OCB019E02B": {
+    "drawing": "8-522",
+    "signals": {
+      "D6-522-02": {
+        "ref_drawing": "6-522",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB020C001": {
+    "drawing": "8-522",
+    "signals": {
+      "TRK01": {},
+      "TRK02": {},
+      "TRK03": {},
+      "TRK04": {}
+    }
+  },
+  "OCB020C015": {
+    "drawing": "8-522",
+    "signals": {
+      "SIT8603": {
+        "tag_type": "속도지시계기",
+        "equipment": "YONSU BOOSTING SYSTEM(2/2)",
+        "src_drawing": "8-522"
+      },
+      "D08-523-03": {
+        "ref_drawing": "8-523",
+        "ref_index": "03",
+        "equipment": "PP252013/014/017/018"
+      }
+    }
+  },
+  "OCB020C003": {
+    "drawing": "8-522",
+    "signals": {
+      "SIT8604": {
+        "tag_type": "속도지시계기",
+        "equipment": "YONSU BOOSTING SYSTEM(2/2)",
+        "src_drawing": "8-522"
+      },
+      "D8-523-09": {
+        "ref_drawing": "8-523",
+        "ref_index": "09"
+      }
+    }
+  },
+  "OCB020C004": {
+    "drawing": "8-522",
+    "signals": {
+      "D8-523-06": {
+        "ref_drawing": "8-523",
+        "ref_index": "06"
+      }
+    }
+  },
+  "OCB020C02D": {
+    "drawing": "8-522",
+    "signals": {
+      "D8-523-06": {
+        "ref_drawing": "8-523",
+        "ref_index": "06"
+      }
+    }
+  },
+  "OCB020C019": {
+    "drawing": "8-522",
+    "signals": {
+      "D8-523-06": {
+        "ref_drawing": "8-523",
+        "ref_index": "06"
+      }
+    }
+  },
+  "OCB020C035": {
+    "drawing": "8-522",
+    "signals": {
+      "D8-523-09": {
+        "ref_drawing": "8-523",
+        "ref_index": "09"
+      }
+    }
+  },
+  "OCB020C017": {
+    "drawing": "8-522",
+    "signals": {
+      "D8-523-09": {
+        "ref_drawing": "8-523",
+        "ref_index": "09"
+      }
+    }
+  },
+  "OCB020C03D": {
+    "drawing": "8-522",
+    "signals": {
+      "D8-523-12": {
+        "ref_drawing": "8-523",
+        "ref_index": "12"
+      }
+    }
+  },
+  "OCB020C002": {
+    "drawing": "8-522",
+    "signals": {
+      "D8-523-12": {
+        "ref_drawing": "8-523",
+        "ref_index": "12"
+      }
+    }
+  },
+  "OCB020C021": {
+    "drawing": "8-522",
+    "signals": {
+      "D08-034-01": {
+        "ref_drawing": "8-034",
+        "ref_index": "01",
+        "equipment": "YOUNSU BOOSTING PP INTERLOCK(PP252013"
+      }
+    }
+  },
+  "OCB020C01D": {
+    "drawing": "8-522",
+    "signals": {
+      "SIC8603": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB020C022": {
+    "drawing": "8-522",
+    "signals": {
+      "SIC8603": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB020C01E": {
+    "drawing": "8-522",
+    "signals": {
+      "D08-038-01": {
+        "ref_drawing": "8-038",
+        "ref_index": "01",
+        "equipment": "YONSU BOOSTING PP INTERLOCK(PP252014)"
+      }
+    }
+  },
+  "OCB020C01B": {
+    "drawing": "8-522",
+    "signals": {
+      "SIC8604": {
+        "tag_type": "속도지시제어기"
+      },
+      "D08-038-01": {
+        "ref_drawing": "8-038",
+        "ref_index": "01",
+        "equipment": "YONSU BOOSTING PP INTERLOCK(PP252014)"
+      }
+    }
+  },
+  "OCB020C01F": {
+    "drawing": "8-522",
+    "signals": {
+      "SIC8604": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB020C00C": {
+    "drawing": "8-522",
+    "signals": {
+      "D08-042-01": {
+        "ref_drawing": "8-042",
+        "ref_index": "01",
+        "equipment": "YONSU BOOSTING PP INTERLOCK(PP252017)"
+      }
+    }
+  },
+  "OCB020C00A": {
+    "drawing": "8-522",
+    "signals": {
+      "SIC8607": {
+        "tag_type": "속도지시제어기"
+      },
+      "D08-042-01": {
+        "ref_drawing": "8-042",
+        "ref_index": "01",
+        "equipment": "YONSU BOOSTING PP INTERLOCK(PP252017)"
+      }
+    }
+  },
+  "OCB020C00E": {
+    "drawing": "8-522",
+    "signals": {
+      "SIC8607": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB020C02A": {
+    "drawing": "8-522",
+    "signals": {
+      "D08-048-01": {
+        "ref_drawing": "8-048",
+        "ref_index": "01",
+        "equipment": "YONSU BOOSTING PP INTERLOCK(PP252018)"
+      }
+    }
+  },
+  "OCB020C028": {
+    "drawing": "8-522",
+    "signals": {
+      "SIC8608": {
+        "tag_type": "속도지시제어기"
+      },
+      "D08-048-01": {
+        "ref_drawing": "8-048",
+        "ref_index": "01",
+        "equipment": "YONSU BOOSTING PP INTERLOCK(PP252018)"
+      }
+    }
+  },
+  "OCB020C02B": {
+    "drawing": "8-522",
+    "signals": {
+      "SIC8608": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "ALG-04FB026": {
+    "drawing": "8-522",
+    "signals": {
+      "TRK01": {},
+      "TRK02": {},
+      "TRK03": {},
+      "TRK04": {}
+    }
+  },
+  "ALG-04FB006": {
+    "drawing": "8-522",
+    "signals": {
+      "D8-523-12": {
+        "ref_drawing": "8-523",
+        "ref_index": "12"
+      }
+    }
+  },
+  "ALG-04FB02F": {
+    "drawing": "8-522",
+    "signals": {
+      "SIT8603": {
+        "tag_type": "속도지시계기",
+        "equipment": "YONSU BOOSTING SYSTEM(2/2)",
+        "src_drawing": "8-522"
+      },
+      "D08-523-03": {
+        "ref_drawing": "8-523",
+        "ref_index": "03",
+        "equipment": "PP252013/014/017/018"
+      },
+      "D08-523-01": {
+        "ref_drawing": "8-523",
+        "ref_index": "01",
+        "equipment": "PP252013/014/017/018"
+      }
+    }
+  },
+  "ALG-04FB037": {
+    "drawing": "8-522",
+    "signals": {
+      "SIT8604": {
+        "tag_type": "속도지시계기",
+        "equipment": "YONSU BOOSTING SYSTEM(2/2)",
+        "src_drawing": "8-522"
+      },
+      "D08-523-06": {
+        "ref_drawing": "8-523",
+        "ref_index": "06",
+        "equipment": "PP252013/014/017/018"
+      }
+    }
+  },
+  "ALG-04FB03F": {
+    "drawing": "8-522",
+    "signals": {
+      "SIT8607": {
+        "tag_type": "속도지시계기",
+        "equipment": "YONSU BOOSTING SYSTEM(2/2)",
+        "src_drawing": "8-522"
+      },
+      "D08-523-09": {
+        "ref_drawing": "8-523",
+        "ref_index": "09",
+        "equipment": "PP252013/014/017/018"
+      },
+      "D8-523-09": {
+        "ref_drawing": "8-523",
+        "ref_index": "09"
+      }
+    }
+  },
+  "ALG-04FB048": {
+    "drawing": "8-522",
+    "signals": {
+      "SIT8608": {
+        "tag_type": "속도지시계기",
+        "equipment": "YONSU BOOSTING SYSTEM(2/2)",
+        "src_drawing": "8-522"
+      },
+      "D08-523-12": {
+        "ref_drawing": "8-523",
+        "ref_index": "12",
+        "equipment": "PP252013/014/017/018"
+      },
+      "D8-523-12": {
+        "ref_drawing": "8-523",
+        "ref_index": "12"
+      }
+    }
+  },
+  "ALG-04FB020": {
+    "drawing": "8-522",
+    "signals": {
+      "D08-038-01": {
+        "ref_drawing": "8-038",
+        "ref_index": "01",
+        "equipment": "YONSU BOOSTING PP INTERLOCK(PP252014)"
+      }
+    }
+  },
+  "ALG-04FB009": {
+    "drawing": "8-522",
+    "signals": {
+      "D08-042-01": {
+        "ref_drawing": "8-042",
+        "ref_index": "01",
+        "equipment": "YONSU BOOSTING PP INTERLOCK(PP252017)"
+      }
+    }
+  },
+  "ALG-04FB027": {
+    "drawing": "8-522",
+    "signals": {
+      "D08-048-01": {
+        "ref_drawing": "8-048",
+        "ref_index": "01",
+        "equipment": "YONSU BOOSTING PP INTERLOCK(PP252018)"
+      }
+    }
+  },
+  "OCB009300C": {
+    "drawing": "8-524",
+    "signals": {
+      "D03-524-01": {
+        "ref_drawing": "3-524",
+        "ref_index": "01",
+        "equipment": "DH 순환라인(8)"
+      }
+    }
+  },
+  "OCB009300E": {
+    "drawing": "8-524",
+    "signals": {
+      "D03-524-01": {
+        "ref_drawing": "3-524",
+        "ref_index": "01",
+        "equipment": "DH 순환라인(8)"
+      }
+    }
+  },
+  "OCB0093004": {
+    "drawing": "8-524",
+    "signals": {
+      "TV2641": {}
+    }
+  },
+  "ALG-0136011": {
+    "drawing": "8-524",
+    "signals": {
+      "TIT2641": {
+        "tag_type": "온도지시계기",
+        "equipment": "순환라인(1)",
+        "src_drawing": "3-510"
+      }
+    }
+  },
+  "OCB01B4002": {
+    "drawing": "8-524",
+    "signals": {
+      "D06-524-02": {
+        "ref_drawing": "6-524",
+        "ref_index": "02",
+        "equipment": "MAIN BLR SPLY WTR(8) BFP PP-B H/C"
+      }
+    }
+  },
+  "OCB020D01B": {
+    "drawing": "8-524",
+    "signals": {
+      "D8-524-02": {
+        "ref_drawing": "8-524",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB008D001": {
+    "drawing": "8-526",
+    "signals": {
+      "D03-526-03": {
+        "ref_drawing": "3-526",
+        "ref_index": "03",
+        "equipment": "DH 순환라인(9)"
+      }
+    }
+  },
+  "OCB008D006": {
+    "drawing": "8-526",
+    "signals": {
+      "PDI2645": {
+        "tag_type": "차압지시계",
+        "equipment": "DH 순환라인(9)",
+        "src_drawing": "3-526"
+      },
+      "D03-526-03": {
+        "ref_drawing": "3-526",
+        "ref_index": "03",
+        "equipment": "DH 순환라인(9)"
+      }
+    }
+  },
+  "OCB00FC00B": {
+    "drawing": "8-526",
+    "signals": {
+      "D04-526-01": {
+        "ref_drawing": "4-526",
+        "ref_index": "01",
+        "equipment": "BLR OUT WTR TEMP CONTROL"
+      }
+    }
+  },
+  "OCB00FC00A": {
+    "drawing": "8-526",
+    "signals": {
+      "D04-528-01": {
+        "ref_drawing": "4-528",
+        "ref_index": "01",
+        "equipment": "BOILER DISTRIBUTED"
+      }
+    }
+  },
+  "ALG-0343001": {
+    "drawing": "8-526",
+    "signals": {
+      "TE4611": {
+        "tag_type": "온도요소",
+        "equipment": "BLR OUT WTR TEMP CONTROL",
+        "src_drawing": "4-526"
+      }
+    }
+  },
+  "OCB01AE00A": {
+    "drawing": "8-526",
+    "signals": {
+      "D06-058-01": {
+        "ref_drawing": "6-058",
+        "ref_index": "01",
+        "equipment": "BFWP-A INTERLOCK(133-M-PP-001)"
+      }
+    }
+  },
+  "OCB01AE00C": {
+    "drawing": "8-526",
+    "signals": {
+      "SIC1481": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "OCB01AE012": {
+    "drawing": "8-526",
+    "signals": {
+      "D06-062-01": {
+        "ref_drawing": "6-062",
+        "ref_index": "01",
+        "equipment": "BFWP-B INTERLOCK(133-M-PP-002)"
+      }
+    }
+  },
+  "OCB01AE011": {
+    "drawing": "8-526",
+    "signals": {
+      "SIC1482": {
+        "tag_type": "속도지시제어기"
+      }
+    }
+  },
+  "ALG-00A102C": {
+    "drawing": "8-526",
+    "signals": {
+      "PP252001": {
+        "tag_type": "펌프"
+      }
+    }
+  },
+  "ALG-00A1004": {
+    "drawing": "8-526",
+    "signals": {
+      "PP252001": {
+        "tag_type": "펌프"
+      }
+    }
+  },
+  "OCB021301B": {
+    "drawing": "8-526",
+    "signals": {
+      "D8-526-02": {
+        "ref_drawing": "8-526",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB01A500D": {
+    "drawing": "8-528",
+    "signals": {
+      "LCV1582": {
+        "tag_type": "레벨제어기"
+      }
+    }
+  },
+  "OCB01A5017": {
+    "drawing": "8-528",
+    "signals": {
+      "TCV1583": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB01A5009": {
+    "drawing": "8-528",
+    "signals": {
+      "LCV1581": {
+        "tag_type": "레벨제어기"
+      }
+    }
+  },
+  "OCB021801B": {
+    "drawing": "8-528",
+    "signals": {
+      "D8-528-02": {
+        "ref_drawing": "8-528",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB00FE00C": {
+    "drawing": "8-530",
+    "signals": {
+      "D04-532-01": {
+        "ref_drawing": "4-532",
+        "ref_index": "01",
+        "equipment": "NO.1 BNR COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB00FE02B": {
+    "drawing": "8-530",
+    "signals": {
+      "D04-526-02": {
+        "ref_drawing": "4-526",
+        "ref_index": "02",
+        "equipment": "BLR OUT WTR TEMP CONTROL"
+      }
+    }
+  },
+  "OCB00FE01F": {
+    "drawing": "8-530",
+    "signals": {
+      "D04-530-02": {
+        "ref_drawing": "4-530",
+        "ref_index": "02",
+        "equipment": "NO.1 BOILER LOAD CONTROL"
+      }
+    }
+  },
+  "OCB00FE023": {
+    "drawing": "8-530",
+    "signals": {
+      "D04-530-03": {
+        "ref_drawing": "4-530",
+        "ref_index": "03",
+        "equipment": "NO.1 BOILER LOAD CONTROL"
+      }
+    }
+  },
+  "OCB00FE00E": {
+    "drawing": "8-530",
+    "signals": {
+      "FCV4301A": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB0142016": {
+    "drawing": "8-530",
+    "signals": {
+      "TE5611": {
+        "tag_type": "온도요소",
+        "equipment": "BLR OUT WTR TEMP CONTROL",
+        "src_drawing": "5-502"
+      }
+    }
+  },
+  "OCB014201C": {
+    "drawing": "8-530",
+    "signals": {
+      "FIT5601": {
+        "tag_type": "유량지시계기",
+        "equipment": "FLOW SUM",
+        "src_drawing": "1-003"
+      }
+    }
+  },
+  "OCB014200B": {
+    "drawing": "8-530",
+    "signals": {
+      "TE5601": {
+        "tag_type": "온도요소",
+        "equipment": "BLR DH WATER RETURN FLOW",
+        "src_drawing": "5-518"
+      }
+    }
+  },
+  "OCB0142004": {
+    "drawing": "8-530",
+    "signals": {
+      "FIT5301A": {
+        "tag_type": "유량지시계기",
+        "equipment": "HOB LNG HEAT INPUT",
+        "src_drawing": "4-403"
+      }
+    }
+  },
+  "OCB020F01B": {
+    "drawing": "8-530",
+    "signals": {
+      "D8-530-02": {
+        "ref_drawing": "8-530",
+        "ref_index": "02"
+      }
+    }
+  },
+  "OCB009500F": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-532-04": {
+        "ref_drawing": "3-532",
+        "ref_index": "04",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB0095046": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-532-04": {
+        "ref_drawing": "3-532",
+        "ref_index": "04",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB0095002": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-532-01": {
+        "ref_drawing": "3-532",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB0095044": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-066-01": {
+        "ref_drawing": "3-066",
+        "ref_index": "01",
+        "equipment": "OPERATION MODE"
+      }
+    }
+  },
+  "OCB0095003": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-532-01": {
+        "ref_drawing": "3-532",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB0095006": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-532-04": {
+        "ref_drawing": "3-532",
+        "ref_index": "04",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB0095007": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-532-04": {
+        "ref_drawing": "3-532",
+        "ref_index": "04",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB0095015": {
+    "drawing": "8-532",
+    "signals": {
+      "D3-066-01": {
+        "ref_drawing": "3-066",
+        "ref_index": "01"
+      }
+    }
+  },
+  "OCB0095039": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-066-01": {
+        "ref_drawing": "3-066",
+        "ref_index": "01",
+        "equipment": "OPERATION MODE"
+      }
+    }
+  },
+  "OCB0095038": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-066-01": {
+        "ref_drawing": "3-066",
+        "ref_index": "01",
+        "equipment": "OPERATION MODE"
+      }
+    }
+  },
+  "OCB009502D": {
+    "drawing": "8-532",
+    "signals": {
+      "TV2652": {}
+    }
+  },
+  "OCB009502C": {
+    "drawing": "8-532",
+    "signals": {
+      "TV2651": {}
+    }
+  },
+  "OCB0095036": {
+    "drawing": "8-532",
+    "signals": {
+      "LS2651": {
+        "tag_type": "레벨스위치",
+        "equipment": "DH REGENERATION LINE",
+        "src_drawing": "3-532"
+      },
+      "D03-536-01": {
+        "ref_drawing": "3-536",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB009501A": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-536-01": {
+        "ref_drawing": "3-536",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB009501C": {
+    "drawing": "8-532",
+    "signals": {
+      "LS2651": {
+        "tag_type": "레벨스위치",
+        "equipment": "DH REGENERATION LINE",
+        "src_drawing": "3-532"
+      },
+      "D03-536-01": {
+        "ref_drawing": "3-536",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB009500A": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-068-03": {
+        "ref_drawing": "3-068",
+        "ref_index": "03",
+        "equipment": "PARALLER OPERATION MODE"
+      },
+      "D3-068-03": {
+        "ref_drawing": "3-068",
+        "ref_index": "03"
+      }
+    }
+  },
+  "OCB0095009": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-068-03": {
+        "ref_drawing": "3-068",
+        "ref_index": "03",
+        "equipment": "PARALLER OPERATION MODE"
+      }
+    }
+  },
+  "OCB009500D": {
+    "drawing": "8-532",
+    "signals": {
+      "FV2621": {}
+    }
+  },
+  "OCB0095011": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-068-03": {
+        "ref_drawing": "3-068",
+        "ref_index": "03",
+        "equipment": "PARALLER OPERATION MODE"
+      }
+    }
+  },
+  "OCB0095013": {
+    "drawing": "8-532",
+    "signals": {
+      "FV2622": {}
+    }
+  },
+  "OCB0095024": {
+    "drawing": "8-532",
+    "signals": {
+      "LS2651": {
+        "tag_type": "레벨스위치",
+        "equipment": "DH REGENERATION LINE",
+        "src_drawing": "3-532"
+      },
+      "FV2651": {},
+      "D03-536-01": {
+        "ref_drawing": "3-536",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "OCB009501D": {
+    "drawing": "8-532",
+    "signals": {
+      "FV2651": {}
+    }
+  },
+  "OCB0095026": {
+    "drawing": "8-532",
+    "signals": {
+      "FV2651": {}
+    }
+  },
+  "OCB0095025": {
+    "drawing": "8-532",
+    "signals": {
+      "FV2652": {}
+    }
+  },
+  "OCB009501F": {
+    "drawing": "8-532",
+    "signals": {
+      "FV2652": {}
+    }
+  },
+  "OCB0095030": {
+    "drawing": "8-532",
+    "signals": {
+      "FV2652": {}
+    }
+  },
+  "ALG-0140018": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-536-01": {
+        "ref_drawing": "3-536",
+        "ref_index": "01",
+        "equipment": "DH REGENERATION LINE"
+      }
+    }
+  },
+  "ALG-014000C": {
+    "drawing": "8-532",
+    "signals": {
+      "D03-068-03": {
+        "ref_drawing": "3-068",
+        "ref_index": "03",
+        "equipment": "PARALLER OPERATION MODE"
+      }
+    }
+  },
+  "OCB011A011": {
+    "drawing": "8-532",
+    "signals": {
+      "D04-538-03": {
+        "ref_drawing": "4-538",
+        "ref_index": "03",
+        "equipment": "BLR LNG COMB A.F CONTROL"
+      }
+    }
+  },
+  "OCB011A02B": {
+    "drawing": "8-532",
+    "signals": {
+      "D04-530-04": {
+        "ref_drawing": "4-530",
+        "ref_index": "04",
+        "equipment": "NO.1 BOILER LOAD CONTROL"
+      }
+    }
+  },
+  "OCB011A01C": {
+    "drawing": "8-532",
+    "signals": {
+      "D04-092-02": {
+        "ref_drawing": "4-092",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      },
+      "D04-092-03": {
+        "ref_drawing": "4-092",
+        "ref_index": "03",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      }
+    }
+  },
+  "OCB011A01D": {
+    "drawing": "8-532",
+    "signals": {
+      "D04-092-02": {
+        "ref_drawing": "4-092",
+        "ref_index": "02",
+        "equipment": "NO.1 BNR COMB AIR DAMP OP/CL CMD"
+      }
+    }
+  },
+  "OCB011A016": {
+    "drawing": "8-532",
+    "signals": {
+      "FCZ4202A": {
+        "tag_type": "유량제어기"
+      }
+    }
+  },
+  "OCB01B9003": {
+    "drawing": "8-532",
+    "signals": {
+      "D06-532-01": {
+        "ref_drawing": "6-532",
+        "ref_index": "01",
+        "equipment": "LINE"
+      }
+    }
+  },
+  "OCB01B9007": {
+    "drawing": "8-532",
+    "signals": {
+      "LCV1421": {
+        "tag_type": "레벨제어기"
+      }
+    }
+  },
+  "OCB01B9009": {
+    "drawing": "8-532",
+    "signals": {
+      "FCV1421": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB0227006": {
+    "drawing": "8-532",
+    "signals": {
+      "FV8603": {}
+    }
+  },
+  "OCB022701A": {
+    "drawing": "8-532",
+    "signals": {
+      "FV8604": {}
+    }
+  },
+  "OCB011701C": {
+    "drawing": "8-534",
+    "signals": {
+      "D04-534-02": {
+        "ref_drawing": "4-534",
+        "ref_index": "02",
+        "equipment": "NO.2 BNR BLR LOAD CONTROL"
+      }
+    }
+  },
+  "OCB0117024": {
+    "drawing": "8-534",
+    "signals": {
+      "D04-526-02": {
+        "ref_drawing": "4-526",
+        "ref_index": "02",
+        "equipment": "BLR OUT WTR TEMP CONTROL"
+      }
+    }
+  },
+  "OCB0117017": {
+    "drawing": "8-534",
+    "signals": {
+      "FCV4301B": {
+        "tag_type": "유량제어밸브"
+      }
+    }
+  },
+  "OCB021D006": {
+    "drawing": "8-534",
+    "signals": {
+      "TCV8610": {
+        "tag_type": "온도제어기"
+      }
+    }
+  },
+  "OCB02CC024": {
+    "drawing": "?-page_120",
+    "signals": {
+      "GOV505": {
+        "equipment": "TURBINE DIGITAL OUTPUT KEYBOARD",
+        "src_drawing": "2-004"
+      }
+    }
+  },
+  "ALG-047402D": {
+    "drawing": "?-page_388",
+    "signals": {
+      "D05-094-02": {
+        "ref_drawing": "5-094",
+        "ref_index": "02",
+        "equipment": "DH CIRCU. SUC SHUT OFF V/V(HV-11002)"
+      }
+    }
+  },
+  "ALG-047402E": {
+    "drawing": "?-page_389",
+    "signals": {
+      "D05-095-02": {
+        "ref_drawing": "5-095",
+        "ref_index": "02",
+        "equipment": "DH WATER SUPPLY TO S/O V/V(HV-11005)"
+      }
+    }
+  },
+  "ALG-047402F": {
+    "drawing": "?-page_390",
+    "signals": {
+      "D05-096-02": {
+        "ref_drawing": "5-096",
+        "ref_index": "02",
+        "equipment": "DH WATER RETURN FROM S/O V/V(HV-11006)"
+      }
+    }
+  },
+  "OCB020100B": {
+    "drawing": "?-page_425",
+    "signals": {
+      "D05-532-08": {
+        "ref_drawing": "5-532",
+        "ref_index": "08",
+        "equipment": "GUNJA DH CIR' PP-A"
+      }
+    }
+  },
+  "OCB020103D": {
+    "drawing": "?-page_425",
+    "signals": {
+      "D05-532-11": {
+        "ref_drawing": "5-532",
+        "ref_index": "11",
+        "equipment": "GUNJA DH CIR' PP-A"
+      }
+    }
+  },
+  "OCB025700B": {
+    "drawing": "?-page_426",
+    "signals": {
+      "D05-534-08": {
+        "ref_drawing": "5-534",
+        "ref_index": "08",
+        "equipment": "GUNJA DH CIR' PP-B"
+      }
+    }
+  },
+  "OCB025703D": {
+    "drawing": "?-page_426",
+    "signals": {
+      "D05-534-11": {
+        "ref_drawing": "5-534",
+        "ref_index": "11",
+        "equipment": "GUNJA DH CIR' PP-B"
+      }
+    }
+  },
+  "OCB025D003": {
+    "drawing": "?-page_427",
+    "signals": {
+      "D05-536-01": {
+        "ref_drawing": "5-536",
+        "ref_index": "01",
+        "equipment": "GUNJA DH CIR' LINE"
+      },
+      "D05-536-02": {
+        "ref_drawing": "5-536",
+        "ref_index": "02",
+        "equipment": "GUNJA DH CIR' LINE"
+      }
+    }
+  },
+  "OCB025D004": {
+    "drawing": "?-page_427",
+    "signals": {
+      "D05-536-02": {
+        "ref_drawing": "5-536",
+        "ref_index": "02",
+        "equipment": "GUNJA DH CIR' LINE"
+      }
+    }
+  },
+  "ALG-0173018": {
+    "drawing": "?-page_431",
+    "signals": {
+      "D05-536-01": {
+        "ref_drawing": "5-536",
+        "ref_index": "01",
+        "equipment": "GUNJA DH CIR' LINE"
+      }
+    }
+  },
+  "ALG-0173025": {
+    "drawing": "?-page_432",
+    "signals": {
+      "D05-536-01": {
+        "ref_drawing": "5-536",
+        "ref_index": "01",
+        "equipment": "GUNJA DH CIR' LINE"
+      }
+    }
+  },
+  "OCB0284009": {
+    "drawing": "?-page_515",
+    "signals": {
+      "D06-302-03": {
+        "ref_drawing": "6-302",
+        "ref_index": "03",
+        "equipment": "INVERTER CONTROL MODE"
+      }
+    }
+  },
+  "OCB0284022": {
+    "drawing": "?-page_515",
+    "signals": {
+      "D06-302-06": {
+        "ref_drawing": "6-302",
+        "ref_index": "06",
+        "equipment": "INVERTER CONTROL MODE"
+      }
+    }
+  }
+}

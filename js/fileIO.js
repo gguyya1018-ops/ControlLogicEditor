@@ -738,6 +738,8 @@ async function loadDataFromLocalDrawings(drawingNumber, pageNumber) {
 
         customConnections = [];
         console.log(`Loaded local: ${basePath}/page_${pageNumber} - ${layoutData.length} elements, ${linesData.length} lines, ${vectorLinesData.length} vlines`);
+        // 블록 컨텍스트 비동기 로드
+        loadPageBlockContext(`${basePath}/page_${pageNumber}_layout.csv`).catch(() => {});
     } catch(e) {
         console.error('Error loading local drawings:', e);
         showToast('파일 로드 실패: ' + e.message, 'error');
@@ -792,6 +794,9 @@ async function loadFromDrawingsPath(dropFolder, drawingNumber, pageNumber) {
 
         customConnections = [];
         console.log(`Loaded from path: ${basePath}/page_${pageNumber} - ${layoutData.length} elements, ${linesData.length} lines`);
+
+        // 블록 컨텍스트 비동기 로드 (포트 설명 + 신호 정보)
+        loadPageBlockContext(`${basePath}/page_${pageNumber}_layout.csv`).catch(() => {});
 
         processData();
         updateStats();
@@ -1292,28 +1297,8 @@ async function exportForLLM() {
         }
     }
 
-    // blockInfo에서 설비명/심볼타입 가져오기
-    const blockInfo = JSON.parse(localStorage.getItem('blockInfo') || '{}');
-    const scanDesc = typeof scanDescriptions !== 'undefined' ? scanDescriptions : {};
-
-    // 블록 표시명 생성: 설비명(코드명) 또는 코드명
-    const displayName = (code) => {
-        const bi = blockInfo[code] || scanDesc[code] || {};
-        const equip = bi.equipment || '';
-        return equip ? `${equip}(${code})` : code;
-    };
-
-    // 심볼타입 가져오기
-    const symbolType = (code) => {
-        const bi = blockInfo[code] || {};
-        if (bi.symbolType) return bi.symbolType;
-        if (typeof identifyBlockType === 'function' && groupsData[code]) {
-            const ports = (groupsData[code].ports || []);
-            const result = identifyBlockType(code, ports);
-            if (result && result.type !== 'UNKNOWN') return result.type;
-        }
-        return groupsData[code]?.type || '';
-    };
+    // 포트사전(전역 portDict) — startup 시 loadPortDictOnce()로 로드됨
+    const pd = (typeof portDict !== 'undefined') ? portDict : {};
 
     // 심볼 설명 가져오기
     const symbolDesc = (type) => {
@@ -1332,54 +1317,126 @@ async function exportForLLM() {
     lines.push(`제목: ${drawingTitle}`);
     lines.push('');
 
-    // 블록 목록 — 심볼 설명 + 포트 역할 포함
+    // 스캔 결과 인덱스 (스캔 탭 실행 시 생성됨 — 없으면 {}로 폴백)
+    const scanIdx = {};
+    if (typeof scanResults !== 'undefined' && scanResults) {
+        for (const sr of scanResults) scanIdx[sr.name] = sr;
+    }
+    const sd = (typeof scanDescriptions !== 'undefined') ? scanDescriptions : {};
+
+    // 블록 목록 — 포트사전 + 스캔 데이터 통합
     lines.push(`=== 블록 목록 (${Object.keys(llmGroups).length}개) ===`);
     lines.push('');
     for (const [name, info] of Object.entries(llmGroups)) {
-        const bi = blockInfo[name] || scanDesc[name] || {};
-        const st = symbolType(name);
-        const sd = symbolDesc(st);
-        const equip = bi.equipment || '';
+        const bi = pd[name] || {};
+        const sr = scanIdx[name] || {};
+        const si = sd[name];
 
-        // 블록 헤더: [설비명(코드)] 심볼타입 — 기본설명
-        let header = `[${equip ? equip + '(' + name + ')' : name}]`;
-        if (st) header += ` ${st}`;
-        if (sd) header += ` — ${sd}`;
+        // 타입: 스캔에서 수동 지정한 userType 우선 → 포트사전
+        const userType  = si && typeof si === 'object' ? (si.userType || '') : '';
+        const pdType    = userType || sr.blockType || bi.type || '';
+        const pdTypedesc = sr.blockDesc || bi.type_desc || symbolDesc(pdType) || '';
+        const role      = sr.portSignals?.__role || bi.role || '';
+        const memo      = si && typeof si === 'object' ? (si.memo || bi.memo || '') : (bi.memo || '');
+        // 설비: 스캔 입력 우선 → 포트사전
+        const scanEquip = si ? (typeof si === 'string' ? si : (si.equipment || '')) : '';
+        const equipment = scanEquip || bi.equipment || '';
+
+        // 블록 헤더: [메모(코드)] 타입설명 — 역할추론
+        let header = `[${memo ? memo + '(' + name + ')' : name}]`;
+        if (pdType)      header += ` ${pdType}`;
+        if (pdTypedesc)  header += ` — ${pdTypedesc}`;
+        if (role)        header += ` | 역할: ${role}`;
+        if (sr.autoDesc && sr.autoDesc !== pdTypedesc) header += ` (${sr.autoDesc})`;
         lines.push(header);
 
-        // 포트 + 심볼사전 설명 (매핑된 경우)
-        const portsDetail = bi.portsDetail || [];
-        if (portsDetail.length > 0) {
-            const portDescs = portsDetail.map(p => {
-                let s = p.name;
-                if (p.description) s += `(${p.description})`;
+        // 사용자 메모/설비 주석
+        if (equipment) lines.push(`  설비: ${equipment}`);
+
+        // 연결 신호 (새 portDict 구조: signals 키)
+        const dictSignals = bi.signals || null;
+        const ctx = (typeof currentPageBlockContext !== 'undefined') ? (currentPageBlockContext[name] || {}) : {};
+        const ctxPorts = ctx.ports || {};
+
+        if (dictSignals && Object.keys(dictSignals).length > 0) {
+            // portDict 신호 데이터 — 태그별 타입+설비+도면
+            for (const [tag, sinfo] of Object.entries(dictSignals)) {
+                let s = `  신호 ${tag}`;
+                if (sinfo.tag_type)   s += `[${sinfo.tag_type}]`;
+                if (sinfo.equipment)  s += ` @ ${sinfo.equipment}`;
+                if (sinfo.ref_drawing) s += ` →도면${sinfo.ref_drawing}-${sinfo.ref_index || '?'}`;
+                else if (sinfo.src_drawing) s += ` (도면${sinfo.src_drawing})`;
+                lines.push(s);
+            }
+        } else if (Object.keys(ctxPorts).length > 0) {
+            // 현재 페이지 on-the-fly 컨텍스트
+            const portLines = Object.entries(ctxPorts).map(([pname, pinfo]) => {
+                let s = pname;
+                if (pinfo.desc || pinfo.description) s += `(${pinfo.desc || pinfo.description})`;
+                if (pinfo.tag) {
+                    s += `=${pinfo.tag}`;
+                    if (pinfo.tag_type)   s += `[${pinfo.tag_type}]`;
+                    if (pinfo.equipment)  s += ` @ ${pinfo.equipment}`;
+                    if (pinfo.src_drawing) s += `→도면${pinfo.src_drawing}`;
+                }
                 return s;
             });
-            lines.push(`  포트: ${portDescs.join(', ')}`);
+            lines.push(`  포트: ${portLines.join(', ')}`);
         } else if (info.ports.length > 0) {
             lines.push(`  포트: ${info.ports.join(', ')}`);
         }
 
-        // 입력 연결
-        const inputs = bi.inputFrom || [];
-        if (inputs.length > 0) {
-            for (const inp of inputs) {
-                const fromBi = blockInfo[inp.fromBlock] || scanDesc[inp.fromBlock] || {};
-                const fromEquip = fromBi.equipment || inp.fromBlock;
-                lines.push(`  ← ${fromEquip}(${inp.fromBlock}).${inp.fromPort} → ${inp.toPort}`);
+        lines.push('');
+    }
+
+    // REF_SIGNAL 블록 판별: groupsData의 type이 REF_SIGNAL이거나 이름이 D0X-YYY-ZZZ 형식
+    const gd = (typeof groupsData !== 'undefined') ? groupsData : {};
+    const isRefSignal = (name) => {
+        const rawType = (gd[name]?.type || '').toUpperCase();
+        if (rawType === 'REF_SIGNAL') return true;
+        // D03-024-01_705_2642 형식
+        return /^D\d+-\d+-\d+/.test(name);
+    };
+
+    // 블록 표시 레이블 생성
+    // REF_SIGNAL → [외부참조 D03-024-01]
+    // OCB/ALG → [타입] 메모(코드) 또는 코드
+    const blockLabel = (name, port, portDesc) => {
+        if (isRefSignal(name)) {
+            const m = name.match(/^(D\d+-\d+-\d+)/);
+            const refDrw = m ? m[1].replace(/^D0*/, '') : name;
+            return `[외부참조 ${refDrw}]`;
+        }
+        const bi = pd[name] || {};
+        const type = bi.type || gd[name]?.type || '';
+        const memo = bi.memo || '';
+        const role = bi.role || '';
+        let label = memo ? `${memo}(${name})` : name;
+        if (type) label = `[${type}]${label}`;
+        if (port) {
+            const pDesc = portDesc || ((bi.ports || {})[port]?.desc || '');
+            label += `.${port}${pDesc ? '(' + pDesc + ')' : ''}`;
+        }
+        return label;
+    };
+
+    // 외부 참조 신호 섹션 (스캔 결과에 refConnections가 있을 때만)
+    const refScanItems = Object.values(scanIdx).filter(sr => sr.type === 'REF_SIGNAL');
+    if (refScanItems.length > 0) {
+        lines.push(`=== 외부 참조 신호 (${refScanItems.length}개) ===`);
+        for (const sr of refScanItems) {
+            const refDrw = typeof extractRefSignalPageNumber === 'function'
+                ? extractRefSignalPageNumber(sr.name) : sr.name;
+            let s = `[${sr.name}] 출처도면: ${refDrw}`;
+            if (sr.autoDesc && sr.autoDesc !== refDrw) s += ` — ${sr.autoDesc}`;
+            lines.push(s);
+            const refConns = sr.refConnections || [];
+            for (const rc of refConns.slice(0, 5)) {
+                const eq = rc.equipment ? ` @ ${rc.equipment}` : '';
+                const tt = rc.tag_type ? ` [${rc.tag_type}]` : '';
+                lines.push(`  연결: ${rc.block}.${rc.port}${tt}${eq}`);
             }
         }
-
-        // 출력 연결
-        const outputs = bi.outputTo || [];
-        if (outputs.length > 0) {
-            for (const out of outputs) {
-                const toBi = blockInfo[out.toBlock] || scanDesc[out.toBlock] || {};
-                const toEquip = toBi.equipment || out.toBlock;
-                lines.push(`  → ${out.fromPort} → ${toEquip}(${out.toBlock}).${out.toPort}`);
-            }
-        }
-
         lines.push('');
     }
 
@@ -1387,13 +1444,10 @@ async function exportForLLM() {
     lines.push(`=== 신호 흐름 (${allConns.length}개 연결) ===`);
     for (const c of allConns) {
         const [fromBlock, fromPort] = c.from.split('.');
-        const [toBlock, toPort] = c.to.split('.');
-        const fromBi = blockInfo[fromBlock] || scanDesc[fromBlock] || {};
-        const toBi = blockInfo[toBlock] || scanDesc[toBlock] || {};
-        const fromEquip = fromBi.equipment || fromBlock;
-        const toEquip = toBi.equipment || toBlock;
-
-        lines.push(`${fromEquip}(${fromBlock}).${fromPort || '?'} → ${toEquip}(${toBlock}).${toPort || '?'}`);
+        const [toBlock,   toPort]   = c.to.split('.');
+        const fromStr = blockLabel(fromBlock, fromPort);
+        const toStr   = blockLabel(toBlock,   toPort);
+        lines.push(`${fromStr} → ${toStr}`);
     }
 
     const textStr = lines.join('\n');
@@ -2039,7 +2093,7 @@ function updateRecentDrawingsList() {
         if (recentDrawings.length === 0) {
             homeLogicRecent.innerHTML = '<p class="text-muted">최근 항목 없음</p>';
         } else {
-            homeLogicRecent.innerHTML = recentDrawings.slice(0, 5).map(d => {
+            homeLogicRecent.innerHTML = recentDrawings.slice(0, 4).map(d => {
                 const date = new Date(d.lastModified).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' });
                 return `
                     <div class="home-recent-item"
@@ -2103,7 +2157,7 @@ function renderRecentDrawingsUI() {
         if (recentDrawings.length === 0) {
             homeLogicRecent2.innerHTML = '<p class="text-muted">최근 항목 없음</p>';
         } else {
-            homeLogicRecent2.innerHTML = recentDrawings.slice(0, 5).map(d => {
+            homeLogicRecent2.innerHTML = recentDrawings.slice(0, 4).map(d => {
                 const date = new Date(d.lastModified).toLocaleDateString('ko-KR', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' });
                 return `
                     <div class="home-recent-item"
@@ -2275,10 +2329,76 @@ function saveDrawingToStorage(drawing) {
     }
 }
 
+// ============ 페이지 블록 컨텍스트 ============
+
+// 현재 도면의 블록 컨텍스트 (포트 설명 + 신호 정보 결합)
+let currentPageBlockContext = {};   // { "OCB0088016": { block_type, block_desc, ports:{...} }, ... }
+let portDict = {};                  // block_port_dict.json 전체 (앱 시작 시 1회 로드)
+let tagContext = {};                // tag_context.json 전체 (앱 시작 시 1회 로드) — 계기태그별 설비명/타입/도면
+
+/**
+ * 현재 도면 레이아웃 CSV에서 블록 컨텍스트를 로드합니다.
+ * Python API get_page_blocks()를 호출하여 결과를 currentPageBlockContext에 저장.
+ * 블록정보 탭(biData)도 갱신합니다.
+ */
+async function loadPageBlockContext(layoutCsvPath) {
+    if (!layoutCsvPath) return;
+    try {
+        let result = null;
+        if (isPyWebView()) {
+            result = await window.pywebview.api.get_page_blocks(layoutCsvPath);
+        } else {
+            // HTTP 모드: 서버 API 호출 (미구현 시 skip)
+            try {
+                const resp = await fetch(`/api/page_blocks?path=${encodeURIComponent(layoutCsvPath)}`);
+                result = await resp.json();
+            } catch { return; }
+        }
+
+        if (!result || !result.success) {
+            console.warn('[블록컨텍스트] 로드 실패:', result?.error);
+            return;
+        }
+
+        currentPageBlockContext = result.blocks || {};
+        console.log(`[블록컨텍스트] ${Object.keys(currentPageBlockContext).length}개 블록 로드 완료`);
+
+    } catch(e) {
+        console.warn('[블록컨텍스트] 오류:', e);
+    }
+}
+
 // ============ 도면 관리 초기화 ============
 
 function initDrawingManager() {
     loadRecentDrawings();
-    // currentDrawingId가 없어도 기본값 추가하지 않음
-    // 사용자가 도면을 열 때만 최근 목록에 추가됨
+    loadPortDictOnce();
+    loadTagContextOnce();
+}
+
+async function loadPortDictOnce() {
+    if (!isPyWebView()) return;
+    try {
+        const result = await window.pywebview.api.load_port_dict();
+        if (result && result.success) {
+            portDict = result.data || {};
+            console.log(`[포트사전] ${Object.keys(portDict).length}개 블록 로드`);
+            if (typeof renderBlockList === 'function') renderBlockList();
+        }
+    } catch(e) {
+        console.warn('[포트사전] 로드 실패:', e);
+    }
+}
+
+async function loadTagContextOnce() {
+    if (!isPyWebView()) return;
+    try {
+        const result = await window.pywebview.api.load_tag_context();
+        if (result && result.success) {
+            tagContext = result.data || {};
+            console.log(`[태그컨텍스트] ${Object.keys(tagContext).length}개 태그 로드`);
+        }
+    } catch(e) {
+        console.warn('[태그컨텍스트] 로드 실패:', e);
+    }
 }
