@@ -8,6 +8,9 @@ let scanResults = [];  // 스캔된 요소 목록
 let scanDescriptions = {};  // 인스턴스별 설명 { 블록명: "설명" }
 let scanCollapsedCategories = {};  // 카테고리 접기 상태
 
+// ============ 블록사전 전역 변수 ============
+let blockDict = {};  // { anchor: [ {drawing, equipment, memo, ports, connections, saved_at} ] }
+
 // ============ 통합 알림 시스템 ============
 
 // 토스트 알림 (alert 대체)
@@ -264,6 +267,8 @@ function hideWelcomeScreen() {
 
     // 전역 스캔 사전 로드 (설비정보 연동)
     loadScanDescriptions();
+    // 블록사전 로드
+    loadBlockDict();
 }
 
 // ============ 모드 토글 ============
@@ -1073,6 +1078,10 @@ function toggleDisplay(type) {
             showBlocks = !showBlocks;
             document.getElementById(btnMap[type])?.classList.toggle('active', showBlocks);
             break;
+        case 'other':
+            showOther = !showOther;
+            document.getElementById('toolShowOther')?.classList.toggle('active', showOther);
+            break;
         case 'ports':
             showPorts = !showPorts;
             document.getElementById(btnMap[type])?.classList.toggle('active', showPorts);
@@ -1108,6 +1117,7 @@ function toggleDisplay(type) {
 function initToolButtons() {
     // 전역 변수 기반으로 버튼 상태 초기화
     document.getElementById('toolShowBlocks')?.classList.toggle('active', showBlocks);
+    document.getElementById('toolShowOther')?.classList.toggle('active', showOther);
     document.getElementById('toolShowPorts')?.classList.toggle('active', showPorts);
     document.getElementById('toolShowConns')?.classList.toggle('active', showConnections);
     document.getElementById('toolDiagramMode')?.classList.toggle('active', diagramMode);
@@ -1193,6 +1203,15 @@ function switchSidebarTab(tabName) {
     const tabContent = document.getElementById(`tab-${tabName}`);
     if (tabContent) {
         tabContent.classList.add('active');
+    }
+
+    // 블록 탭 진입 시 목록 갱신
+    if (tabName === 'block') {
+        if (scanResults.length === 0 && groupsData && Object.keys(groupsData).length > 0) {
+            runScanElements();
+        } else {
+            renderBlockList();
+        }
     }
 
     // 패턴 탭 떠날 때 결과 초기화
@@ -1619,6 +1638,9 @@ function switchMainTab(tabName) {
 
     if (tabName === 'block-types') {
         btInit();
+    }
+    if (tabName === 'block-dict') {
+        renderBdMain();
     }
 
     // 헤더 버튼 그룹 전환
@@ -2955,47 +2977,61 @@ function runScanElements() {
         let autoDesc = '';
         let type = groupData.type || 'OTHER';
 
-        // SIGNAL 블록 판별
+        // ── 타입/카테고리 분류 ──────────────────────────────────────────
         if (type === 'SIGNAL' || (nameUpper.match(/^[A-Z]{2,3}\d{3,}/) && !nameUpper.startsWith('OCB') && !nameUpper.startsWith('ALG') && !nameUpper.startsWith('D0'))) {
-            category = 'SIGNAL';
+            // 계기 태그 (ISA 형식: FIC1234, TIC_511_A 등)
+            category = 'PORT';
             type = 'SIGNAL';
             autoDesc = extractSignalDescription(gPorts);
+
         } else if (type === 'REF_SIGNAL' || nameUpper.match(/^D\d{2}-\d{3}-\d{2}/)) {
-            category = 'REF_SIGNAL';
+            // 도면 간 참조 신호 (D03-511-05 등)
+            category = '참조신호';
             type = 'REF_SIGNAL';
             const refDrw = extractRefSignalPageNumber(groupName);
-            // 포트에서 신호 설명 추출 (예: "DH RTN WTR Gcal/H")
             const refSigDesc = extractSignalDescription(gPorts);
             autoDesc = refSigDesc ? `${refDrw} — ${refSigDesc}` : refDrw;
-        } else if (nameUpper.startsWith('OCB') || nameUpper.startsWith('ALG')) {
-            // OCB/ALG 기능 블록
-            // ALG 블록 = Ovation PID 알고리즘 블록 (기본값 PID)
-            category = gPorts.length > 0 ? inferBlockCategory(groupName, gPorts) : '미분류';
+
+        } else if (nameUpper.startsWith('ALG')) {
+            // Ovation 알고리즘 블록 (PID, Transfer 등)
+            category = 'ALG 블록';
+            type = 'ALG_BLOCK';
+            autoDesc = gPorts.length > 0 ? inferBlockCategory(groupName, gPorts) : '';
+
+        } else if (nameUpper.startsWith('OCB')) {
+            // Ovation 제어 블록
+            category = 'OCB 블록';
             type = 'OCB_BLOCK';
-            autoDesc = category;
-        } else if (/^([A-Z])_\d+_\d+$/i.test(groupName)) {
-            // Ovation 내부 블록 인스턴스 (N_1813_2211, H_0012_0034 등)
-            // 첫 글자가 블록 타입
+            autoDesc = gPorts.length > 0 ? inferBlockCategory(groupName, gPorts) : '';
+
+        } else if (/^[A-Z]_\d+_\d+$/i.test(groupName)) {
+            // Ovation 내부 인스턴스 (N_1813_2211, T_xxx_xxx 등) — 첫 글자가 블록 타입
             if (gPorts.length === 0) continue;
             const abbrevType = groupName.split('_')[0].toUpperCase();
             const ABBREV_MAP = { N:'NOT', H:'H값 선택', L:'L값 선택', T:'Transfer', K:'Gain/Bias', X:'Multiply', AND:'AND', OR:'OR' };
             type = 'OCB_BLOCK';
-            const abbrevDesc = ABBREV_MAP[abbrevType] || abbrevType;
-            // currentPageBlockContext에서 block_type 보완 가능하므로 blockType은 나중에 채움
-            category = inferBlockCategory(groupName, gPorts);
-            autoDesc = abbrevDesc;
+            category = 'OCB 내부';
+            autoDesc = ABBREV_MAP[abbrevType] || abbrevType;
+
+        } else if (/^MODE_\d+/i.test(groupName) || /^MA_\d+/i.test(groupName) ||
+                   /^MAMODE:/i.test(groupName) || nameUpper === 'MA') {
+            // Ovation M/A 스테이션 (MAMODE:018, MODE_xxx 등 — 포트 없어도 포함)
+            // "M/A" 단순 라벨은 제외 → 기타로 처리
+            type = 'OCB_BLOCK';
+            category = 'M/A 스테이션';
+            autoDesc = 'M/A 스테이션';
+
         } else {
-            // 기타 블록 (AND, OR, NOT, MODE 등) — 포트가 있으면 포함
+            // 기타 블록 (AND, OR, NOT, 라벨 등) — 포트가 있어야 포함
             if (gPorts.length === 0) continue;
             type = groupData.type || 'BLOCK_TYPE';
-            // blockDictionary에서 심볼 정보 확인
             const dictEntry = typeof blockDictionary !== 'undefined' ? blockDictionary[nameUpper] || blockDictionary[groupName] : null;
             if (dictEntry) {
-                category = dictEntry.category || 'logic';
+                category = '로직 블록';
                 autoDesc = dictEntry.desc || groupName;
             } else {
-                category = inferBlockCategory(groupName, gPorts);
-                autoDesc = category || groupName;
+                category = '기타';
+                autoDesc = inferBlockCategory(groupName, gPorts) || groupName;
             }
         }
 
@@ -3005,25 +3041,50 @@ function runScanElements() {
         // portDict 신호 정보 가져오기
         const _pdPre = (typeof portDict !== 'undefined') ? (portDict[groupName] || {}) : {};
 
-        // blockDictionary 포트 집합 매칭으로 타입 추론
+        // blockDictionary 포트 집합 매칭으로 심볼 타입 추론
         let blockType = null, blockDesc = '', blockCategory = '';
-        // ALG 블록 타입 추론: canvas 템플릿 포트 이름으로 판별 (portDict는 신호 정보만 보유)
-        const isAlgBlock = nameUpper.startsWith('ALG');
+        const isAlgBlock = type === 'ALG_BLOCK';
+
         if (isAlgBlock) {
-            const gPortSet = new Set(gPorts.map(p => (p.name || p.text || '').toUpperCase()));
-            if (gPortSet.has('FLAG') || (gPortSet.has('NO') && gPortSet.has('YES'))) {
-                blockType = 'T';   // Transfer 블록 (FLAG/YES/NO 포트 고유)
-            } else {
-                blockType = 'PID'; // 기본값
+            // ALG 블록: blockDictionary 매칭 먼저 시도
+            const algTypeInfo = typeof identifyBlockType === 'function' ? identifyBlockType(groupName, gPorts, '') : null;
+            if (algTypeInfo && algTypeInfo.type && algTypeInfo.type !== 'UNKNOWN') {
+                blockType = algTypeInfo.type;
+                blockDesc = algTypeInfo.description || '';
+                blockCategory = algTypeInfo.category || '';
+                if (blockDesc) autoDesc = blockDesc;
+            } else if (gPorts.length > 0) {
+                // 포트 패턴 휴리스틱
+                const gPortSet = new Set(gPorts.map(p => (p.name || p.text || '').toUpperCase()));
+                if (gPortSet.has('FLAG') || (gPortSet.has('NO') && gPortSet.has('YES'))) {
+                    blockType = 'T';   // Transfer 블록
+                } else if ((gPortSet.has('STPT') || gPortSet.has('SP')) && gPortSet.has('PV')) {
+                    blockType = 'PID'; // PID 포트 패턴 확인됨
+                }
+                // 그 외는 blockType null (알 수 없음 — PID 단정 금지)
             }
         }
         if (!isAlgBlock && typeof identifyBlockType === 'function' && (type === 'OCB_BLOCK' || type === 'BLOCK_TYPE' || type === 'OTHER')) {
-            const typeInfo = identifyBlockType(groupName, gPorts, '');
-            if (typeInfo && typeInfo.type && typeInfo.type !== 'UNKNOWN') {
-                blockType = typeInfo.type;
-                blockDesc = typeInfo.description || '';
-                blockCategory = typeInfo.category || '';
-                if (blockDesc) autoDesc = blockDesc;
+            if (gPorts.length > 0) {
+                // 포트가 있으면 포트 집합 매칭
+                const typeInfo = identifyBlockType(groupName, gPorts, '');
+                if (typeInfo && typeInfo.type && typeInfo.type !== 'UNKNOWN') {
+                    blockType = typeInfo.type;
+                    blockDesc = typeInfo.description || '';
+                    blockCategory = typeInfo.category || '';
+                    if (blockDesc) autoDesc = blockDesc;
+                }
+            }
+            // 포트 없어도 이름 기반 사전 조회 (M/A, AND, OR 등 이름 자체가 심볼명인 경우)
+            if (!blockType && typeof blockDictionary !== 'undefined') {
+                const dictEntry = blockDictionary[nameUpper] || blockDictionary[groupName] ||
+                                  blockDictionary[nameUpper.replace('/', '')] || null;
+                if (dictEntry) {
+                    blockType = dictEntry.id || groupName;
+                    blockDesc = dictEntry.desc || '';
+                    blockCategory = dictEntry.category || '';
+                    if (blockDesc) autoDesc = blockDesc;
+                }
             }
         }
 
@@ -3044,6 +3105,27 @@ function runScanElements() {
                 if (!autoDesc && blockDesc) autoDesc = blockDesc;
             }
         }
+        // OCB/ALG 블록: autoDesc에서 심볼 ID 역추적 (PID 제어기 → "PID")
+        if ((type === 'OCB_BLOCK' || type === 'ALG_BLOCK') && autoDesc && typeof blockDictionary !== 'undefined') {
+            const autoSymMap = [
+                [/PID/i, 'PID'], [/AND/i, 'AND'], [/\bOR\b/i, 'OR'],
+                [/NOT\b|반전/i, 'N'], [/Transfer|조건 선택/i, 'T'],
+                [/Gain|Bias|이득/i, 'K'], [/Multiply|곱/i, 'X'],
+                [/최고값|High.*선택/i, 'H'], [/최저값|Low.*선택/i, 'L'],
+                [/리미터|Limit/i, 'LIM'], [/나눗셈/i, 'DIV'],
+                [/절대값/i, 'ABS'], [/합산/i, 'SUM'], [/M\/A/i, 'M/A'],
+            ];
+            for (const [re, symId] of autoSymMap) {
+                if (re.test(autoDesc) && blockDictionary[symId]) {
+                    blockType = symId;
+                    const de = blockDictionary[symId];
+                    blockDesc     = de.desc     || blockDesc;
+                    blockCategory = de.category || blockCategory;
+                    break;
+                }
+            }
+        }
+
         // BLOCK_TYPE: 이름 자체가 심볼명인 경우 (AND, OR, NOT 등)
         if (!blockType && type === 'BLOCK_TYPE') {
             const dictEntry = typeof blockDictionary !== 'undefined' ? (blockDictionary[nameUpper] || blockDictionary[groupName]) : null;
@@ -3132,20 +3214,22 @@ function runScanElements() {
                 }
             }
         } else {
-            // ── OCB/ALG/기타: portDict.signals 우선, 없으면 API ctx 사용 ──
-            const pdSignals = pdBlock.signals || {};
-            if (Object.keys(pdSignals).length > 0) {
-                // 새 portDict 구조: {tag: {tag_type, equipment, ref_drawing, ...}}
-                for (const [tag, sinfo] of Object.entries(pdSignals)) {
+            // ── OCB/ALG/기타: portDict.connected 우선 → API ctx ──
+            const pdConnected = pdBlock.connected || {};
+            if (Object.keys(pdConnected).length > 0) {
+                // v3 portDict: connected = {tag → {tag_type, equipment, drawing_title, ref_drawing, ...}}
+                for (const [tag, info] of Object.entries(pdConnected)) {
+                    // REF_SIGNAL(D0X-YYY-ZZ) 제외 — 연결신호 섹션은 실제 ISA 태그만
+                    if (/^D\d+-\d+-\d+$/i.test(tag)) continue;
                     portSignals[tag] = {
-                        direction:   sinfo.direction   || '',
-                        description: sinfo.desc        || '',
-                        tag:         tag,
-                        tag_type:    sinfo.tag_type    || '',
-                        equipment:   sinfo.equipment   || '',
-                        src_drawing: sinfo.src_drawing || '',
-                        ref_drawing: sinfo.ref_drawing || '',
-                        ref_index:   sinfo.ref_index   || '',
+                        direction:     '',
+                        description:   info.drawing_title || '',
+                        tag:           tag,
+                        tag_type:      info.tag_type      || '',
+                        equipment:     info.equipment     || '',
+                        src_drawing:   info.drawing       || '',
+                        ref_drawing:   info.ref_drawing   || '',
+                        ref_index:     info.ref_index     || '',
                     };
                 }
             } else if (Object.keys(ctx.ports || {}).length > 0) {
@@ -3211,6 +3295,7 @@ function runScanElements() {
 
     renderScanList();
     updateScanStats();
+    renderBlockList();  // 블록탭도 동기화
     console.log('Scan complete:', scanResults.length, 'elements');
 }
 
@@ -3258,8 +3343,19 @@ function renderScanList(filterText) {
         groups[item.category].push(item);
     }
 
+    // 카테고리 표시 순서
+    const CAT_ORDER = ['OCB 블록', 'ALG 블록', 'OCB 내부', 'M/A 스테이션', '로직 블록', '참조신호', 'PORT', '기타'];
+    const sortedGroups = Object.entries(groups).sort((a, b) => {
+        const ia = CAT_ORDER.indexOf(a[0]);
+        const ib = CAT_ORDER.indexOf(b[0]);
+        if (ia !== -1 && ib !== -1) return ia - ib;
+        if (ia !== -1) return -1;
+        if (ib !== -1) return 1;
+        return a[0].localeCompare(b[0]);
+    });
+
     let html = '';
-    for (const [cat, catItems] of Object.entries(groups)) {
+    for (const [cat, catItems] of sortedGroups) {
         const isCollapsed = scanCollapsedCategories[cat];
         const arrow = isCollapsed ? '&#9654;' : '&#9660;';
         html += `<div style="margin-bottom:4px;">`;
@@ -3459,30 +3555,98 @@ function openScanDetailPopup(blockName) {
     let portsSection = '';
     const group = groupsData[blockName];
     if (group && group.ports && group.ports.length > 0) {
-        // dictEntry에서 포트 상세 가져오기
-        const dictEntry2 = effectiveType && typeof blockDictionary !== 'undefined' ? blockDictionary[effectiveType] : null;
+        // 1) effectiveType으로 직접 조회
+        let dictEntry2 = effectiveType && typeof blockDictionary !== 'undefined' ? blockDictionary[effectiveType] : null;
+        // 2) 없으면 autoDesc / 포트 이름으로 심볼 역추적
+        if ((!dictEntry2 || !dictEntry2.ports?.length) && typeof btBlockData !== 'undefined') {
+            // autoDesc → 심볼 ID 매핑 (inferBlockCategory 결과 활용)
+            const autoDescStr = item.autoDesc || '';
+            const autoSymMap = [
+                [/PID/i, 'PID'],
+                [/AND/i, 'AND'],
+                [/OR\b/i, 'OR'],
+                [/NOT\b/i, 'N'],
+                [/Transfer|조건 선택/i, 'T'],
+                [/Gain|Bias/i, 'K'],
+                [/Multiply|곱/i, 'X'],
+                [/최고값|High/i, 'H'],
+                [/최저값|Low/i, 'L'],
+                [/리미터|Limit/i, 'LIM'],
+                [/나눗셈|Divid/i, 'DIV'],
+                [/절대값|ABS/i, 'ABS'],
+                [/합산|SUM/i, 'SUM'],
+            ];
+            for (const [re, symId] of autoSymMap) {
+                if (re.test(autoDescStr) && btBlockData[symId]?.ports?.length) {
+                    dictEntry2 = btBlockData[symId];
+                    break;
+                }
+            }
+            // 3) 그래도 없으면 포트 이름 교집합 비율로 (블록포트 기준)
+            if (!dictEntry2?.ports?.length) {
+                const portNames = new Set(group.ports.map(p => (p.name || p.text || '').toUpperCase()));
+                let bestScore = 0, bestEntry = null;
+                for (const sym of Object.values(btBlockData)) {
+                    if (!sym.ports?.length) continue;
+                    const symPortNames = new Set(sym.ports.map(p => p.name?.toUpperCase()).filter(Boolean));
+                    let matches = 0;
+                    for (const pn of portNames) if (symPortNames.has(pn)) matches++;
+                    const score = matches / portNames.size; // 블록 포트 기준
+                    if (score > bestScore && score >= 0.5) { bestScore = score; bestEntry = sym; }
+                }
+                if (bestEntry) dictEntry2 = bestEntry;
+            }
+        }
         const dictPorts = dictEntry2 && dictEntry2.ports ? dictEntry2.ports : [];
+
+        // 포트명 매핑되지 않는 경우 대비 보조 설명표
+        const fallbackPortDesc = {
+            'K':'이득/게인 (Gain)', 'GAIN':'이득/게인 (Gain)',
+            'd':'미분 이득 (Derivative Gain)', 'DGAIN':'미분 이득',
+            'dt':'미분 시간 (Derivative Time)', 'DRAT':'미분 감쇠 상수',
+            'NUM':'분자 (Numerator)', 'DEN':'분모 (Denominator)',
+            'A':'입력값', 'B':'입력값 B',
+            'FLAG':'조건 신호 (Boolean)', 'YES':'참일 때 값', 'NO':'거짓일 때 값',
+            'T':'Transfer 블록 참조', 'H':'상한값 (High Limit)', 'L':'하한값 (Low Limit)',
+            'IN1':'입력 1', 'IN2':'입력 2', 'IN3':'입력 3', 'IN4':'입력 4',
+            'OUT':'출력', 'STPT':'설정값 (Setpoint)', 'PV':'측정값 (Process Variable)',
+            'MODE':'모드 신호', 'MRE':'수동 리셋', 'ARE':'자동 리셋',
+        };
 
         const portList = group.ports.map(p => {
             const pName = p.name || p.text || '?';
-            const dp = dictPorts.find(d => d.name && d.name.toUpperCase() === pName.toUpperCase());
+            const pUpper = pName.toUpperCase();
+            const dp = dictPorts.find(d => d.name && d.name.toUpperCase() === pUpper);
             if (dp && dp.description) {
-                const dirColor = dp.direction === 'output' ? '#ff9800' : '#4fc3f7';
-                const dirLabel = dp.direction === 'output' ? 'OUT' : 'IN';
-                return `<div style="display:flex; align-items:center; gap:4px; padding:2px 0;">
-                    <span style="font-size:8px; color:${dirColor}; width:22px;">${dirLabel}</span>
-                    <span style="font-size:10px; color:#e0e0e0; font-weight:600; min-width:40px;">${pName}</span>
-                    <span style="font-size:9px; color:rgba(255,255,255,0.4);">${dp.description}${dp.default !== null && dp.default !== undefined ? ` (기본:${dp.default})` : ''}</span>
+                const isOut = dp.direction === 'output';
+                const dirColor = isOut ? '#fb923c' : '#4fc3f7';
+                const dirLabel = isOut ? '→' : '←';
+                return `<div style="display:flex; align-items:center; gap:6px; padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                    <span style="font-size:9px; color:${dirColor}; width:14px; text-align:center;">${dirLabel}</span>
+                    <span style="font-size:10px; color:#e0e0e0; font-weight:600; min-width:36px;">${pName}</span>
+                    <span style="font-size:9px; color:rgba(255,255,255,0.45);">${dp.description}</span>
                 </div>`;
             }
-            return `<span style="padding:2px 6px; border-radius:3px; font-size:9px; background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.6); border:1px solid rgba(255,255,255,0.08);">${pName}</span>`;
+            // 심볼 매칭 없으면 보조 설명표 사용
+            const fallback = fallbackPortDesc[pUpper] || fallbackPortDesc[pName];
+            if (fallback) {
+                return `<div style="display:flex; align-items:center; gap:6px; padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                    <span style="font-size:9px; color:rgba(255,255,255,0.2); width:14px; text-align:center;">·</span>
+                    <span style="font-size:10px; color:#e0e0e0; font-weight:600; min-width:36px;">${pName}</span>
+                    <span style="font-size:9px; color:rgba(255,255,255,0.3);">${fallback}</span>
+                </div>`;
+            }
+            // 설명 없는 포트도 같은 row 형식으로 통일
+            return `<div style="display:flex; align-items:center; gap:6px; padding:3px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                <span style="font-size:9px; color:rgba(255,255,255,0.15); width:14px; text-align:center;">·</span>
+                <span style="font-size:10px; color:rgba(255,255,255,0.5); font-weight:600; min-width:36px;">${pName}</span>
+            </div>`;
         }).join('');
 
-        const hasDetail = dictPorts.length > 0 && dictPorts.some(d => d.description);
         portsSection = `
             <div style="margin-bottom:12px;">
                 <div style="font-size:10px; font-weight:600; color:rgba(255,255,255,0.4); margin-bottom:4px;">포트 구성 (${group.ports.length})</div>
-                <div style="${hasDetail ? 'display:flex; flex-direction:column; gap:1px; max-height:150px; overflow-y:auto;' : 'display:flex; flex-wrap:wrap; gap:4px;'}">${portList}</div>
+                <div style="display:flex; flex-direction:column; gap:0; max-height:200px; overflow-y:auto;">${portList}</div>
             </div>`;
     }
 
@@ -3526,13 +3690,24 @@ function openScanDetailPopup(blockName) {
         const _tc = (typeof tagContext !== 'undefined') ? tagContext : {};
         const tcEntry = _tc[blockName] || _tc[blockName.toUpperCase()] || {};
 
-        // portDict 역방향 검색: 이 tag를 signals에 가진 블록들 (새 구조)
+        // portDict 역방향 검색: 이 tag를 connected에 가진 블록들
         const usedIn = [];
+        const _bnu = blockName.toUpperCase();
         for (const [bname, binfo] of Object.entries(_pd)) {
-            const sigMap = binfo.signals || binfo.ports || {};
-            if (sigMap[blockName] || sigMap[blockName.toUpperCase()]) {
-                const sinfo = sigMap[blockName] || sigMap[blockName.toUpperCase()] || {};
-                usedIn.push({ block: bname, port: '', dir: sinfo.direction || '', desc: sinfo.desc || '', role: '' });
+            if (binfo.entry_type !== 'BLOCK') continue;
+            const conn = binfo.connected || {};
+            const info = conn[blockName] || conn[_bnu];
+            if (info) {
+                usedIn.push({
+                    block:    bname,
+                    port:     '',
+                    dir:      '',
+                    desc:     info.drawing_title || '',
+                    role:     '',
+                    equipment: info.equipment || '',
+                    drawing:  binfo.drawings?.[0] || '',
+                    tag_type: info.tag_type || '',
+                });
             }
         }
 
@@ -3593,7 +3768,10 @@ function openScanDetailPopup(blockName) {
     overlay.innerHTML = `
         <div style="background:#1a1a2e; border:1px solid rgba(255,255,255,0.15); border-radius:12px; padding:24px; width:480px; max-width:90vw; max-height:85vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <div style="font-size:14px; font-weight:700; color:#fff;">${blockName}</div>
+                <div>
+                    <div style="font-size:14px; font-weight:700; color:#fff;">${blockName}</div>
+                    ${item.blockType && item.blockType !== 'UNKNOWN' ? `<button onclick="document.getElementById('scan-detail-popup').remove(); switchMainTab('block-types'); setTimeout(()=>{ document.getElementById('btSearchInput').value='${item.blockType}'; btRenderBlockList(); btSelectBlock('${item.blockType}'); }, 100);" style="margin-top:4px; padding:2px 8px; font-size:10px; background:rgba(139,92,246,0.2); color:#a78bfa; border:1px solid rgba(139,92,246,0.3); border-radius:4px; cursor:pointer;">심볼사전 → ${item.blockType}</button>` : ''}
+                </div>
                 <button onclick="document.getElementById('scan-detail-popup').remove()" style="background:none; border:none; color:rgba(255,255,255,0.5); font-size:18px; cursor:pointer; padding:4px;">&times;</button>
             </div>
 
@@ -3660,34 +3838,32 @@ async function saveScanPopup(blockName) {
         scanDescriptions[blockName].memo      = memo;
     }
 
-    // ── portDict에 메모/설비정보만 패치 (기본 정보는 건드리지 않음) ──
-    if (typeof portDict !== 'undefined') {
-        if (!portDict[blockName]) portDict[blockName] = {};
-        if (equipment) portDict[blockName].equipment = equipment;
-        else delete portDict[blockName].equipment;
-        if (memo) portDict[blockName].memo = memo;
-        else delete portDict[blockName].memo;
-    }
-
-    // 파일 저장 (메모/설비정보 패치만 전송)
-    if (isPyWebView()) {
-        const patch = {};
-        patch[blockName] = portDict[blockName] || { equipment, memo };
-        await window.pywebview.api.save_port_dict(patch).catch(e => console.warn('[블록저장]', e));
-    }
+    // ── 블록사전에 저장 (앵커 + 현재 도면 기준) ──
+    const drawing = (typeof currentDrawingNumber !== 'undefined' && currentDrawingNumber) ? currentDrawingNumber : '';
+    const item = scanResults.find(r => r.name === blockName);
+    // 템플릿 포트 정보
+    const tmpl = blockTemplates.find(t => t.anchor === blockName || t.name === blockName);
+    const ports = tmpl ? (tmpl.ports || []) : [];
+    const bdEntry = {
+        drawing,
+        equipment,
+        memo,
+        ports,
+        block_type: item?.blockType || '',
+        connections: {},
+        saved_at: new Date().toISOString(),
+    };
+    await saveBlockDictEntry(blockName, bdEntry);
 
     // 스캔 목록 즉시 갱신 (userDesc 반영)
-    const item = scanResults.find(r => r.name === blockName);
     if (item) item.userDesc = equipment;
 
-    if (typeof renderBlockList === 'function') renderBlockList();
     updateScanStats();
-
     const searchEl = document.getElementById('scan-search');
     renderScanList(searchEl?.value.trim() || undefined);
 
     document.getElementById('scan-detail-popup').remove();
-    showToast(`${blockName} 저장 완료`, 'success');
+    showToast(`${blockName} 블록사전에 저장`, 'success');
 }
 
 function toggleScanCategory(cat) {
@@ -3777,6 +3953,257 @@ function loadScanDescriptions() {
             console.log('[ScanDict] 기존 도면별 데이터 마이그레이션 완료:', Object.keys(scanDescriptions).length, '항목');
         }
     }
+}
+
+// ============================================================
+// 블록사전 (Block Dictionary)
+// ============================================================
+
+async function loadBlockDict() {
+    // localStorage 우선 (빠름), 그 다음 파일
+    try { blockDict = JSON.parse(localStorage.getItem('block_dict') || '{}'); } catch(e) { blockDict = {}; }
+    if (isPyWebView()) {
+        try {
+            const res = await window.pywebview.api.load_block_dict();
+            if (res.success && Object.keys(res.data || {}).length > 0) {
+                blockDict = res.data;
+                localStorage.setItem('block_dict', JSON.stringify(blockDict));
+            }
+        } catch(e) { console.warn('[BlockDict] 파일 로드 실패, localStorage 사용', e); }
+    }
+    renderBdList();
+}
+
+async function saveBlockDictEntry(anchor, entry) {
+    // 메모리 업데이트
+    if (!blockDict[anchor]) blockDict[anchor] = [];
+    const idx = blockDict[anchor].findIndex(e => e.drawing === entry.drawing);
+    if (idx >= 0) blockDict[anchor][idx] = entry;
+    else blockDict[anchor].push(entry);
+
+    // 파일 저장 (항상 localStorage + pywebview 둘 다)
+    localStorage.setItem('block_dict', JSON.stringify(blockDict));
+    if (isPyWebView()) {
+        const patch = { [anchor]: [entry] };
+        await window.pywebview.api.save_block_dict(patch).catch(e => console.warn('[BlockDict] 저장 실패', e));
+    }
+    renderBdList();
+}
+
+function renderBdList(filterText) {
+    const listEl = document.getElementById('bd-list');
+    const countEl = document.getElementById('bd-count');
+    if (!listEl) return;
+
+    const q = (filterText || document.getElementById('bd-search')?.value || '').toLowerCase().trim();
+    const anchors = Object.keys(blockDict).filter(anchor => {
+        if (!q) return true;
+        if (anchor.toLowerCase().includes(q)) return true;
+        return (blockDict[anchor] || []).some(e =>
+            (e.equipment || '').toLowerCase().includes(q) ||
+            (e.memo || '').toLowerCase().includes(q) ||
+            (e.drawing || '').toLowerCase().includes(q)
+        );
+    });
+
+    if (countEl) countEl.textContent = `${anchors.length}개`;
+
+    if (anchors.length === 0) {
+        listEl.innerHTML = `<div style="color:var(--text-muted); font-size:10px; text-align:center; margin-top:24px;">등록된 블록이 없습니다<br><span style="font-size:9px; color:rgba(255,255,255,0.2);">스캔탭에서 블록 저장 시 여기 표시됩니다</span></div>`;
+        return;
+    }
+
+    listEl.innerHTML = anchors.map(anchor => {
+        const entries = blockDict[anchor] || [];
+        const equipList = [...new Set(entries.map(e => e.equipment).filter(Boolean))].slice(0, 2).join(' / ');
+        const drawingCount = entries.length;
+        return `<div onclick="openBdDetail('${anchor.replace(/'/g,"\\'")}') "
+            style="padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); cursor:pointer; transition:background 0.15s;"
+            onmouseover="this.style.background='rgba(255,255,255,0.04)'"
+            onmouseout="this.style.background=''">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:11px; font-weight:600; color:#e2e8f0;">${anchor}</span>
+                <span style="font-size:9px; color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.06); padding:1px 5px; border-radius:3px;">${drawingCount}도면</span>
+            </div>
+            ${equipList ? `<div style="font-size:10px; color:#10b981; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${equipList}</div>` : ''}
+        </div>`;
+    }).join('');
+}
+
+function filterBdList() {
+    const q = document.getElementById('bd-search')?.value || '';
+    renderBdList(q);
+}
+
+// ── 블록사전 전체화면 (메인 탭) ──────────────────────────
+function filterBdMain() {
+    renderBdMain(document.getElementById('bd-main-search')?.value || '');
+}
+
+function renderBdMain(filterText) {
+    const listEl   = document.getElementById('bd-main-list');
+    const countEl  = document.getElementById('bd-main-count');
+    if (!listEl) return;
+
+    const q = (filterText || '').toLowerCase().trim();
+    const anchors = Object.keys(blockDict).filter(anchor => {
+        if (!q) return true;
+        if (anchor.toLowerCase().includes(q)) return true;
+        return (blockDict[anchor] || []).some(e =>
+            (e.equipment || '').toLowerCase().includes(q) ||
+            (e.memo || '').toLowerCase().includes(q) ||
+            (e.drawing || '').toLowerCase().includes(q)
+        );
+    }).sort();
+
+    if (countEl) countEl.textContent = `${anchors.length}개 등록`;
+
+    if (anchors.length === 0) {
+        listEl.innerHTML = `<div style="color:rgba(255,255,255,0.3); font-size:11px; text-align:center; margin-top:40px; padding:0 16px; line-height:1.6;">등록된 블록이 없습니다<br><span style="font-size:10px; color:rgba(255,255,255,0.15);">스캔탭 → 블록 저장</span></div>`;
+        document.getElementById('bd-main-detail').innerHTML = '';
+        return;
+    }
+
+    listEl.innerHTML = anchors.map(anchor => {
+        const entries = blockDict[anchor] || [];
+        const equipList = [...new Set(entries.map(e => e.equipment).filter(Boolean))].slice(0, 2).join(' / ');
+        return `<div onclick="renderBdMainDetail('${anchor.replace(/'/g,"\\'")}') "
+            style="padding:9px 14px; border-bottom:1px solid rgba(255,255,255,0.04); cursor:pointer;"
+            onmouseover="this.style.background='rgba(255,255,255,0.04)'"
+            onmouseout="this.style.background=''">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:12px; font-weight:600; color:#e2e8f0;">${anchor}</span>
+                <span style="font-size:9px; color:rgba(255,255,255,0.3);">${entries.length}도면</span>
+            </div>
+            ${equipList ? `<div style="font-size:10px; color:#10b981; margin-top:2px;">${equipList}</div>` : ''}
+        </div>`;
+    }).join('');
+}
+
+function renderBdMainDetail(anchor) {
+    const detailEl = document.getElementById('bd-main-detail');
+    if (!detailEl) return;
+
+    // 목록 선택 표시
+    document.querySelectorAll('#bd-main-list > div').forEach(el => {
+        el.style.background = el.textContent.trim().startsWith(anchor) ? 'rgba(99,102,241,0.12)' : '';
+    });
+
+    const entries = blockDict[anchor] || [];
+    const tmpl = blockTemplates.find(t => t.anchor === anchor || t.name === anchor);
+    const tmplPorts = tmpl ? (tmpl.ports || []) : [];
+
+    const portBadges = tmplPorts.filter(p => p.type === 'PORT').map(p =>
+        `<span style="padding:2px 6px; border-radius:3px; font-size:10px; background:rgba(251,146,60,0.12); color:#fb923c;">${p.name}</span>`).join('');
+    const signalBadges = tmplPorts.filter(p => p.type === 'SIGNAL').map(p =>
+        `<span style="padding:2px 6px; border-radius:3px; font-size:10px; background:rgba(0,188,212,0.1); color:#00bcd4;">${p.name}</span>`).join('');
+    const otherTexts = tmplPorts.filter(p => p.type === 'OTHER').map(p => p.name).join(', ');
+
+    const tmplHtml = tmplPorts.length > 0 ? `
+        <div style="margin-bottom:20px; padding:12px 16px; background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.15); border-radius:8px;">
+            <div style="font-size:11px; font-weight:600; color:#a78bfa; margin-bottom:8px;">템플릿 포트</div>
+            ${portBadges ? `<div style="margin-bottom:6px; display:flex; flex-wrap:wrap; gap:4px;">${portBadges}</div>` : ''}
+            ${signalBadges ? `<div style="margin-bottom:6px; display:flex; flex-wrap:wrap; gap:4px;">${signalBadges}</div>` : ''}
+            ${otherTexts ? `<div style="font-size:10px; color:rgba(255,255,255,0.4);">텍스트: ${otherTexts}</div>` : ''}
+        </div>` : '';
+
+    const entriesHtml = entries.length === 0
+        ? `<div style="color:rgba(255,255,255,0.3); font-size:11px;">등록된 도면 없음</div>`
+        : entries.map((e, i) => `
+        <div style="padding:14px 16px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:8px; margin-bottom:10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <span style="font-size:13px; font-weight:600; color:#7dd3fc;">도면 ${e.drawing || '(미지정)'}</span>
+                <button onclick="deleteBdEntry('${anchor.replace(/'/g,"\\'")}', ${i}); renderBdMain();" style="font-size:10px; padding:2px 8px; background:rgba(239,68,68,0.15); color:#f87171; border:none; border-radius:4px; cursor:pointer;">삭제</button>
+            </div>
+            ${e.block_type ? `<div style="font-size:10px; color:#a78bfa; margin-bottom:6px;">타입: ${e.block_type}</div>` : ''}
+            ${e.equipment ? `<div style="font-size:12px; color:#10b981; margin-bottom:4px;">⚙ ${e.equipment}</div>` : '<div style="font-size:11px; color:rgba(255,255,255,0.2); margin-bottom:4px;">설비명 미입력</div>'}
+            ${e.memo ? `<div style="font-size:11px; color:rgba(255,255,255,0.5); margin-bottom:4px;">💬 ${e.memo}</div>` : ''}
+            ${e.saved_at ? `<div style="font-size:9px; color:rgba(255,255,255,0.2);">${new Date(e.saved_at).toLocaleString('ko-KR')}</div>` : ''}
+        </div>`).join('');
+
+    detailEl.innerHTML = `
+        <div style="max-width:600px;">
+            <h2 style="font-size:18px; font-weight:700; color:#e2e8f0; margin:0 0 6px 0;">${anchor}</h2>
+            <div style="font-size:11px; color:rgba(255,255,255,0.35); margin-bottom:20px;">${entries.length}개 도면 등록</div>
+            ${tmplHtml}
+            <div style="font-size:11px; font-weight:600; color:rgba(255,255,255,0.4); margin-bottom:10px;">등록 도면</div>
+            ${entriesHtml}
+        </div>`;
+}
+
+function openBdDetail(anchor) {
+    const entries = blockDict[anchor] || [];
+    const existing = document.getElementById('bd-detail-popup');
+    if (existing) existing.remove();
+
+    // 템플릿 포트 정보
+    const tmpl = blockTemplates.find(t => t.anchor === anchor || t.name === anchor);
+    const tmplPorts = tmpl ? (tmpl.ports || []) : [];
+    const otherTexts = tmplPorts.filter(p => p.type === 'OTHER').map(p => p.name);
+    const signalPorts = tmplPorts.filter(p => p.type === 'SIGNAL').map(p => p.name);
+    const portItems = tmplPorts.filter(p => p.type === 'PORT').map(p => p.name);
+
+    let tmplHtml = '';
+    if (tmplPorts.length > 0) {
+        const badges = (portItems.length ? `<div style="margin-bottom:4px;"><span style="font-size:9px; color:rgba(255,255,255,0.35);">포트: </span>${portItems.map(p=>`<span style="padding:1px 5px; margin:1px; border-radius:3px; font-size:9px; background:rgba(251,146,60,0.12); color:#fb923c;">${p}</span>`).join('')}</div>` : '') +
+            (signalPorts.length ? `<div style="margin-bottom:4px;"><span style="font-size:9px; color:rgba(255,255,255,0.35);">신호: </span>${signalPorts.map(p=>`<span style="padding:1px 5px; margin:1px; border-radius:3px; font-size:9px; background:rgba(0,188,212,0.1); color:#00bcd4;">${p}</span>`).join('')}</div>` : '') +
+            (otherTexts.length ? `<div><span style="font-size:9px; color:rgba(255,255,255,0.35);">텍스트: </span><span style="font-size:9px; color:rgba(255,255,255,0.5);">${otherTexts.join(', ')}</span></div>` : '');
+        tmplHtml = `<div style="margin-bottom:14px; padding:8px 10px; background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.15); border-radius:6px;">
+            <div style="font-size:10px; font-weight:600; color:#a78bfa; margin-bottom:6px;">템플릿 포트 구성</div>
+            ${badges}
+        </div>`;
+    }
+
+    const entriesHtml = entries.length === 0
+        ? `<div style="color:rgba(255,255,255,0.3); font-size:10px; text-align:center; padding:16px;">등록된 도면 없음</div>`
+        : entries.map((e, i) => {
+            const connCount = Object.keys(e.connections || {}).length;
+            return `<div style="padding:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:6px; margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-size:11px; font-weight:600; color:#7dd3fc;">도면 ${e.drawing || '?'}</span>
+                    <div style="display:flex; gap:4px;">
+                        ${connCount ? `<span style="font-size:9px; color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.06); padding:1px 5px; border-radius:3px;">연결 ${connCount}</span>` : ''}
+                        <button onclick="deleteBdEntry('${anchor.replace(/'/g,"\\'")}', ${i})" style="font-size:9px; padding:1px 6px; background:rgba(239,68,68,0.15); color:#f87171; border:none; border-radius:3px; cursor:pointer;">삭제</button>
+                    </div>
+                </div>
+                ${e.equipment ? `<div style="font-size:11px; color:#10b981; margin-bottom:3px;">⚙ ${e.equipment}</div>` : ''}
+                ${e.memo ? `<div style="font-size:10px; color:rgba(255,255,255,0.45); margin-bottom:3px;">💬 ${e.memo}</div>` : ''}
+                ${e.saved_at ? `<div style="font-size:9px; color:rgba(255,255,255,0.2);">${new Date(e.saved_at).toLocaleString('ko-KR')}</div>` : ''}
+            </div>`;
+        }).join('');
+
+    const popup = document.createElement('div');
+    popup.id = 'bd-detail-popup';
+    popup.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.6); z-index:10000; display:flex; align-items:center; justify-content:center;';
+    popup.innerHTML = `
+        <div style="background:#1a2236; border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:18px; width:420px; max-height:80vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <div>
+                    <div style="font-size:14px; font-weight:700; color:#e2e8f0;">${anchor}</div>
+                    <div style="font-size:10px; color:rgba(255,255,255,0.35);">블록사전 항목</div>
+                </div>
+                <button onclick="document.getElementById('bd-detail-popup').remove()" style="background:rgba(255,255,255,0.08); border:none; color:rgba(255,255,255,0.5); width:26px; height:26px; border-radius:4px; cursor:pointer; font-size:14px;">✕</button>
+            </div>
+            ${tmplHtml}
+            <div style="font-size:10px; font-weight:600; color:rgba(255,255,255,0.4); margin-bottom:8px;">등록된 도면 (${entries.length})</div>
+            ${entriesHtml}
+        </div>`;
+    popup.addEventListener('click', e => { if (e.target === popup) popup.remove(); });
+    document.body.appendChild(popup);
+}
+
+async function deleteBdEntry(anchor, idx) {
+    if (!blockDict[anchor]) return;
+    blockDict[anchor].splice(idx, 1);
+    if (blockDict[anchor].length === 0) delete blockDict[anchor];
+    if (isPyWebView()) {
+        await window.pywebview.api.save_block_dict(blockDict).catch(() => {});
+    } else {
+        localStorage.setItem('block_dict', JSON.stringify(blockDict));
+    }
+    document.getElementById('bd-detail-popup')?.remove();
+    renderBdList();
+    showToast('삭제 완료', 'info');
 }
 
 function saveScanAll() {
@@ -3881,42 +4308,51 @@ function saveScanAll() {
  * currentPageBlockContext (Python API get_page_blocks 결과)를 사용합니다.
  */
 async function addBlocksToDict() {
-    if (!isPyWebView()) { showToast('PyWebView 환경에서만 동작합니다.', 'warning'); return; }
-
-    // scanDescriptions에 저장된 메모/설비 정보만 패치
-    const sd = (typeof scanDescriptions !== 'undefined') ? scanDescriptions : {};
-    const patch = {};
-
-    for (const [blockName, info] of Object.entries(sd)) {
-        const equipment = typeof info === 'string' ? info : (info.equipment || '');
-        const memo      = typeof info === 'object' ? (info.memo || '') : '';
-        if (!equipment && !memo) continue;
-
-        // portDict에 메모/설비만 병합 (기본 정보 보호)
-        if (typeof portDict !== 'undefined') {
-            if (!portDict[blockName]) portDict[blockName] = {};
-            if (equipment) portDict[blockName].equipment = equipment;
-            else delete portDict[blockName].equipment;
-            if (memo) portDict[blockName].memo = memo;
-            else delete portDict[blockName].memo;
-        }
-        patch[blockName] = portDict[blockName] || { equipment, memo };
-    }
-
-    if (Object.keys(patch).length === 0) {
-        showToast('저장할 메모/설비 정보가 없습니다. 스캔 팝업에서 먼저 입력해주세요.', 'warning');
+    // 현재 스캔된 결과를 모두 블록사전에 저장
+    if (scanResults.length === 0) {
+        showToast('먼저 스캔을 실행해주세요.', 'warning');
         return;
     }
 
-    try {
-        const result = await window.pywebview.api.save_port_dict(patch);
-        if (!result || !result.success) throw new Error(result?.error || '저장 실패');
+    const drawing = (typeof currentDrawingNumber !== 'undefined' && currentDrawingNumber) ? currentDrawingNumber : '';
+    const sd = (typeof scanDescriptions !== 'undefined') ? scanDescriptions : {};
+    let saved = 0;
 
-        renderBlockList();
-        showToast(`블록 정보 저장 완료 (${Object.keys(patch).length}개)`, 'success');
-    } catch(e) {
-        showToast(`저장 오류: ${e.message}`, 'error');
+    for (const item of scanResults) {
+        const blockName = item.name;
+        const info = sd[blockName];
+        const equipment = info ? (typeof info === 'string' ? info : (info.equipment || '')) : '';
+        const memo = info && typeof info === 'object' ? (info.memo || '') : '';
+
+        const tmpl = blockTemplates.find(t => t.anchor === blockName || t.name === blockName);
+        const ports = tmpl ? (tmpl.ports || []) : [];
+
+        const entry = {
+            drawing,
+            equipment,
+            memo,
+            ports,
+            block_type: item.blockType || '',
+            connections: {},
+            saved_at: new Date().toISOString(),
+        };
+
+        // 메모리 업데이트
+        if (!blockDict[blockName]) blockDict[blockName] = [];
+        const idx = blockDict[blockName].findIndex(e => e.drawing === drawing);
+        if (idx >= 0) blockDict[blockName][idx] = entry;
+        else blockDict[blockName].push(entry);
+        saved++;
     }
+
+    // 파일 저장
+    if (isPyWebView()) {
+        await window.pywebview.api.save_block_dict(blockDict).catch(e => console.warn('[BlockDict] 저장 실패', e));
+    }
+    localStorage.setItem('block_dict', JSON.stringify(blockDict));
+
+    renderBdList();
+    showToast(`블록사전 저장 완료 (${saved}개)`, 'success');
 }
 
 function filterScanList() {
@@ -3928,85 +4364,62 @@ function filterScanList() {
 // ============ 블록 탭 렌더링 ============
 
 function renderBlockList() {
+    // scanResults 기반으로 스캔탭과 동일한 데이터 표시
     const listEl = document.getElementById('block-list');
     if (!listEl) return;
 
-    const search = (document.getElementById('block-search')?.value || '').toLowerCase();
-    const pd  = (typeof portDict !== 'undefined') ? portDict : {};
-    const sd  = (typeof scanDescriptions !== 'undefined') ? scanDescriptions : {};
-    const gd  = (typeof groupsData !== 'undefined') ? groupsData : {};
-
-    // ── 현재 도면 블록만 대상 (groupsData 기준)
-    //    REF_SIGNAL/SIGNAL/PORT/BLOCK_TYPE 제외, 실제 제어 블록만 표시
-    const EXCLUDE_TYPES = new Set(['REF_SIGNAL', 'SIGNAL', 'PORT', 'BLOCK_TYPE', 'OTHER']);
-    // D0X-YYY-ZZZ 형식 이름도 REF_SIGNAL로 판단
-    const isExcluded = (name, gInfo) => {
-        const t = (gInfo.type || '').toUpperCase();
-        if (EXCLUDE_TYPES.has(t)) return true;
-        if (/^D\d{2}-\d{3}-\d{2}/i.test(name)) return true;
-        return false;
-    };
-
-    // 타입별 그룹화
-    const groups = {};
-    for (const [name, gInfo] of Object.entries(gd)) {
-        if (isExcluded(name, gInfo)) continue;
-
-        // portDict + ctx 보강 정보 (ctx.block_type 우선 — portDict.type보다 신뢰성 높음)
-        const bi     = pd[name] || {};
-        const ctx    = (typeof currentPageBlockContext !== 'undefined') ? (currentPageBlockContext[name] || {}) : {};
-        const sdInfo = sd[name];
-        const equipment = bi.equipment || (typeof sdInfo === 'string' ? sdInfo : (sdInfo?.equipment || ''));
-        const memo      = bi.memo      || (typeof sdInfo === 'object' ? (sdInfo?.memo || '') : '');
-        // 타입: ctx(API) > scanDescriptions.userType > groupsData
-        const ctxType  = (ctx.block_type && ctx.block_type !== 'UNKNOWN') ? ctx.block_type : '';
-        const userType = (sdInfo && typeof sdInfo === 'object' && sdInfo.userType) ? sdInfo.userType : '';
-        const type     = ctxType || userType || gInfo.type || '미분류';
-        const role     = bi.role || ctx.block_role || '';
-        const signals   = bi.signals || {};
-        const tagStr    = Object.keys(signals).join(' ');
-        const drawing   = bi.drawing || '';
-
-        if (search) {
-            const hay = `${name} ${type} ${role} ${tagStr} ${equipment} ${memo}`.toLowerCase();
-            if (!hay.includes(search)) continue;
-        }
-        if (!groups[type]) groups[type] = [];
-        groups[type].push({ name, type, role, signals, drawing, equipment, memo });
+    if (!scanResults || scanResults.length === 0) {
+        listEl.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:11px;">스캔 탭에서 스캔을 먼저 실행해주세요</div>';
+        return;
     }
 
-    const typeColorMap = {
-        T:'#4fc3f7', K:'#a78bfa', X:'#fb923c', H:'#10b981', L:'#f59e0b',
-        N:'#f87171', AND:'#38bdf8', OR:'#34d399', SUM:'#c084fc', ABS:'#ff9800',
-        OCB:'#60a5fa', ALG:'#34d399',
+    const search = (document.getElementById('block-search')?.value || '').toLowerCase();
+    const sd = (typeof scanDescriptions !== 'undefined') ? scanDescriptions : {};
+
+    // 카테고리별 그룹화
+    const groups = {};
+    for (const item of scanResults) {
+        const sdInfo = sd[item.name];
+        const equipment = typeof sdInfo === 'string' ? sdInfo : (sdInfo?.equipment || '');
+        const memo = typeof sdInfo === 'object' ? (sdInfo?.memo || '') : '';
+        const label = item.category || item.type || '기타';
+
+        if (search) {
+            const hay = `${item.name} ${item.type} ${item.autoDesc || ''} ${equipment} ${memo}`.toLowerCase();
+            if (!hay.includes(search)) continue;
+        }
+
+        if (!groups[label]) groups[label] = [];
+        groups[label].push({ ...item, equipment, memo });
+    }
+
+    const catColorMap = {
+        'OCB 블록':'#60a5fa', 'ALG 블록':'#34d399', 'M/A 스테이션':'#a78bfa',
+        'PORT':'#00bcd4', '참조신호':'#fb923c', '기타':'#6b7280',
     };
 
     let html = '';
-    for (const [type, items] of Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]))) {
-        const cc = typeColorMap[type] || '#6b7280';
-        html += `<div style="margin-bottom:2px;">`;
-        html += `<div style="padding:5px 8px; background:rgba(255,255,255,0.04); font-size:10px; font-weight:600; color:${cc}; display:flex; justify-content:space-between; align-items:center;">`;
-        html += `<span>${type}</span><span style="color:rgba(255,255,255,0.25);">${items.length}</span></div>`;
+    for (const [cat, items] of Object.entries(groups).sort((a,b) => a[0].localeCompare(b[0]))) {
+        const cc = catColorMap[cat] || '#6b7280';
+        html += `<div style="margin-bottom:2px;">
+            <div style="padding:5px 8px; background:rgba(255,255,255,0.04); font-size:10px; font-weight:600; color:${cc}; display:flex; justify-content:space-between;">
+                <span>${cat}</span><span style="color:rgba(255,255,255,0.25);">${items.length}</span>
+            </div>`;
         for (const item of items) {
-            const escaped = item.name.replace(/'/g, "\\'");
-            const tagCount = Object.keys(item.signals || {}).length;
-            const label = item.memo ? `${item.memo} (${item.name})` : item.name;
-            html += `<div style="padding:4px 8px 4px 14px; font-size:10px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.03); display:flex; flex-direction:column; gap:1px;" onclick="openScanDetailPopup('${escaped}')">`;
-            html += `<div style="display:flex; justify-content:space-between; align-items:center;">`;
-            html += `<span style="font-family:monospace; font-size:10px; color:#fff;">${label}</span>`;
-            html += `<span style="font-size:9px; color:rgba(255,255,255,0.25);">${item.drawing}</span>`;
-            html += `</div>`;
-            const sub = [item.role, item.equipment, tagCount ? tagCount + '신호' : ''].filter(Boolean).join(' · ');
-            if (sub) html += `<div style="font-size:9px; color:rgba(255,255,255,0.4);">${sub}</div>`;
-            html += `</div>`;
+            const esc = item.name.replace(/'/g, "\\'");
+            const desc = item.equipment || item.autoDesc || '';
+            html += `<div style="padding:5px 8px 5px 14px; font-size:10px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.03);" onclick="openScanDetailPopup('${esc}')">
+                <div style="font-family:monospace; color:#e2e8f0;">${item.name}</div>
+                ${desc ? `<div style="font-size:9px; color:rgba(255,255,255,0.4); margin-top:1px;">${desc}</div>` : ''}
+            </div>`;
         }
         html += `</div>`;
     }
 
-    const total = Object.keys(groups).reduce((s, k) => s + groups[k].length, 0);
-    if (!html) html = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:11px;">도면을 열면 블록 목록이 표시됩니다</div>';
+    const total = Object.values(groups).reduce((s, a) => s + a.length, 0);
+    if (!html) html = '<div style="padding:20px; text-align:center; color:var(--text-muted); font-size:11px;">검색 결과 없음</div>';
     const filterChips = document.getElementById('block-type-filters');
-    if (filterChips) filterChips.innerHTML = `<span style="font-size:9px; color:rgba(255,255,255,0.3);">${total ? '총 ' + total + '개 블록' : ''}</span>`;
+    if (filterChips) filterChips.innerHTML = `<span style="font-size:9px; color:rgba(255,255,255,0.3);">총 ${total}개</span>`;
     listEl.innerHTML = html;
 }
 
@@ -4032,14 +4445,15 @@ async function biInit() {
 }
 
 function biUpdateStats() {
-    const blocks = Object.values(biData);
-    const types = new Set(blocks.map(b => b.type || '미분류'));
-    const totalPorts = blocks.reduce((sum, b) => sum + Object.keys(b.ports || {}).filter(p => (b.ports[p].tag || '')).length, 0);
+    const entries = Object.values(biData);
+    const blocks  = entries.filter(b => b.entry_type !== 'SIGNAL');
+    const signals = entries.filter(b => b.entry_type === 'SIGNAL');
+    const totalPorts = blocks.reduce((sum, b) => sum + Object.keys(b.connected || {}).length, 0);
     const el1 = document.getElementById('biStatBlocks');
     const el2 = document.getElementById('biStatTypes');
     const el3 = document.getElementById('biStatPorts');
-    if (el1) el1.textContent = blocks.length;
-    if (el2) el2.textContent = types.size;
+    if (el1) el1.textContent = blocks.length + (signals.length ? ` (+${signals.length}태그)` : '');
+    if (el2) el2.textContent = new Set(blocks.map(b => b.type || b.blk_type_raw || '미분류')).size;
     if (el3) el3.textContent = totalPorts;
 }
 
@@ -4048,7 +4462,7 @@ function biRenderFilters() {
     if (!container) return;
     const types = new Set();
     for (const v of Object.values(biData)) {
-        types.add(v.type || '미분류');
+        types.add(v.type || v.blk_type_raw || '미분류');
     }
     let html = `<button class="bt-filter-chip ${biCurrentType === 'all' ? 'active' : ''}" onclick="biSetType('all')">전체</button>`;
     for (const t of [...types].sort()) {
@@ -4078,12 +4492,11 @@ function biRenderList() {
     const search = (document.getElementById('biSearchInput')?.value || '').toLowerCase();
 
     const filtered = Object.entries(biData).filter(([name, info]) => {
-        const type = info.type || '미분류';
+        const type = info.type || info.blk_type_raw || '미분류';
         if (biCurrentType !== 'all' && type !== biCurrentType) return false;
         if (search) {
-            // 태그명도 검색 대상에 포함
-            const tagStr = Object.values(info.ports || {}).map(p => p.tag || '').join(' ');
-            const haystack = `${name} ${info.memo || ''} ${type} ${info.type_desc || ''} ${info.drawing || ''} ${tagStr}`.toLowerCase();
+            const tagStr = Object.keys(info.connected || {}).join(' ');
+            const haystack = `${name} ${info.memo || ''} ${type} ${info.type_desc || ''} ${info.tag_type || ''} ${info.equipment || ''} ${info.drawing || ''} ${(info.drawings || []).join(' ')} ${tagStr}`.toLowerCase();
             if (!haystack.includes(search)) return false;
         }
         return true;
@@ -4092,7 +4505,7 @@ function biRenderList() {
     // 타입별 그룹화
     const groups = {};
     for (const [name, info] of filtered) {
-        const cat = info.type || '미분류';
+        const cat = info.type || info.blk_type_raw || '미분류';
         if (!groups[cat]) groups[cat] = [];
         groups[cat].push([name, info]);
     }
@@ -4112,15 +4525,24 @@ function biRenderList() {
 
         for (const [name, info] of items) {
             const isActive = biSelectedBlock === name;
-            const portCount = Object.keys(info.ports || {}).length;
-            const tagCount = Object.values(info.ports || {}).filter(p => p.tag).length;
-            const drawing = info.drawing ? `<span style="font-size:9px; color:rgba(255,255,255,0.25);">${info.drawing}</span>` : '';
+            const isSig = info.entry_type === 'SIGNAL';
+            const drawing = (info.drawing || (info.drawings && info.drawings[0]) || '') ;
+            const drwBadge = drawing ? `<span style="font-size:9px; color:rgba(255,255,255,0.25);">${drawing}</span>` : '';
+            let subLine = '';
+            if (isSig) {
+                const tt = info.tag_type || '';
+                const eq = info.equipment || '';
+                subLine = [tt, eq].filter(Boolean).join(' · ');
+            } else {
+                const connCount = Object.keys(info.connected || {}).length;
+                subLine = `${connCount ? connCount + '개 연결' : '연결 없음'}${info.memo ? ' · ' + info.memo : ''}`;
+            }
             html += `<div class="bt-block-item ${isActive ? 'active' : ''}" onclick="biSelectBlock('${name.replace(/'/g, "\\'")}')" style="padding-left:16px;">
                 <div style="flex:1; min-width:0;">
                     <div style="font-size:11px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:5px;">
-                        <span>${name}</span>${drawing}
+                        <span>${name}</span>${drwBadge}
                     </div>
-                    <div style="font-size:9px; color:rgba(255,255,255,0.35);">${portCount}포트${tagCount ? ' · ' + tagCount + '신호' : ''}${info.memo ? ' · ' + info.memo : ''}</div>
+                    <div style="font-size:9px; color:rgba(255,255,255,0.35);">${subLine}</div>
                 </div>
             </div>`;
         }
@@ -4145,8 +4567,34 @@ function biRenderDetail() {
         return;
     }
 
+    // ── SIGNAL 항목 전용 뷰 ──────────────────────────────────────────────────
+    if (b.entry_type === 'SIGNAL') {
+        const name    = biSelectedBlock;
+        const tagType = b.tag_type || '';
+        const equip   = b.equipment || '';
+        const primDrw = b.primary_drawing || '';
+        const title   = b.drawing_title || '';
+        const refDrws = (b.ref_drawings || []).join(', ');
+        const drwList = (b.drawings || []).join(', ');
+        content.innerHTML = `
+            <div style="padding:24px;">
+                <div style="display:flex; align-items:center; gap:14px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid rgba(255,255,255,0.06);">
+                    <div style="width:48px; height:48px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; background:#00ff8822; color:#00ff88; flex-shrink:0;">ISA</div>
+                    <div style="flex:1;">
+                        <div style="font-size:18px; font-weight:700; color:#fff;">${name}</div>
+                        <div style="font-size:12px; color:rgba(255,255,255,0.4);">${tagType || 'ISA 계기 태그'}</div>
+                    </div>
+                </div>
+                ${equip ? `<div style="margin-bottom:10px; padding:8px 12px; background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.2); border-radius:6px; font-size:12px; color:#10b981;">📍 ${equip}</div>` : ''}
+                ${primDrw ? `<div style="margin-bottom:8px; font-size:11px; color:rgba(255,255,255,0.5);">주 도면: <span style="color:#f0a050;">${primDrw}</span>${title ? ' — ' + title : ''}</div>` : ''}
+                ${refDrws ? `<div style="margin-bottom:8px; font-size:11px; color:rgba(255,255,255,0.4);">참조 도면: ${refDrws}</div>` : ''}
+                ${drwList ? `<div style="margin-bottom:8px; font-size:11px; color:rgba(255,255,255,0.35);">발견 도면: ${drwList}</div>` : ''}
+            </div>`;
+        return;
+    }
+
     const name = biSelectedBlock;
-    const type = b.type || '미분류';
+    const type = b.type || b.blk_type_raw || '미분류';
     const memo = b.memo || '';
     const drawing = b.drawing || '';
     const cc = biCatColors[type] || '#6b7280';
@@ -4157,52 +4605,77 @@ function biRenderDetail() {
     const typeDesc = b.type_desc || (dictEntry ? dictEntry.desc : '') || '';
     const dictPorts = dictEntry && dictEntry.ports ? dictEntry.ports : [];
 
-    // 포트-신호 연결 테이블 생성
-    const ports = b.ports || {};
-    let portTableRows = '';
-    for (const [pname, pinfo] of Object.entries(ports)) {
-        const dp = dictPorts.find(d => d.name && d.name.toUpperCase() === pname.toUpperCase());
-        const portDesc  = pinfo.desc || (dp ? dp.description : '') || '';
-        const dir       = pinfo.direction || (dp ? dp.direction : '') || '';
-        const tag       = pinfo.tag       || '';
-        const tagType   = pinfo.tag_type  || '';
-        const equipment = pinfo.equipment || '';
-        const srcDrw    = pinfo.src_drawing ? `도면 ${pinfo.src_drawing}` : '';
-        const refDrw    = pinfo.ref_drawing ? `→ 도면 ${pinfo.ref_drawing}` : '';
-        const dirColor  = dir === 'input' ? '#4fc3f7' : dir === 'output' ? '#10b981' : '#9ca3af';
-        const dirLabel  = dir === 'input' ? '입력' : dir === 'output' ? '출력' : dir;
-        const tagBadge  = tag ? `<span style="padding:2px 6px; border-radius:3px; font-size:10px; background:rgba(0,255,136,0.1); color:#00ff88; border:1px solid rgba(0,255,136,0.2);">${tag}</span>` : '';
-        const tagTypeBadge = tagType ? `<span style="padding:2px 5px; border-radius:3px; font-size:9px; background:rgba(255,255,255,0.05); color:rgba(255,200,100,0.7);">${tagType}</span>` : '';
-        const refBadge  = refDrw ? `<span style="padding:2px 5px; border-radius:3px; font-size:9px; background:rgba(251,146,60,0.1); color:#fb923c;">${refDrw}</span>` : '';
-        // 설비명 + 출처도면 (태그 아래 작은 글씨)
-        const eqLine = (equipment || srcDrw) ? `<div style="font-size:9px; color:#10b981; margin-top:2px;">📍 ${[equipment, srcDrw].filter(Boolean).join(' ')}</div>` : '';
-        portTableRows += `
-            <tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
-                <td style="padding:8px 10px; font-size:11px; font-weight:600; color:#fff; white-space:nowrap;">${pname}</td>
-                <td style="padding:8px 6px; font-size:10px; color:${dirColor}; white-space:nowrap;">${dirLabel}</td>
-                <td style="padding:8px 6px; font-size:10px; color:rgba(255,255,255,0.5);">${portDesc}</td>
-                <td style="padding:8px 10px;">
-                    <div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">${tagBadge}${tagTypeBadge}${refBadge}</div>
-                    ${eqLine}
-                </td>
-            </tr>`;
+    // 연결 신호 테이블 생성 (connected 맵 기반, REF_SIGNAL은 도면별 그룹화)
+    const connected = b.connected || {};
+
+    // ISA 태그 vs REF_SIGNAL 분리
+    const isaConns = [], refConns = [];
+    for (const [tag, info] of Object.entries(connected)) {
+        if (/^D\d+-\d+-\d+$/i.test(tag)) refConns.push([tag, info]);
+        else isaConns.push([tag, info]);
     }
 
-    const portTableHtml = portTableRows ? `
+    // REF_SIGNAL → 도면별 그룹화
+    const refByDrawing = {};  // ref_drawing → {title, indices, resolved_tags, resolved_equip}
+    for (const [tag, info] of refConns) {
+        const drw = info.ref_drawing || tag;
+        if (!refByDrawing[drw]) {
+            refByDrawing[drw] = {
+                title:         info.drawing_title || '',
+                indices:       [],
+                resolved_tags:  info.resolved_tags  || [],
+                resolved_equip: info.resolved_equip || [],
+            };
+        }
+        refByDrawing[drw].indices.push(info.ref_index || tag.split('-').pop());
+    }
+
+    let connTableRows = '';
+
+    // ISA 태그 행
+    for (const [tag, info] of isaConns) {
+        const tagType   = info.tag_type  || '';
+        const equipment = info.equipment || '';
+        const srcDrw    = info.drawing   || '';
+        const ttBadge   = tagType ? `<span style="padding:2px 5px; border-radius:3px; font-size:9px; background:rgba(255,255,255,0.05); color:rgba(255,200,100,0.7);">${tagType}</span>` : '';
+        const eqLine    = equipment ? `<div style="font-size:9px; color:#10b981; margin-top:2px;">📍 ${equipment}${srcDrw ? ' · 도면 '+srcDrw : ''}</div>` : '';
+        connTableRows += `<tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:8px 10px;">
+                <div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">
+                    <span style="padding:2px 6px; border-radius:3px; font-size:10px; background:rgba(0,255,136,0.1); color:#00ff88; border:1px solid rgba(0,255,136,0.2);">${tag}</span>${ttBadge}
+                </div>${eqLine}
+            </td></tr>`;
+    }
+
+    // REF_SIGNAL 행 (도면별 1행)
+    for (const [drw, grp] of Object.entries(refByDrawing)) {
+        const idxStr  = grp.indices.sort().join(', ');
+        const title   = grp.title || drw;
+        // 실제 장치 태그 목록 (PP 계열만 우선)
+        const ppTags  = grp.resolved_tags.filter(t => /^[A-Z]{2}\d{6}/.test(t));
+        const showTags = (ppTags.length > 0 ? ppTags : grp.resolved_tags).slice(0, 4);
+        const tagBadges = showTags.map(t => `<span style="padding:2px 5px; border-radius:3px; font-size:9px; background:rgba(0,188,212,0.1); color:#00bcd4; border:1px solid rgba(0,188,212,0.2);">${t}</span>`).join(' ');
+        // 설비명: resolved_tags[i] 와 resolved_equip[i] 가 1:1 대응이 아니므로
+        // build_port_dict.py 에서 이미 PP 우선 정렬돼 있으므로 앞 2개만 사용
+        const uniqueEquips = [...new Set(grp.resolved_equip)].slice(0, 2);
+        const equipLine = uniqueEquips.length > 0
+            ? `<div style="font-size:9px; color:#10b981; margin-top:3px;">📍 ${uniqueEquips.join(' / ')}</div>` : '';
+
+        connTableRows += `<tr style="border-bottom:1px solid rgba(255,255,255,0.04);">
+            <td style="padding:8px 10px;">
+                <div style="font-size:11px; color:rgba(255,255,255,0.85); margin-bottom:3px;">${title}</div>
+                <div style="font-size:9px; color:rgba(255,255,255,0.35);">도면 ${drw} · 인덱스 ${idxStr}</div>
+            </td></tr>`;
+    }
+
+    const totalConn = isaConns.length + Object.keys(refByDrawing).length;
+    const portTableHtml = connTableRows ? `
         <div style="margin-bottom:16px;">
-            <div style="font-size:10px; font-weight:600; color:#a78bfa; margin-bottom:8px;">포트 연결 현황 (${Object.keys(ports).length})</div>
+            <div style="font-size:10px; font-weight:600; color:#a78bfa; margin-bottom:8px;">연결 신호 / 도면 (${totalConn})</div>
             <table style="width:100%; border-collapse:collapse; font-size:11px;">
-                <thead>
-                    <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
-                        <th style="padding:6px 10px; text-align:left; font-size:9px; color:rgba(255,255,255,0.3); font-weight:600;">포트</th>
-                        <th style="padding:6px 6px; text-align:left; font-size:9px; color:rgba(255,255,255,0.3); font-weight:600;">방향</th>
-                        <th style="padding:6px 6px; text-align:left; font-size:9px; color:rgba(255,255,255,0.3); font-weight:600;">설명</th>
-                        <th style="padding:6px 10px; text-align:left; font-size:9px; color:rgba(255,255,255,0.3); font-weight:600;">연결 신호 / 설비</th>
-                    </tr>
-                </thead>
-                <tbody>${portTableRows}</tbody>
+                <tbody>${connTableRows}</tbody>
             </table>
-        </div>` : '<div style="padding:12px 0; font-size:11px; color:rgba(255,255,255,0.3);">포트 연결 정보 없음</div>';
+        </div>` : '<div style="padding:12px 0; font-size:11px; color:rgba(255,255,255,0.3);">연결 신호 정보 없음</div>';
 
     content.innerHTML = `
         <div style="padding:24px 24px 32px 24px;">

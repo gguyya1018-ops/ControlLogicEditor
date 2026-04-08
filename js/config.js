@@ -210,6 +210,7 @@ let portCreateType = 'PORT';
 // ============ DISPLAY TOGGLES ============
 let showPorts = true;
 let showBlocks = true;
+let showOther = true;   // OTHER 타입 표시 (라벨/주석 등)
 let showLines = true;
 let showConnections = true;
 let showBgLines = false;

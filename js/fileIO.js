@@ -1323,8 +1323,98 @@ async function exportForLLM() {
         for (const sr of scanResults) scanIdx[sr.name] = sr;
     }
     const sd = (typeof scanDescriptions !== 'undefined') ? scanDescriptions : {};
+    const gd = (typeof groupsData !== 'undefined') ? groupsData : {};
 
-    // 블록 목록 — 포트사전 + 스캔 데이터 통합
+    // ── portConnMap: allConns에서 포트별 연결 맵 구성 ──
+    // portConnMap[blockName][portName] = { isOutput: bool, conns: [{block, port}] }
+    const portConnMap = {};
+    for (const c of allConns) {
+        const dotF = c.from.indexOf('.');
+        const dotT = c.to.indexOf('.');
+        const fromBlock = dotF >= 0 ? c.from.slice(0, dotF) : c.from;
+        const fromPort  = dotF >= 0 ? c.from.slice(dotF + 1) : '';
+        const toBlock   = dotT >= 0 ? c.to.slice(0, dotT) : c.to;
+        const toPort    = dotT >= 0 ? c.to.slice(dotT + 1) : '';
+        if (!portConnMap[fromBlock]) portConnMap[fromBlock] = {};
+        if (!portConnMap[fromBlock][fromPort]) portConnMap[fromBlock][fromPort] = { isOutput: true, conns: [] };
+        portConnMap[fromBlock][fromPort].conns.push({ block: toBlock, port: toPort });
+        if (!portConnMap[toBlock]) portConnMap[toBlock] = {};
+        if (!portConnMap[toBlock][toPort]) portConnMap[toBlock][toPort] = { isOutput: false, conns: [] };
+        portConnMap[toBlock][toPort].conns.push({ block: fromBlock, port: fromPort });
+    }
+
+    // ── 포트 설명 보조표 ──
+    const portDescFallback = {
+        'K':'이득/게인', 'GAIN':'이득/게인',
+        'd':'미분 이득', 'dt':'미분 시간', 'DRAT':'미분 감쇠',
+        'A':'입력값', 'B':'입력값 B', 'G':'게인 입력',
+        'FLAG':'조건 신호', 'YES':'참 분기', 'NO':'거짓 분기',
+        'T':'Transfer 참조', 'H':'상한', 'L':'하한',
+        'IN1':'입력1', 'IN2':'입력2', 'IN3':'입력3', 'IN4':'입력4', 'IN':'입력',
+        'OUT':'출력', 'STPT':'설정값 (SP)', 'PV':'측정값 (PV)', 'SP':'설정값',
+        'MODE':'모드', 'MRE':'수동리셋', 'ARE':'자동리셋',
+        'MAN':'수동입력', 'AUTO':'자동입력',
+        'I':'적분값',
+    };
+
+    // ── autoSymMap (autoDesc → btBlockData 심볼ID) ──
+    const autoSymMapLLM = [
+        [/PID/i, 'PID'], [/AND/i, 'AND'], [/\bOR\b/i, 'OR'],
+        [/NOT\b|반전/i, 'N'], [/Transfer|조건 선택/i, 'T'],
+        [/Gain|Bias|이득/i, 'K'], [/Multiply|곱/i, 'X'],
+        [/최고값|High.*선택/i, 'H'], [/최저값|Low.*선택/i, 'L'],
+        [/리미터|Limit/i, 'LIM'], [/나눗셈/i, 'DIV'],
+        [/절대값/i, 'ABS'], [/합산/i, 'SUM'], [/M\/A/i, 'M/A'],
+    ];
+
+    // ── 심볼 포트 목록 조회 ──
+    const getBdtPorts = (blockType, autoDescStr) => {
+        const bdt = (typeof btBlockData !== 'undefined') ? btBlockData : {};
+        let entry = bdt[blockType];
+        if (!entry && autoDescStr) {
+            for (const [re, symId] of autoSymMapLLM) {
+                if (re.test(autoDescStr) && bdt[symId]) { entry = bdt[symId]; break; }
+            }
+        }
+        return entry ? (entry.ports || []) : [];
+    };
+
+    // ── REF_SIGNAL 판별 ──
+    const isRefSignal = (name) => {
+        const rawType = (gd[name]?.type || '').toUpperCase();
+        if (rawType === 'REF_SIGNAL') return true;
+        return /^D\d+-\d+-\d+/.test(name);
+    };
+
+    // ── 연결 대상 텍스트 생성 ──
+    const connText = (otherBlock, otherPort) => {
+        // 빈 블록명 (포트만 있는 경우) 방어
+        if (!otherBlock) return otherPort || '';
+        // REF_SIGNAL (D03-511-xx_... 형태)
+        if (isRefSignal(otherBlock)) {
+            const m = otherBlock.match(/^(D\d+-\d+-\d+)/);
+            return m ? `[외부참조 ${m[1].replace(/^D0*/, '')}]` : `[외부참조 ${otherBlock}]`;
+        }
+        const osr = scanIdx[otherBlock] || {};
+        const ogd = gd[otherBlock] || {};
+        if (osr.type === 'SIGNAL' || ogd.type === 'SIGNAL') {
+            let s = otherBlock;
+            const ti = (osr.portSignals || {})['태그정보'] || {};
+            const tagType = ti.tag_type || osr.autoDesc || '';
+            if (tagType) s += ` [${tagType}]`;
+            if (ti.equipment) s += ` @ ${ti.equipment}`;
+            return s;
+        }
+        const oRawType = osr.blockType || ogd.type || '';
+        const oMetaTypes = ['BLOCK_TYPE','OTHER','PORT','SIGNAL','REF_SIGNAL','OCB_BLOCK','ALG_BLOCK'];
+        const oNamePrefix = otherBlock.split('_')[0] || '';
+        const oPrefixType = /^(N|AND|OR|NOT|XOR|NAND|NOR|MODE|SR|RS|SEL|H|L|GT|LT|GE|LE|EQ|NE|SUM|ADD|SUB|K|X|MUL|DIV|ABS|LIM|PID|LAG|INTEG|RAMP)$/i.test(oNamePrefix) ? oNamePrefix.toUpperCase() : '';
+        const oType = oMetaTypes.includes(oRawType.toUpperCase()) ? oPrefixType : (oRawType || oPrefixType);
+        const showType = oType ? `(${oType})` : '';
+        return `${otherBlock}${showType}${otherPort ? '.' + otherPort : ''}`;
+    };
+
+    // 블록 목록 — 포트 중심 통합 표시
     lines.push(`=== 블록 목록 (${Object.keys(llmGroups).length}개) ===`);
     lines.push('');
     for (const [name, info] of Object.entries(llmGroups)) {
@@ -1332,71 +1422,108 @@ async function exportForLLM() {
         const sr = scanIdx[name] || {};
         const si = sd[name];
 
-        // 타입: 스캔에서 수동 지정한 userType 우선 → 포트사전
-        const userType  = si && typeof si === 'object' ? (si.userType || '') : '';
-        const pdType    = userType || sr.blockType || bi.type || '';
+        // 타입: 스캔 userType 우선 → scanResults → portDict → 블록명 접두어 추론
+        const userType   = si && typeof si === 'object' ? (si.userType || '') : '';
+        // groupsData.type에서 'BLOCK_TYPE'/'OTHER'/'PORT'/'SIGNAL'/'REF_SIGNAL' 같은 메타타입은 제외
+        const gdRawType  = gd[name]?.type || '';
+        const gdUseful   = ['BLOCK_TYPE','OTHER','PORT','SIGNAL','REF_SIGNAL'].includes(gdRawType.toUpperCase()) ? '' : gdRawType;
+        // 블록명 접두어에서 타입 추출 (N_853_2251 → N, AND_xxx → AND)
+        const namePrefix = name.split('_')[0] || '';
+        const prefixType = /^(N|AND|OR|NOT|XOR|NAND|NOR|MODE|SR|RS|SEL|H|L|GT|LT|GE|LE|EQ|NE|SUM|ADD|SUB|K|X|MUL|DIV|ABS|LIM|PID|LAG|INTEG|RAMP)$/i.test(namePrefix) ? namePrefix.toUpperCase() : '';
+        const pdType     = userType || sr.blockType || bi.type || gdUseful || prefixType || '';
         const pdTypedesc = sr.blockDesc || bi.type_desc || symbolDesc(pdType) || '';
-        const role      = sr.portSignals?.__role || bi.role || '';
-        const memo      = si && typeof si === 'object' ? (si.memo || bi.memo || '') : (bi.memo || '');
-        // 설비: 스캔 입력 우선 → 포트사전
-        const scanEquip = si ? (typeof si === 'string' ? si : (si.equipment || '')) : '';
-        const equipment = scanEquip || bi.equipment || '';
+        const memo       = si && typeof si === 'object' ? (si.memo || bi.memo || '') : (bi.memo || '');
+        const scanEquip  = si ? (typeof si === 'string' ? si : (si.equipment || '')) : '';
+        const equipment  = scanEquip || bi.equipment || '';
 
-        // 블록 헤더: [메모(코드)] 타입설명 — 역할추론
+        // 블록 헤더
         let header = `[${memo ? memo + '(' + name + ')' : name}]`;
         if (pdType)      header += ` ${pdType}`;
         if (pdTypedesc)  header += ` — ${pdTypedesc}`;
-        if (role)        header += ` | 역할: ${role}`;
         if (sr.autoDesc && sr.autoDesc !== pdTypedesc) header += ` (${sr.autoDesc})`;
         lines.push(header);
 
-        // 사용자 메모/설비 주석
         if (equipment) lines.push(`  설비: ${equipment}`);
 
-        // 연결 신호 (새 portDict 구조: signals 키)
-        const dictSignals = bi.signals || null;
-        const ctx = (typeof currentPageBlockContext !== 'undefined') ? (currentPageBlockContext[name] || {}) : {};
-        const ctxPorts = ctx.ports || {};
+        // ── 포트별 연결 정보 ──
+        const bdtPorts = getBdtPorts(pdType, sr.autoDesc || '');
+        const bdtPortMap = {};
+        for (const bp of bdtPorts) {
+            if (bp.name) bdtPortMap[bp.name.toUpperCase()] = bp;
+        }
 
-        if (dictSignals && Object.keys(dictSignals).length > 0) {
-            // portDict 신호 데이터 — 태그별 타입+설비+도면
-            for (const [tag, sinfo] of Object.entries(dictSignals)) {
-                let s = `  신호 ${tag}`;
-                if (sinfo.tag_type)   s += `[${sinfo.tag_type}]`;
-                if (sinfo.equipment)  s += ` @ ${sinfo.equipment}`;
-                if (sinfo.ref_drawing) s += ` →도면${sinfo.ref_drawing}-${sinfo.ref_index || '?'}`;
-                else if (sinfo.src_drawing) s += ` (도면${sinfo.src_drawing})`;
-                lines.push(s);
+        const myConns = portConnMap[name] || {};
+
+        // 포트 목록: 연결된 포트 우선, 심볼 정의 포트는 연결 있거나 핵심 포트만
+        // 블록 타입명과 같은 포트(AND, N, OR 등)는 제외
+        const blockTypeUpper = pdType.toUpperCase();
+        const portNames = [];
+        const seenPorts = new Set();
+        // 연결 있는 포트 먼저 (중요 포트)
+        for (const pn of Object.keys(myConns)) {
+            const pUp = pn.toUpperCase();
+            if (pn && pUp !== blockTypeUpper && !seenPorts.has(pUp)) {
+                portNames.push(pn);
+                seenPorts.add(pUp);
             }
-        } else if (Object.keys(ctxPorts).length > 0) {
-            // 현재 페이지 on-the-fly 컨텍스트
-            const portLines = Object.entries(ctxPorts).map(([pname, pinfo]) => {
-                let s = pname;
-                if (pinfo.desc || pinfo.description) s += `(${pinfo.desc || pinfo.description})`;
-                if (pinfo.tag) {
-                    s += `=${pinfo.tag}`;
-                    if (pinfo.tag_type)   s += `[${pinfo.tag_type}]`;
-                    if (pinfo.equipment)  s += ` @ ${pinfo.equipment}`;
-                    if (pinfo.src_drawing) s += `→도면${pinfo.src_drawing}`;
-                }
-                return s;
-            });
-            lines.push(`  포트: ${portLines.join(', ')}`);
-        } else if (info.ports.length > 0) {
-            lines.push(`  포트: ${info.ports.join(', ')}`);
+        }
+        // 심볼 정의 포트 중 연결된 것 또는 설명 있는 핵심 포트 (미연결 일반 입력 IN3~IN8 제외)
+        for (const bp of bdtPorts) {
+            if (!bp.name) continue;
+            const pUp = bp.name.toUpperCase();
+            if (pUp === blockTypeUpper) continue;
+            if (seenPorts.has(pUp)) continue;
+            const hasConn = !!(myConns[bp.name] || myConns[pUp]);
+            const hasDesc = !!(bp.description || portDescFallback[pUp] || portDescFallback[bp.name]);
+            // 입력 포트: IN3 이상 번호 포트는 연결 있을 때만 표시
+            // 출력 포트(output)는 항상 표시
+            const isOutput = bp.direction === 'output';
+            const isHighNumIn = /^IN([3-9]|\d{2,})$/i.test(bp.name);
+            if (!isOutput && isHighNumIn && !hasConn) continue;
+            if (!isOutput && !hasConn && !hasDesc) continue;
+            portNames.push(bp.name);
+            seenPorts.add(pUp);
+        }
+        // info.ports에서 누락된 연결 포트만 추가 (타입명 제외)
+        for (const pn of (info.ports || [])) {
+            const pUp = pn.toUpperCase();
+            if (pn && pUp !== blockTypeUpper && !seenPorts.has(pUp) && myConns[pn]) {
+                portNames.push(pn);
+                seenPorts.add(pUp);
+            }
+        }
+
+        for (const pName of portNames) {
+            const pUpper = pName.toUpperCase();
+            const bp = bdtPortMap[pUpper];
+            const connInfo = myConns[pName] || myConns[pUpper] || null;
+
+            // 방향: 연결맵 > 심볼 정의
+            let dir = '·';
+            if (connInfo) {
+                dir = connInfo.isOutput ? '→' : '←';
+            } else if (bp) {
+                dir = bp.direction === 'output' ? '→' : '←';
+            }
+
+            // 설명: 심볼 > 보조표
+            const desc = (bp && bp.description) ? bp.description
+                       : portDescFallback[pUpper] || portDescFallback[pName] || '';
+
+            let portLine = `  ${dir} ${pName}`;
+            if (desc) portLine += ` (${desc})`;
+
+            if (connInfo && connInfo.conns.length > 0) {
+                const connStr = connInfo.conns.map(c => connText(c.block, c.port)).join(', ');
+                portLine += ` : ${connStr}`;
+            }
+            lines.push(portLine);
         }
 
         lines.push('');
     }
 
-    // REF_SIGNAL 블록 판별: groupsData의 type이 REF_SIGNAL이거나 이름이 D0X-YYY-ZZZ 형식
-    const gd = (typeof groupsData !== 'undefined') ? groupsData : {};
-    const isRefSignal = (name) => {
-        const rawType = (gd[name]?.type || '').toUpperCase();
-        if (rawType === 'REF_SIGNAL') return true;
-        // D03-024-01_705_2642 형식
-        return /^D\d+-\d+-\d+/.test(name);
-    };
+    // (isRefSignal은 위쪽에서 정의됨)
 
     // 블록 표시 레이블 생성
     // REF_SIGNAL → [외부참조 D03-024-01]
@@ -1440,14 +1567,24 @@ async function exportForLLM() {
         lines.push('');
     }
 
-    // 전체 연결 흐름 요약
-    lines.push(`=== 신호 흐름 (${allConns.length}개 연결) ===`);
-    for (const c of allConns) {
-        const [fromBlock, fromPort] = c.from.split('.');
-        const [toBlock,   toPort]   = c.to.split('.');
-        const fromStr = blockLabel(fromBlock, fromPort);
-        const toStr   = blockLabel(toBlock,   toPort);
-        lines.push(`${fromStr} → ${toStr}`);
+    // 제어 블록 간 흐름 요약 (SIGNAL/REF 제외 — 블록↔블록 연결만)
+    const ctrlConns = allConns.filter(c => {
+        const fromBlock = c.from.split('.')[0];
+        const toBlock   = c.to.split('.')[0];
+        const fsr = scanIdx[fromBlock] || {};
+        const tsr = scanIdx[toBlock]   || {};
+        return fsr.type !== 'SIGNAL' && tsr.type !== 'SIGNAL'
+            && !isRefSignal(fromBlock) && !isRefSignal(toBlock);
+    });
+    if (ctrlConns.length > 0) {
+        lines.push(`=== 제어 블록 연결 흐름 (${ctrlConns.length}개) ===`);
+        for (const c of ctrlConns) {
+            const [fromBlock, fromPort] = c.from.split('.');
+            const [toBlock,   toPort]   = c.to.split('.');
+            const fromStr = blockLabel(fromBlock, fromPort);
+            const toStr   = blockLabel(toBlock,   toPort);
+            lines.push(`${fromStr} → ${toStr}`);
+        }
     }
 
     const textStr = lines.join('\n');

@@ -497,6 +497,47 @@ class Api:
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
+    def load_block_dict(self):
+        """블록사전 로드 (data/block_dict.json)"""
+        try:
+            path = DATA_DIR / 'block_dict.json'
+            if not path.exists():
+                return {'success': True, 'data': {}}
+            with open(path, 'r', encoding='utf-8') as f:
+                return {'success': True, 'data': json.load(f)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def save_block_dict(self, data):
+        """블록사전 저장 (data/block_dict.json) — 기존 데이터에 병합"""
+        try:
+            path = DATA_DIR / 'block_dict.json'
+            existing = {}
+            if path.exists():
+                with open(path, 'r', encoding='utf-8') as f:
+                    existing = json.load(f)
+            # data: { anchor: [ {drawing, equipment, memo, ...}, ... ] }
+            for anchor, entries in data.items():
+                if anchor not in existing:
+                    existing[anchor] = []
+                if isinstance(entries, list):
+                    for new_entry in entries:
+                        drw = new_entry.get('drawing', '')
+                        # 같은 도면 항목 교체, 없으면 추가
+                        replaced = False
+                        for i, ex in enumerate(existing[anchor]):
+                            if ex.get('drawing') == drw:
+                                existing[anchor][i] = new_entry
+                                replaced = True
+                                break
+                        if not replaced:
+                            existing[anchor].append(new_entry)
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(existing, f, ensure_ascii=False, indent=2)
+            return {'success': True, 'total': len(existing)}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
     def scan_all_drawings(self):
         """모든 도면에서 기능 블록 타입 수집 (layout.csv 파일 파싱)"""
         try:

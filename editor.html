@@ -9,7 +9,7 @@
     <title>Control Logic Editor</title>
 
     <!-- Styles -->
-    <link rel="stylesheet" href="css/editor.css?v=20260406d">
+    <link rel="stylesheet" href="css/editor.css?v=20260406r">
 
     <!-- Supabase Client Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -26,7 +26,6 @@
                 <button class="nav-tab" data-tab="home" onclick="goHome()">홈</button>
                 <button class="nav-tab active" data-tab="editor" onclick="switchMainTab('editor')">도면</button>
                 <button class="nav-tab" data-tab="block-types" onclick="switchMainTab('block-types')">심볼 사전</button>
-                <button class="nav-tab" data-tab="block-info" onclick="switchMainTab('block-info')">블록정보</button>
             </nav>
         </div>
         <!-- 통합 검색 (제어로직 태그 / P&ID 밸브,계기) -->
@@ -163,7 +162,8 @@
         </div>
         <div class="tool-divider"></div>
         <div class="tool-group">
-            <button class="tool-btn" id="toolShowBlocks" onclick="toggleDisplay('blocks')" title="블록 표시">B</button>
+            <button class="tool-btn" id="toolShowBlocks" onclick="toggleDisplay('blocks')" title="제어 블록 표시 (OCB/ALG/신호)">B</button>
+            <button class="tool-btn active" id="toolShowOther" onclick="toggleDisplay('other')" title="기타 요소 표시 (OTHER/라벨)">O</button>
             <button class="tool-btn" id="toolShowPorts" onclick="toggleDisplay('ports')" title="포트 표시">P</button>
             <button class="tool-btn" id="toolShowConns" onclick="toggleDisplay('conns')" title="연결선 표시">L</button>
             <button class="tool-btn" id="toolDiagramMode" onclick="toggleDisplay('diagram')" title="다이어그램 모드 (D)">D</button>
@@ -332,62 +332,91 @@
         <canvas id="mainCanvas"></canvas>
         <!-- 홈 화면 -->
         <div id="welcome-screen" class="home-layout">
-            <!-- 좌측 사이드: 로직 통계 + DROP 시스템 -->
-            <div class="home-sidebar home-sidebar-left">
-                <div class="home-sidebar-stats">
-                    <div class="hss-item"><span class="hss-value" id="ws-pages">-</span><span class="hss-label">Pages</span></div>
-                    <div class="hss-item"><span class="hss-value" id="ws-tags">-</span><span class="hss-label">Tags</span></div>
-                    <div class="hss-item"><span class="hss-value" id="ws-drops">-</span><span class="hss-label">Drops</span></div>
+            <div class="home-main">
+                <!-- 앱 타이틀 -->
+                <div class="home-title">
+                    <span class="home-title-main">Control Logic Editor</span>
+                    <span class="home-title-sub">위드인천에너지 · 제어 로직 / P&amp;ID</span>
                 </div>
-                <div class="home-sidebar-title">시스템 구성 (DROP)</div>
-                <div class="home-sidebar-list" id="home-drop-list"></div>
-            </div>
-
-            <!-- 중앙: 카드 2개 -->
-            <div class="home-center">
-                <!-- 제어 로직 카드 -->
-                <div class="home-card home-card-logic">
-                    <div class="home-card-header">
-                        <span class="home-card-title">제어 로직</span>
+                <!-- 통계: 제어로직 / P&ID 분리 -->
+                <div class="home-stats-dual">
+                    <!-- 제어로직 -->
+                    <div class="home-stats-group home-stats-logic">
+                        <div class="home-stats-group-label">제어 로직</div>
+                        <div class="home-stats-group-body">
+                            <div class="home-stat">
+                                <span class="home-stat-value" id="ws-pages">-</span>
+                                <span class="home-stat-label">Pages</span>
+                            </div>
+                            <div class="home-stat-sep"></div>
+                            <div class="home-stat">
+                                <span class="home-stat-value" id="ws-tags">-</span>
+                                <span class="home-stat-label">Tags</span>
+                            </div>
+                            <div class="home-stat-sep"></div>
+                            <div class="home-stat">
+                                <span class="home-stat-value" id="ws-drops">-</span>
+                                <span class="home-stat-label">Drops</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="home-card-actions">
-                        <button class="btn btn-primary" onclick="showDrawingList()">📁 도면 목록</button>
-                        <button class="btn" onclick="loadFromLocal()">💾 로컬 파일</button>
-                    </div>
-                    <div class="home-card-recent">
-                        <h4>최근 열었던 도면</h4>
-                        <div class="home-recent-list" id="home-logic-recent">
-                            <p class="text-muted">최근 항목 없음</p>
+                    <!-- P&ID -->
+                    <div class="home-stats-group home-stats-pid">
+                        <div class="home-stats-group-label">P&amp;ID</div>
+                        <div class="home-stats-group-body">
+                            <div class="home-stat">
+                                <span class="home-stat-value" id="ws-pid-count">-</span>
+                                <span class="home-stat-label">도면</span>
+                            </div>
+                            <div class="home-stat-sep"></div>
+                            <div class="home-stat">
+                                <span class="home-stat-value" id="ws-valves">-</span>
+                                <span class="home-stat-label">밸브</span>
+                            </div>
+                            <div class="home-stat-sep"></div>
+                            <div class="home-stat">
+                                <span class="home-stat-value" id="ws-instruments">-</span>
+                                <span class="home-stat-label">계기</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- P&ID 카드 -->
-                <div class="home-card home-card-pid">
-                    <div class="home-card-header">
-                        <span class="home-card-title">P&ID</span>
+                <!-- 카드 2개 -->
+                <div class="home-center">
+                    <!-- 제어 로직 카드 -->
+                    <div class="home-card home-card-logic">
+                        <div class="home-card-header">
+                            <span class="home-card-title">제어 로직</span>
+                        </div>
+                        <div class="home-card-actions">
+                            <button class="btn btn-primary" onclick="showDrawingList()">📁 도면 목록</button>
+                            <button class="btn" onclick="loadFromLocal()">💾 로컬 파일</button>
+                        </div>
+                        <div class="home-card-recent">
+                            <h4>최근 열었던 도면</h4>
+                            <div class="home-recent-list" id="home-logic-recent">
+                                <p class="text-muted">최근 항목 없음</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="home-card-actions">
-                        <button class="btn btn-primary" onclick="showPIDList()">📁 P&ID 목록</button>
-                    </div>
-                    <div class="home-card-recent">
-                        <h4>최근 열었던 P&ID</h4>
-                        <div class="home-recent-list" id="home-pid-recent">
-                            <p class="text-muted">최근 항목 없음</p>
+
+                    <!-- P&ID 카드 -->
+                    <div class="home-card home-card-pid">
+                        <div class="home-card-header">
+                            <span class="home-card-title">P&ID</span>
+                        </div>
+                        <div class="home-card-actions">
+                            <button class="btn btn-primary" onclick="showPIDList()">📁 P&ID 목록</button>
+                        </div>
+                        <div class="home-card-recent">
+                            <h4>최근 열었던 P&ID</h4>
+                            <div class="home-recent-list" id="home-pid-recent">
+                                <p class="text-muted">최근 항목 없음</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- 우측 사이드: P&ID 통계 + 도면 목록 -->
-            <div class="home-sidebar home-sidebar-right">
-                <div class="home-sidebar-stats">
-                    <div class="hss-item"><span class="hss-value" id="ws-pid-count">-</span><span class="hss-label">P&ID</span></div>
-                    <div class="hss-item"><span class="hss-value" id="ws-valves">-</span><span class="hss-label">밸브</span></div>
-                    <div class="hss-item"><span class="hss-value" id="ws-instruments">-</span><span class="hss-label">계기</span></div>
-                </div>
-                <div class="home-sidebar-title">P&ID 도면</div>
-                <div class="home-sidebar-list home-pid-grid" id="home-pid-list"></div>
             </div>
         </div>
         <div id="stats"></div>
@@ -431,7 +460,7 @@
                 <div style="flex-shrink:0;">
                     <div style="display:flex; gap:6px;">
                         <button onclick="runScanElements()" style="flex:1; padding:7px; background:var(--accent-blue); color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">스캔 실행</button>
-                        <button onclick="saveScanAll()" style="flex:1; padding:7px; background:#10b981; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">스캔 저장</button>
+                        <button onclick="addBlocksToDict()" style="flex:1; padding:7px; background:#10b981; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-weight:600;">블록 저장</button>
                     </div>
                     <div id="scan-stats" style="font-size:10px; color:var(--text-muted); margin-top:6px;"></div>
                 </div>
@@ -443,14 +472,13 @@
         </div>
 
         <!-- Tab 4: Connection Pattern -->
-        <!-- Tab 6: Function Blocks (현재 도면) -->
+        <!-- Tab 6: 블록사전 -->
         <div id="tab-block" class="sidebar-tab-content" style="display:none;">
             <div style="display:flex; flex-direction:column; height:100%; gap:8px;">
-                <div style="flex-shrink:0; font-size:11px; font-weight:600; color:var(--accent-cyan);">블록 목록</div>
-                <input type="text" id="block-search" placeholder="블록/타입 검색..."
-                       style="padding:6px 8px; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); font-size:11px;"
+                <input type="text" id="block-search" placeholder="블록/태그/설명 검색..."
+                       style="flex-shrink:0; padding:6px 8px; background:var(--bg-tertiary); border:1px solid var(--border-color); border-radius:4px; color:var(--text-primary); font-size:11px;"
                        oninput="filterBlockList()">
-                <div id="block-type-filters" style="display:flex; flex-wrap:wrap; gap:3px; flex-shrink:0;"></div>
+                <div id="block-type-filters" style="flex-shrink:0;"></div>
                 <div id="block-list" style="flex:1; overflow-y:auto; overflow-x:hidden;"></div>
             </div>
         </div>
@@ -732,7 +760,7 @@
                     <button class="bt-filter-chip" data-cat="io" onclick="btSetCategory('io')">I/O</button>
                     <button class="bt-filter-chip" data-cat="other" onclick="btSetCategory('other')">기타</button>
                 </div>
-                <div id="btBlockList" style="flex:1; overflow-y:auto; padding:8px 0;"></div>
+                <div id="btBlockList" style="flex:1; overflow-y:auto; padding:8px 0 24px 0;"></div>
             </div>
 
             <!-- 메인: 상세 보기 -->
@@ -805,41 +833,7 @@
 
     </div><!-- end tab-block-types -->
 
-    <!-- ===== 블록정보 탭 (심볼사전 형식) ===== -->
-    <div id="tab-block-info" class="tab-content">
-        <div style="display:flex; flex-direction:column; height:100%; background:#0a0a0f;">
-            <!-- 상단 통계바 -->
-            <div style="padding:10px 20px; display:flex; align-items:center; gap:20px; border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0;">
-                <div style="display:flex; align-items:center; gap:6px;"><span id="biStatBlocks" style="font-size:18px; font-weight:700; color:#4fc3f7;">0</span><span style="font-size:11px; color:rgba(255,255,255,0.4);">블록</span></div>
-                <div style="width:1px; height:20px; background:rgba(255,255,255,0.1);"></div>
-                <div style="display:flex; align-items:center; gap:6px;"><span id="biStatTypes" style="font-size:18px; font-weight:700; color:#a78bfa;">0</span><span style="font-size:11px; color:rgba(255,255,255,0.4);">타입</span></div>
-                <div style="width:1px; height:20px; background:rgba(255,255,255,0.1);"></div>
-                <div style="display:flex; align-items:center; gap:6px;"><span id="biStatEquip" style="font-size:18px; font-weight:700; color:#10b981;">0%</span><span style="font-size:11px; color:rgba(255,255,255,0.4);">설비입력</span></div>
-                <div style="flex:1;"></div>
-                <button onclick="biExportCSV()" style="padding:6px 12px; border:none; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; background:rgba(79,195,247,0.15); color:#4fc3f7;">CSV</button>
-                <button onclick="biResetAll()" style="padding:6px 12px; border:none; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; background:rgba(239,68,68,0.15); color:#f87171;">초기화</button>
-            </div>
-            <!-- 본문: 좌측 목록 + 우측 상세 -->
-            <div style="display:flex; flex:1; overflow:hidden;">
-                <!-- 좌측 사이드바: 블록 목록 -->
-                <div style="width:300px; background:rgba(0,0,0,0.2); border-right:1px solid rgba(255,255,255,0.04); display:flex; flex-direction:column; flex-shrink:0;">
-                    <div style="padding:12px; border-bottom:1px solid rgba(255,255,255,0.04);">
-                        <input type="text" id="biSearchInput" placeholder="블록/설비/타입 검색..."
-                               style="width:100%; padding:8px 12px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:6px; color:#fff; font-size:12px; box-sizing:border-box;"
-                               oninput="biFilterList()">
-                    </div>
-                    <div id="biFilterChips" style="display:flex; gap:4px; padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.04); flex-wrap:wrap;"></div>
-                    <div id="biBlockList" style="flex:1; overflow-y:auto; padding:8px 0;"></div>
-                </div>
-                <!-- 우측 상세 패널 -->
-                <div id="biContent" style="flex:1; overflow-y:auto; padding:0; background:#0a0a0f;">
-                    <div style="display:flex; align-items:center; justify-content:center; height:100%; color:rgba(255,255,255,0.3); font-size:13px;">
-                        좌측에서 블록을 선택하세요
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div><!-- end tab-block-info -->
+
 
 </div><!-- end app-container -->
 
@@ -966,10 +960,10 @@ select.form-input option {
 </style>
 
 <!-- JavaScript Modules - 순서 중요! -->
-<script src="js/config.js?v=20260326"></script>
+<script src="js/config.js?v=20260407a"></script>
 <script src="js/utils.js?v=20260326"></script>
 <script src="js/data.js?v=20260326"></script>
-<script src="js/canvas.js?v=20260326"></script>
+<script src="js/canvas.js?v=20260407g"></script>
 <script src="js/events.js?v=20260326"></script>
 <script src="js/groups.js?v=20260326"></script>
 <script src="js/connections.js?v=20260326"></script>
@@ -977,12 +971,12 @@ select.form-input option {
 <script src="js/blockTypes.js?v=20260406"></script>
 <script src="js/templates.js?v=20260326"></script>
 <script src="js/graph.js?v=20260326"></script>
-<script src="js/fileIO.js?v=20260406"></script>
-<script src="js/ui.js?v=20260406"></script>
+<script src="js/fileIO.js?v=20260407g"></script>
+<script src="js/ui.js?v=20260407y"></script>
 <script src="js/pid.js?v=20260326"></script>
 <script src="js/splitView.js?v=20260326"></script>
 <script src="js/app.js?v=20260406"></script>
-<script src="js/circuitBg.js?v=20260406b"></script>
+<script src="js/circuitBg.js?v=20260406e"></script>
 
 </body>
 </html>

@@ -43,9 +43,7 @@ function render() {
         drawDiagramBlocks();
     } else {
         const sharedPositions = new Set();
-        if (showBlocks) {
-            drawBlocks(sharedPositions);
-        }
+        drawBlocks(sharedPositions);   // 내부에서 타입별 showBlocks/showPorts/showOther 처리
         if (showPorts) {
             drawPorts(sharedPositions);
         }
@@ -364,7 +362,61 @@ function drawBlocks(drawnPositions = new Set()) {
         }
     }
 
+    // 타입별 표시 제어:
+    //   B(showBlocks): OCB_BLOCK, ALG_BLOCK, REF_SIGNAL, M/A 스테이션 블록
+    //   P(showPorts):  SIGNAL(ISA 태그), OTHER 중 포트 기능 라벨(MAN/AUTO/MRE 등)
+    //   O(showOther):  OTHER 중 순수 텍스트 주석
+    const _showOther = typeof showOther !== 'undefined' ? showOther : true;
+    const _showPorts = typeof showPorts !== 'undefined' ? showPorts : true;
+
+    // 기능 포트 라벨 (OTHER 타입이지만 P 버튼에 속함)
+    const PORT_LABEL_SET = new Set([
+        'PV','SP','STPT','OUT','MV','FB','IN','I','FLAG','YES','NO',
+        'MAN','AUTO','MODE','MRE','ARE','RAI','LWI','REF',
+        'AND','OR','NOT',
+        'K','D','DT','H','L','NUM','DEN','A','B','T','N','X',
+        'PPR','SPR','PK','SIG','CNF','ERR','LIMIT','FBPV','FBIN'
+    ]);
+    const _isPortLabel = (n) => {
+        const u = n.toUpperCase();
+        return PORT_LABEL_SET.has(u) || /^IN\d+$/.test(u) || /^OUT\d+$/.test(u) || /^PPR\d+$/.test(u);
+    };
+    // M/A 스테이션 블록 (B 버튼) — "M/A" 단순 라벨은 제외, MAMODE:xxx 같은 실제 블록만
+    const _isMABlock = (n) => {
+        const u = n.toUpperCase();
+        return u === 'MA' ||
+               /^MAMODE:/i.test(n) ||
+               /^MODE_\d+/i.test(n) || /^MA_\d+/i.test(n) ||
+               /^[A-Z]{1,4}_\d{4}_\d{4}$/.test(n);
+    };
+
     for (const block of blocks) {
+        const btype = block.type;
+        if (btype === 'SIGNAL') {
+            // IN으로 시작하는 포트명(IN1, IN2 등) → P 버튼
+            // 그 외 ISA 태그(FIC1234, SIT2681A 등) → B 버튼
+            const _sn = block.name.toUpperCase();
+            if (/^IN\d*$/.test(_sn)) {
+                if (!_showPorts) continue;
+            } else {
+                if (!showBlocks) continue;
+            }
+        } else if (btype === 'OTHER') {
+            if (_isPortLabel(block.name)) {
+                // 기능 포트 라벨 → P 버튼
+                if (!_showPorts) continue;
+            } else if (_isMABlock(block.name)) {
+                // M/A 스테이션 블록 → B 버튼
+                if (!showBlocks) continue;
+            } else {
+                // 순수 텍스트 주석 → O 버튼
+                if (!_showOther) continue;
+            }
+        } else {
+            // OCB_BLOCK, ALG_BLOCK, REF_SIGNAL → B 버튼
+            if (!showBlocks) continue;
+        }
+
         const posKey = `${Math.round(block.cx)}_${Math.round(block.cy)}`;
         if (drawnPositions.has(posKey)) continue;
         drawnPositions.add(posKey);
@@ -411,8 +463,10 @@ function drawBlocks(drawnPositions = new Set()) {
 }
 
 function drawPorts(drawnPositions = new Set()) {
-
     for (const port of ports) {
+        // PORT, BLOCK_TYPE(PV/MAN/AUTO 등 기능 라벨), SHEET_REF 모두 P 버튼으로 제어
+        // (showPorts가 false면 drawPorts 자체가 호출 안 됨 — 상위에서 처리)
+
         // 위치 기반 중복 체크
         const posKey = `${Math.round(port.cx)}_${Math.round(port.cy)}`;
         if (drawnPositions.has(posKey)) {

@@ -1,9 +1,8 @@
 /**
- * circuitBg.js — 시작화면 배경: 실제 제어 로직 회로 애니메이션
- * ovation_symbols.json의 실제 블록 데이터를 사용하여
- * 복잡한 제어 로직 도면을 배경에 렌더링
+ * circuitBg.js — 커스텀 프로시저럴 로직 회로 배경
+ * 전체 화면을 촘촘한 회로망으로 채움 (빈 곳 없음)
  */
-(function() {
+(function () {
     const ws = document.getElementById('welcome-screen');
     if (!ws) return;
 
@@ -18,346 +17,318 @@
     container.appendChild(canvas);
 
     const ctx = canvas.getContext('2d');
-    let W, H, nodes = [], edges = [], signals = [], animId;
-    const BG = '#0d1117';
+    let W, H, animId;
 
-    // 실제 Ovation 심볼에서 가져온 블록 정의 (카테고리별 색상)
-    const BLOCKS = [
-        // Control (파란계열)
-        { label: 'PID', sub: ['Δ','κ','∫','d/dt'], color: '#4fc3f7', cat: 'ctrl' },
-        { label: 'PIDFF', sub: ['Δ','∫','FF'], color: '#4fc3f7', cat: 'ctrl' },
-        { label: 'LEADLAG', sub: ['sτ','1/sτ'], color: '#4fc3f7', cat: 'ctrl' },
-        { label: 'PREDICTOR', sub: ['e⁻ˢᵀ','G(s)'], color: '#4fc3f7', cat: 'ctrl' },
-        // Logic (초록계열)
-        { label: 'AND', sub: ['&'], color: '#10b981', cat: 'logic' },
-        { label: 'OR', sub: ['OR'], color: '#10b981', cat: 'logic' },
-        { label: 'NOT', sub: ['NOT'], color: '#e94560', cat: 'logic' },
-        { label: 'XOR', sub: ['XOR'], color: '#a78bfa', cat: 'logic' },
-        { label: 'FLIPFLOP', sub: ['S','R'], color: '#10b981', cat: 'logic' },
-        // Math (보라계열)
-        { label: 'SUM', sub: ['Σ'], color: '#a78bfa', cat: 'math' },
-        { label: 'MULTIPLY', sub: ['×'], color: '#a78bfa', cat: 'math' },
-        { label: 'DIVIDE', sub: ['÷'], color: '#a78bfa', cat: 'math' },
-        { label: 'SQUAREROOT', sub: ['√'], color: '#a78bfa', cat: 'math' },
-        { label: 'ABSVALUE', sub: ['|x|'], color: '#a78bfa', cat: 'math' },
-        { label: 'COMPARE', sub: ['>','=','<'], color: '#a78bfa', cat: 'math' },
-        { label: 'POLYNOMIAL', sub: ['Σaₙxⁿ'], color: '#a78bfa', cat: 'math' },
-        { label: 'FUNCTION', sub: ['f(x)'], color: '#a78bfa', cat: 'math' },
-        // Timer (주황계열)
-        { label: 'ONDELAY', sub: ['⏱↑'], color: '#ff9800', cat: 'timer' },
-        { label: 'OFFDELAY', sub: ['⏱↓'], color: '#ff9800', cat: 'timer' },
-        { label: 'ONESHOT', sub: ['⏱¹'], color: '#ff9800', cat: 'timer' },
-        { label: 'COUNTER', sub: ['CTR'], color: '#ff9800', cat: 'timer' },
-        // Selector (노란계열)
-        { label: 'HISELECT', sub: ['MAX'], color: '#fbbf24', cat: 'sel' },
-        { label: 'LOSELECT', sub: ['MIN'], color: '#fbbf24', cat: 'sel' },
-        { label: 'TRANSFER', sub: ['⇄'], color: '#fbbf24', cat: 'sel' },
-        { label: 'SELECTOR', sub: ['MUX'], color: '#fbbf24', cat: 'sel' },
-        // Monitor (빨간계열)
-        { label: 'HIGHMON', sub: ['>H'], color: '#e94560', cat: 'mon' },
-        { label: 'LOWMON', sub: ['<L'], color: '#e94560', cat: 'mon' },
-        { label: 'RATEMON', sub: ['Δ/t'], color: '#e94560', cat: 'mon' },
-        // IO (청록계열)
-        { label: 'MASTATION', sub: ['M','A'], color: '#06b6d4', cat: 'io' },
-        { label: 'SETPOINT', sub: ['SP'], color: '#06b6d4', cat: 'io' },
-        { label: 'GAINBIAS', sub: ['×G','+B'], color: '#06b6d4', cat: 'io' },
-        { label: 'RATELIMIT', sub: ['ΔR'], color: '#06b6d4', cat: 'io' },
-        // Signal
-        { label: 'SMOOTH', sub: ['α'], color: '#4fc3f7', cat: 'sig' },
-        { label: 'TRANSPORT', sub: ['e⁻ˢᵀ'], color: '#4fc3f7', cat: 'sig' },
-        // Simple
-        { label: 'K', sub: [], color: '#fbbf24', cat: 'const' },
-        { label: 'T', sub: [], color: '#ff9800', cat: 'logic' },
+    // ── 팔레트 ────────────────────────────────────────────
+    const PALETTE = [
+        { type: 'OCB',  color: '#e94560', weight: 4 },
+        { type: 'ALG',  color: '#a78bfa', weight: 3 },
+        { type: 'AND',  color: '#4fc3f7', weight: 3 },
+        { type: 'OR',   color: '#4fc3f7', weight: 2 },
+        { type: 'PID',  color: '#10b981', weight: 2 },
+        { type: 'NOT',  color: '#ff9800', weight: 2 },
+        { type: 'MAST', color: '#06b6d4', weight: 1 },
+        { type: 'SUM',  color: '#a78bfa', weight: 1 },
     ];
+    // weight-based random pick table
+    const PICK_TABLE = PALETTE.flatMap(p => Array(p.weight).fill(p));
 
-    // 포트 이름들 (연결선 라벨용)
-    const PORT_NAMES = ['PV','STPT','OUT','IN1','IN2','MV','SP','TRIN','TOUT','DEVA','FLAG','YES','NO','ENBL'];
-
-    function resize() {
-        const dpr = window.devicePixelRatio || 1;
-        W = container.clientWidth || window.innerWidth;
-        H = container.clientHeight || window.innerHeight;
-        canvas.width = W * dpr;
-        canvas.height = H * dpr;
-        canvas.style.width = W + 'px';
-        canvas.style.height = H + 'px';
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    function rgba(hex, a) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r},${g},${b},${Math.min(Math.max(a, 0), 1)})`;
     }
 
-    function init() {
-        resize();
-        nodes = []; edges = []; signals = [];
+    // ── 고정 시드 난수 (xorshift32) ──────────────────────
+    function makeRng(seed) {
+        let s = (seed || 1) >>> 0;
+        return function () {
+            s ^= s << 13; s ^= s >> 17; s ^= s << 5;
+            return (s >>> 0) / 0x100000000;
+        };
+    }
 
-        // 촘촘한 그리드
-        const cellW = 80, cellH = 55;
-        const cols = Math.floor(W / cellW);
-        const rows = Math.floor(H / cellH);
-        const nodeCount = Math.min(Math.floor(cols * rows * 0.6), 120);
+    // ── 데이터 ────────────────────────────────────────────
+    let nodes   = [];
+    let wires   = [];
+    let signals = [];
 
-        const slots = [];
-        for (let r = 0; r < rows; r++)
-            for (let c = 0; c < cols; c++)
-                slots.push({ c, r });
-        shuffle(slots);
+    // OCB 번호 카운터 (시드 기반)
+    function makeLabel(type, rng) {
+        const n = Math.floor(rng() * 9000 + 1000);
+        if (type === 'OCB')  return `OCB${n}`;
+        if (type === 'ALG')  return `ALG-${n.toString(16).toUpperCase().slice(0, 3)}`;
+        if (type === 'PID')  return `PID-${String(Math.floor(rng() * 99 + 1)).padStart(2, '0')}`;
+        if (type === 'MAST') return `MAST`;
+        return type;
+    }
 
-        for (let i = 0; i < nodeCount && i < slots.length; i++) {
-            const slot = slots[i];
-            const bt = BLOCKS[Math.floor(Math.random() * BLOCKS.length)];
-            const hasSub = bt.sub.length > 0;
-            const w = hasSub ? Math.max(40, bt.label.length * 5 + 20) : 30;
-            const h = hasSub ? 32 : 22;
+    function generate() {
+        const rng = makeRng(0xc0ffee42);
+        nodes = [];
+        wires = [];
 
-            nodes.push({
-                x: (slot.c + 0.5) * cellW + (Math.random() - 0.5) * 15,
-                y: (slot.r + 0.5) * cellH + (Math.random() - 0.5) * 10,
-                w, h,
-                label: bt.label,
-                sub: bt.sub,
-                color: bt.color,
-                cat: bt.cat,
-                alpha: 0.14 + Math.random() * 0.10,
-            });
-        }
+        // Grid spacing
+        const GW = 108, GH = 66;
+        const cols = Math.ceil(W / GW) + 1;
+        const rows = Math.ceil(H / GH) + 1;
 
-        // 연결: 가까운 노드끼리 (다양한 방향)
-        for (let i = 0; i < nodes.length; i++) {
-            const a = nodes[i];
-            const candidates = nodes.map((b, j) => ({
-                j, d: Math.hypot(b.x - a.x, b.y - a.y), dx: b.x - a.x, dy: b.y - a.y
-            }))
-            .filter(d => d.j !== i && d.d < 160 && d.d > 30)
-            .sort((a, b) => a.d - b.d)
-            .slice(0, 3);
+        // ① 노드 배치
+        const grid = Array.from({ length: rows }, () => new Array(cols).fill(null));
 
-            for (const { j, dx, dy } of candidates) {
-                if (!edges.find(e => (e.a === i && e.b === j) || (e.a === j && e.b === i))) {
-                    // 방향 결정: 오른쪽이면 좌→우, 아래면 상→하
-                    const from = dx >= 0 ? i : j;
-                    const to = dx >= 0 ? j : i;
-                    edges.push({ a: from, b: to, path: null, len: 0 });
-                }
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                if (rng() > 0.54) continue;          // ~46% 채움
+                const pal = PICK_TABLE[Math.floor(rng() * PICK_TABLE.length)];
+                const jx  = (rng() - 0.5) * GW * 0.36;
+                const jy  = (rng() - 0.5) * GH * 0.30;
+                const x   = c * GW + GW * 0.5 + jx;
+                const y   = r * GH + GH * 0.5 + jy;
+                // AND/OR/NOT 같은 단순 게이트는 좀 더 작게
+                const isGate = ['AND','OR','NOT','SUM'].includes(pal.type);
+                const w = isGate ? (24 + rng() * 14) : (38 + rng() * 20);
+                const h = isGate ? (14 + rng() * 6)  : (16 + rng() * 8);
+                const node = { x, y, w, h, color: pal.color, label: makeLabel(pal.type, rng) };
+                grid[r][c] = node;
+                nodes.push(node);
             }
         }
 
-        // 경로 계산
-        for (const e of edges) {
-            e.path = calcPath(e);
-            e.len = pathLen(e.path);
-        }
+        // ② 와이어 라우팅 (L자형 Manhattan)
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const a = grid[r][c];
+                if (!a) continue;
 
-        // 신호 — 많이 생성
-        for (let i = 0; i < edges.length; i++) {
-            if (Math.random() < 0.35) {
+                // 오른쪽 이웃
+                if (c + 1 < cols && grid[r][c + 1] && rng() < 0.70)
+                    wires.push(routeL(a, grid[r][c + 1], rng));
+                // 아래 이웃
+                if (r + 1 < rows && grid[r + 1][c] && rng() < 0.62)
+                    wires.push(routeL(a, grid[r + 1][c], rng));
+                // 아래-오른쪽 2칸 (대각 연결 느낌)
+                if (r + 1 < rows && c + 2 < cols && grid[r + 1][c + 2] && rng() < 0.16)
+                    wires.push(routeL(a, grid[r + 1][c + 2], rng));
+                // 오른쪽 2칸 (긴 수평선)
+                if (c + 2 < cols && grid[r][c + 2] && rng() < 0.14)
+                    wires.push(routeL(a, grid[r][c + 2], rng));
+            }
+        }
+    }
+
+    function routeL(a, b, rng) {
+        // L자 꺾임점을 중간~약간치우침으로 결정
+        const pivot = 0.3 + rng() * 0.4;
+        const midX  = a.x + (b.x - a.x) * pivot;
+        const pts   = [
+            { x: a.x,  y: a.y  },
+            { x: midX, y: a.y  },
+            { x: midX, y: b.y  },
+            { x: b.x,  y: b.y  },
+        ];
+        return { pts, color: rng() < 0.5 ? a.color : b.color };
+    }
+
+    function buildSignals() {
+        signals = [];
+        for (let i = 0; i < wires.length; i++) {
+            if (Math.random() < 0.30) {
                 signals.push({
-                    edge: i,
-                    t: Math.random(),
-                    speed: 0.002 + Math.random() * 0.004,
-                    color: nodes[edges[i].a].color,
-                    tailLen: 15 + Math.random() * 25,
+                    idx:   i,
+                    t:     Math.random(),
+                    speed: 0.0012 + Math.random() * 0.0038,
+                    tail:  0.10   + Math.random() * 0.14,
                 });
             }
         }
     }
 
-    function calcPath(e) {
-        const a = nodes[e.a], b = nodes[e.b];
-        const x1 = a.x + a.w/2, y1 = a.y;
-        const x2 = b.x - b.w/2, y2 = b.y;
-        const midX = (x1 + x2) / 2;
+    // ── 렌더링 ────────────────────────────────────────────
+    function draw() {
+        ctx.fillStyle = '#0d1117';
+        ctx.fillRect(0, 0, W, H);
 
-        // 수직 차이가 작으면 직선, 크면 직각 경로
-        if (Math.abs(y2 - y1) < 5) {
-            return [{ x: x1, y: y1 }, { x: x2, y: y2 }];
-        }
-        return [
-            { x: x1, y: y1 },
-            { x: midX, y: y1 },
-            { x: midX, y: y2 },
-            { x: x2, y: y2 },
-        ];
-    }
+        // 와이어
+        for (const wire of wires) drawWire(wire);
 
-    function pathLen(pts) {
-        let len = 0;
-        for (let i = 1; i < pts.length; i++)
-            len += Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
-        return len;
-    }
-
-    function pointOnPath(pts, totalLen, t) {
-        let target = Math.max(0, Math.min(1, t)) * totalLen;
-        for (let i = 1; i < pts.length; i++) {
-            const seg = Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
-            if (target <= seg || i === pts.length - 1) {
-                const r = seg > 0 ? target / seg : 0;
-                return {
-                    x: pts[i-1].x + (pts[i].x - pts[i-1].x) * Math.min(r, 1),
-                    y: pts[i-1].y + (pts[i].y - pts[i-1].y) * Math.min(r, 1),
-                };
+        // 꺾임 접합점 (junction dot)
+        for (const wire of wires) {
+            const { pts, color } = wire;
+            for (let i = 1; i < pts.length - 1; i++) {
+                ctx.fillStyle = rgba(color, 0.42);
+                ctx.beginPath();
+                ctx.arc(pts[i].x, pts[i].y, 1.6, 0, Math.PI * 2);
+                ctx.fill();
             }
-            target -= seg;
         }
-        return pts[pts.length - 1];
+
+        // 블록 노드
+        for (const node of nodes) drawNode(node);
+
+        // 신호 빛줄기
+        for (const sig of signals) {
+            drawSignal(sig);
+            sig.t += sig.speed;
+            if (sig.t > 1) sig.t -= 1;
+        }
+
+        // 중앙 비네트 (카드 가독성↑)
+        const vx = W / 2, vy = H / 2;
+        const vr1 = Math.min(W, H) * 0.12;
+        const vr2 = Math.min(W, H) * 0.65;
+        const vig = ctx.createRadialGradient(vx, vy, vr1, vx, vy, vr2);
+        vig.addColorStop(0, 'rgba(13,17,23,0.28)');
+        vig.addColorStop(1, 'rgba(13,17,23,0)');
+        ctx.fillStyle = vig;
+        ctx.fillRect(0, 0, W, H);
     }
 
-    function shuffle(a) {
-        for (let i = a.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [a[i], a[j]] = [a[j], a[i]];
-        }
-    }
-
-    // ─── 그리기 ───
-
-    function drawNode(n) {
-        const { x, y, w, h, label, sub, color, alpha } = n;
-
-        // 메인 박스
-        ctx.fillStyle = rgba(color, alpha * 0.3);
-        ctx.strokeStyle = rgba(color, alpha * 1.0);
-        ctx.lineWidth = 0.6;
+    function drawWire(wire) {
+        const { pts, color } = wire;
+        ctx.strokeStyle = rgba(color, 0.20);
+        ctx.lineWidth   = 0.85;
+        ctx.lineJoin    = 'miter';
         ctx.beginPath();
-        ctx.roundRect(x - w/2, y - h/2, w, h, 3);
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+        ctx.stroke();
+    }
+
+    function drawNode(node) {
+        const { x, y, w, h, color, label } = node;
+        ctx.fillStyle   = rgba(color, 0.10);
+        ctx.strokeStyle = rgba(color, 0.58);
+        ctx.lineWidth   = 0.75;
+        ctx.beginPath();
+        ctx.roundRect(x - w / 2, y - h / 2, w, h, 2);
         ctx.fill();
         ctx.stroke();
 
-        if (sub.length > 0) {
-            // 서브블록 (PID 스타일 내부 구조)
-            if (sub.length === 1) {
-                // 단일 기호 — 중앙에 크게
-                ctx.fillStyle = rgba(color, alpha * 2.5);
-                ctx.font = '600 10px -apple-system, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(sub[0], x, y);
-            } else {
-                // 다중 서브블록 — 가로로 나열
-                const subW = (w - 8) / sub.length;
-                const subY = y - h/2 + 4;
-                const subH = h - 8;
-                const colors = ['#4fc3f7', '#10b981', '#e94560', '#ff9800', '#a78bfa'];
-                for (let i = 0; i < sub.length; i++) {
-                    const sx = x - w/2 + 4 + i * subW;
-                    const sc = colors[i % colors.length];
-                    ctx.fillStyle = rgba(sc, alpha * 0.6);
-                    ctx.strokeStyle = rgba(sc, alpha * 0.8);
-                    ctx.lineWidth = 0.4;
-                    ctx.beginPath();
-                    ctx.roundRect(sx, subY, subW - 2, subH, 2);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    ctx.fillStyle = rgba(sc, alpha * 2.5);
-                    ctx.font = '600 7px -apple-system, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(sub[i], sx + subW/2 - 1, subY + subH/2);
-                }
-            }
-        } else {
-            // 라벨만
-            ctx.fillStyle = rgba(color, alpha * 2.5);
-            ctx.font = '600 9px -apple-system, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(label, x, y);
-        }
-
-        // 입출력 포트 (작은 사각형)
-        ctx.fillStyle = rgba(color, alpha * 1.5);
-        ctx.fillRect(x - w/2 - 2, y - 1.5, 3, 3);
-        ctx.fillRect(x + w/2 - 1, y - 1.5, 3, 3);
-
-        // 상단/하단 포트 (일부 블록)
-        if (sub.length >= 3) {
-            ctx.fillRect(x - 1.5, y - h/2 - 2, 3, 3);
-            ctx.fillRect(x - 1.5, y + h/2 - 1, 3, 3);
-        }
+        const fs = Math.max(5.5, Math.min(w * 0.22, 8));
+        ctx.font         = `600 ${fs}px monospace`;
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle    = rgba(color, 0.88);
+        const lbl = label.length > 9 ? label.slice(0, 8) + '…' : label;
+        ctx.fillText(lbl, x, y);
     }
 
-    function drawEdge(e) {
-        if (!e.path || e.len <= 0) return;
-        const a = nodes[e.a], b = nodes[e.b];
-        const alpha = Math.min(a.alpha, b.alpha) * 0.6;
+    function drawSignal(sig) {
+        const wire = wires[sig.idx];
+        if (!wire) return;
+        const { pts, color } = wire;
 
-        ctx.strokeStyle = rgba('#4fc3f7', alpha * 1.2);
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.moveTo(e.path[0].x, e.path[0].y);
-        for (let i = 1; i < e.path.length; i++)
-            ctx.lineTo(e.path[i].x, e.path[i].y);
-        ctx.stroke();
+        // 세그먼트 길이 계산
+        const segs  = [];
+        let total = 0;
+        for (let i = 0; i < pts.length - 1; i++) {
+            const d = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+            segs.push({ i, d, start: total });
+            total += d;
+        }
+        if (total < 5) return;
 
-        // 꺾이는 점에 작은 점
-        for (let i = 1; i < e.path.length - 1; i++) {
-            ctx.fillStyle = rgba('#4fc3f7', alpha * 1.5);
+        const headD = sig.t * total;
+        const tailD = Math.max(0, headD - sig.tail * total);
+
+        for (const seg of segs) {
+            const sEnd = seg.start + seg.d;
+            if (sEnd < tailD || seg.start > headD) continue;
+            const d1 = Math.max(tailD, seg.start) - seg.start;
+            const d2 = Math.min(headD, sEnd) - seg.start;
+            if (d2 <= d1) continue;
+
+            const p = pts[seg.i], q = pts[seg.i + 1];
+            const span = headD - tailD || 1;
+            const STEPS = 8;
+            for (let k = 0; k < STEPS; k++) {
+                const fa = k / STEPS, fb = (k + 1) / STEPS;
+                const t1 = d1 / seg.d + fa * (d2 - d1) / seg.d;
+                const t2 = d1 / seg.d + fb * (d2 - d1) / seg.d;
+                const x1 = p.x + (q.x - p.x) * t1, y1 = p.y + (q.y - p.y) * t1;
+                const x2 = p.x + (q.x - p.x) * t2, y2 = p.y + (q.y - p.y) * t2;
+                // 꼬리→머리 방향 밝기
+                const posA = (seg.start + d1 + (d2 - d1) * fa - tailD) / span;
+                const posB = (seg.start + d1 + (d2 - d1) * fb - tailD) / span;
+                const br   = (posA + posB) * 0.5;
+                ctx.strokeStyle = rgba(color, 0.18 + br * 0.82);
+                ctx.lineWidth   = 0.6 + br * 2.4;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+            }
+        }
+
+        // 머리 글로우 점
+        const hs = segs.find(s => s.start <= headD && s.start + s.d >= headD);
+        if (hs) {
+            const ht = (headD - hs.start) / hs.d;
+            const p  = pts[hs.i], q = pts[hs.i + 1];
+            const hx = p.x + (q.x - p.x) * ht;
+            const hy = p.y + (q.y - p.y) * ht;
+            const grd = ctx.createRadialGradient(hx, hy, 0, hx, hy, 7);
+            grd.addColorStop(0, rgba(color, 1.0));
+            grd.addColorStop(0.4, rgba(color, 0.5));
+            grd.addColorStop(1,   rgba(color, 0));
+            ctx.fillStyle = grd;
             ctx.beginPath();
-            ctx.arc(e.path[i].x, e.path[i].y, 1, 0, Math.PI * 2);
+            ctx.arc(hx, hy, 7, 0, Math.PI * 2);
             ctx.fill();
         }
     }
 
-    function drawSignal(s) {
-        const e = edges[s.edge];
-        if (!e || !e.path || e.len <= 0) return;
-
-        const headDist = s.t * e.len;
-        const tailDist = Math.max(0, headDist - s.tailLen);
-        const steps = 10;
-
-        for (let i = 0; i < steps; i++) {
-            const d1 = tailDist + (headDist - tailDist) * (i / steps);
-            const d2 = tailDist + (headDist - tailDist) * ((i + 1) / steps);
-            const p1 = pointOnPath(e.path, e.len, d1 / e.len);
-            const p2 = pointOnPath(e.path, e.len, d2 / e.len);
-
-            const brightness = i / steps;
-            ctx.strokeStyle = rgba(s.color, brightness * 0.75);
-            ctx.lineWidth = 1.0 + brightness * 1.8;
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.stroke();
-        }
+    // ── 리사이즈 + 루프 ──────────────────────────────────
+    function resize() {
+        const dpr = window.devicePixelRatio || 1;
+        W = container.clientWidth  || window.innerWidth;
+        H = container.clientHeight || window.innerHeight;
+        canvas.width  = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width  = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
-
-    function rgba(hex, a) {
-        const r = parseInt(hex.slice(1,3),16);
-        const g = parseInt(hex.slice(3,5),16);
-        const b = parseInt(hex.slice(5,7),16);
-        return `rgba(${r},${g},${b},${Math.min(Math.max(a,0),1)})`;
-    }
-
-    // ─── 애니메이션 루프 ───
 
     function animate() {
-        ctx.fillStyle = BG;
-        ctx.fillRect(0, 0, W, H);
-
-        for (const e of edges) drawEdge(e);
-        for (const n of nodes) drawNode(n);
-        for (const s of signals) {
-            s.t += s.speed;
-            if (s.t > 1) { s.t = 0; }
-            drawSignal(s);
-        }
+        draw();
         animId = requestAnimationFrame(animate);
     }
 
-    init();
-    animate();
+    function init() {
+        resize();
+        generate();
+        buildSignals();
+        animate();
+    }
 
     window.addEventListener('resize', () => {
         cancelAnimationFrame(animId);
-        init();
+        animId = null;
+        resize();
+        generate();
+        buildSignals();
         animate();
     });
 
+    // 웰컴화면 숨겨지면 정지
     const observer = new MutationObserver(() => {
         if (ws.classList.contains('hidden') || ws.style.display === 'none') {
             cancelAnimationFrame(animId);
+            animId = null;
             canvas.style.display = 'none';
+        } else {
+            canvas.style.display = '';
+            if (!animId) animate();
         }
     });
     observer.observe(ws, { attributes: true, attributeFilter: ['class', 'style'] });
+
+    // 시작
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        setTimeout(init, 0);
+    }
 })();
