@@ -223,9 +223,9 @@ async function updateWelcomeStats() {
         const el = document.getElementById(id);
         if (el) el.textContent = val.toLocaleString();
     };
-    setVal('ws-pages', pageCount);
-    setVal('ws-tags', drawingCount);
     setVal('ws-drops', Object.keys(drops).length);
+    setVal('ws-pages', pageCount);
+    setVal('ws-tags', tagCount);
 
     // Drop 목록 (사이드바용)
     const listEl = document.getElementById('home-drop-list');
