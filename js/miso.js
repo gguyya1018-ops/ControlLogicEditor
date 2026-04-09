@@ -73,7 +73,7 @@ async function misoSendAnalysis() {
     // 미소사전에 도면 등록 + llm_text 갱신
     const now = new Date().toISOString();
     const page = (currentPageNumber && currentPageNumber !== '?') ? currentPageNumber : '';
-    let drawingTitle = currentDrawingName || (page ? `${drawingNum}-${page}` : `${drawingNum}`);
+    let drawingTitle = formatDrawingLabel(drawingNum, page);
     let equipmentName = '';
     if (typeof scanResults !== 'undefined' && scanResults) {
         const signals = scanResults.filter(sr => sr.type === 'SIGNAL' && sr.portSignals?.['태그정보']?.equipment);

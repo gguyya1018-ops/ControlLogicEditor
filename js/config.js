@@ -236,6 +236,61 @@ let currentListFolder = 'original';
 let supabaseDrawings = {};
 let localDrawingIndex = {};
 
+// ============ 도면 인덱스 (drawing_index.json) ============
+let drawingIndex = {};
+
+async function loadDrawingIndex() {
+    try {
+        if (typeof window.pywebview !== 'undefined' && window.pywebview.api) {
+            const result = await window.pywebview.api.load_drawing_index();
+            if (result.success) drawingIndex = result.data || {};
+        } else {
+            const resp = await fetch('drawings/drawing_index.json');
+            if (resp.ok) drawingIndex = await resp.json();
+        }
+    } catch (e) {
+        console.warn('도면 인덱스 로드 실패:', e);
+    }
+}
+
+// D{drop}-{task}-{sheet} 형식 생성
+function formatDrawingId(task, page) {
+    const info = drawingIndex[String(task)];
+    if (!info) return page ? `${task}-${page}` : `${task}`;
+    const drop = String(info.drop).padStart(2, '0');
+    return page ? `D${drop}-${task}-${page}` : `D${drop}-${task}`;
+}
+
+// D{drop}-{task}-{sheet} + 제목
+function formatDrawingLabel(task, page) {
+    const id = formatDrawingId(task, page);
+    const info = drawingIndex[String(task)];
+    const title = info?.title || '';
+    return title ? `${id} ${title}` : id;
+}
+
+// REF_SIGNAL 파싱: D03-511-03 → {drop:'03', task:'511', sheet:'03'}
+function parseRefSignal(name) {
+    const m = name.match(/^D(\d+)-(\d+)-(\d+)/);
+    if (!m) return null;
+    return { drop: m[1], task: m[2], sheet: m[3] };
+}
+
+// REF_SIGNAL → 표시 문자열 (인덱스에서 제목 조회)
+function formatRefSignal(name) {
+    const ref = parseRefSignal(name);
+    if (!ref) return name;
+    const info = drawingIndex[ref.task];
+    const id = `D${ref.drop.padStart(2,'0')}-${ref.task}-${ref.sheet}`;
+    return info?.title ? `${id} ${info.title}` : id;
+}
+
+// 도면 인덱스에서 task 제목만 가져오기
+function getDrawingTitle(task) {
+    const info = drawingIndex[String(task)];
+    return info?.title || '';
+}
+
 // Legacy drawing files mapping
 const drawingFiles = {
     'page_187': 'page_187.json',

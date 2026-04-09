@@ -134,7 +134,7 @@ function loadSplitLogic(drawingNum, pageNum) {
 
         // 타이틀 업데이트
         const titleEl = document.getElementById('split-logic-title');
-        if (titleEl) titleEl.textContent = `${drawingNum} - Page ${pageNum}`;
+        if (titleEl) titleEl.textContent = typeof formatDrawingLabel === 'function' ? formatDrawingLabel(drawingNum, pageNum) : `${drawingNum} - Page ${pageNum}`;
 
         // 빈 화면 숨기기
         const emptyEl = document.getElementById('split-logic-empty');

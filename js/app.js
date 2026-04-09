@@ -557,6 +557,9 @@ async function startApp() {
         }
     }
 
+    // 도면 인덱스 로드
+    await loadDrawingIndex();
+
     init();
     initTemplates();
     initDrawingManager();

@@ -596,6 +596,19 @@ class Api:
             return {'success': False, 'error': str(e)}
 
 
+    # ============ 도면 인덱스 ============
+
+    def load_drawing_index(self):
+        """drawing_index.json 로드"""
+        path = BUNDLE_DIR / 'drawings' / 'drawing_index.json'
+        try:
+            if path.exists():
+                with open(path, 'r', encoding='utf-8') as f:
+                    return {'success': True, 'data': json.load(f)}
+            return {'success': True, 'data': {}}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
     # ============ MISO API 연동 ============
 
     def miso_load_prompt(self):

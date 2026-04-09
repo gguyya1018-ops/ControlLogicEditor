@@ -597,9 +597,7 @@ async function loadFromSupabaseWithVersion(drawingNumber, pageNumber, version) {
         resetView();
     }, 50);
 
-    const drawingInfo = supabaseDrawings[drawingNumber]?.info || info;
-    const title = drawingInfo?.title || drawingNumber;
-    const drawingName = `${drawingNumber} - Page ${pageNumber} - ${title}`;
+    const drawingName = formatDrawingLabel(drawingNumber, pageNumber);
     setDrawingTitle(drawingName);
 
     // 최근 도면에 추가
@@ -808,7 +806,7 @@ async function loadFromDrawingsPath(dropFolder, drawingNumber, pageNumber) {
             resetView();
         }, 50);
 
-        const drawingName = `${drawingNumber} - Page ${pageNumber}`;
+        const drawingName = formatDrawingLabel(drawingNumber, pageNumber);
         setDrawingTitle(drawingName);
 
         // 최근 도면에 추가
@@ -1310,11 +1308,10 @@ function generateLLMText() {
 
     // TXT 생성 — LLM이 이해할 수 있는 자연어 기반 구조
     const lines = [];
-    const drawingTitle = currentDrawingName || `${currentDrawingNumber || '?'}-${currentPageNumber || '?'}`;
+    const drawingLabel = formatDrawingLabel(currentDrawingNumber || '?', currentPageNumber || '?');
 
     lines.push(`=== 도면 정보 ===`);
-    lines.push(`도면번호: ${currentDrawingNumber || '?'}, 페이지: ${currentPageNumber || '?'}`);
-    lines.push(`제목: ${drawingTitle}`);
+    lines.push(`도면: ${drawingLabel}`);
     lines.push('');
 
     // 심볼 사전 요약 (LLM이 블록 타입을 정확히 이해하도록)
@@ -1427,7 +1424,13 @@ function generateLLMText() {
         // REF_SIGNAL (D03-511-xx_... 형태)
         if (isRefSignal(otherBlock)) {
             const m = otherBlock.match(/^(D\d+-\d+-\d+)/);
-            return m ? `[외부참조 ${m[1].replace(/^D0*/, '')}]` : `[외부참조 ${otherBlock}]`;
+            if (m) {
+                const ref = parseRefSignal(m[1]);
+                const refTitle = ref ? getDrawingTitle(ref.task) : '';
+                const label = m[1];
+                return refTitle ? `[${label} ${refTitle}]` : `[${label}]`;
+            }
+            return `[${otherBlock}]`;
         }
         const osr = scanIdx[otherBlock] || {};
         const ogd = gd[otherBlock] || {};
@@ -1491,7 +1494,11 @@ function generateLLMText() {
         }
         lines.push(`=== 외부 참조 신호 (${Object.keys(refBlocks).length}개) ===`);
         for (const [drw, names] of Object.entries(refByDrawing)) {
-            lines.push(`도면 ${drw}: ${names.length}개 신호`);
+            // drw = "3-511" → task=511에서 제목 조회
+            const taskMatch = drw.match(/\d+-(\d+)/);
+            const taskNum = taskMatch ? taskMatch[1] : '';
+            const refTitle = taskNum ? getDrawingTitle(taskNum) : '';
+            lines.push(`${drw}${refTitle ? ' ' + refTitle : ''}: ${names.length}개 신호`);
         }
         lines.push('');
     }
