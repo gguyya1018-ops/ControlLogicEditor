@@ -285,17 +285,17 @@ function misoRenderList() {
         const equip = e.equipment_name || '';
 
         return `<div class="miso-item ${isSelected ? 'active' : ''}" onclick="misoSelectDrawing('${e.drawing_number}')">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight:600; color:#e0e0e0; font-size:12px;">${title}</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <span style="font-weight:600; color:#e2e8f0; font-size:13px;">${title}</span>
                 <div style="display:flex; gap:4px; align-items:center;">
-                    <span style="font-size:9px; color:${statusColor}; background:${statusColor}22; padding:2px 5px; border-radius:3px;">${realStatus}</span>
-                    <button class="btn btn-sm" onclick="event.stopPropagation(); misoDeleteDrawing('${e.drawing_number}')"
-                        style="font-size:8px; color:#f87171; padding:1px 4px; line-height:1;">X</button>
+                    <span style="font-size:9px; color:${statusColor}; background:${statusColor}15; padding:2px 6px; border-radius:10px; border:1px solid ${statusColor}33;">${realStatus}</span>
+                    <button onclick="event.stopPropagation(); misoDeleteDrawing('${e.drawing_number}')"
+                        style="background:none; border:none; font-size:10px; color:rgba(255,255,255,0.2); cursor:pointer; padding:2px;" title="삭제">✕</button>
                 </div>
             </div>
-            ${equip ? `<div style="font-size:10px; color:rgba(255,255,255,0.45); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${equip}</div>` : ''}
-            <div style="font-size:10px; color:rgba(255,255,255,0.25); margin-top:2px;">
-                ${date} | 분석 ${analysesCnt}회
+            ${equip ? `<div style="font-size:11px; color:rgba(255,255,255,0.5); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${equip}</div>` : ''}
+            <div style="font-size:10px; color:rgba(255,255,255,0.3);">
+                ${date} · 분석 ${analysesCnt}회
             </div>
         </div>`;
     }).join('');
@@ -398,13 +398,13 @@ function misoRenderDetail(drawingNum) {
     const hasAnalyzing = analysesList.some(a => a.status === '분석중');
     const dataSize = (entry.llm_text || '').length.toLocaleString();
 
-    // 헤더: 분석 실행 버튼만
+    // 헤더
     let html = `
-        <div style="padding:8px 12px; border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div style="padding:10px 16px; border-bottom:1px solid rgba(255,255,255,0.08); background:rgba(0,0,0,0.1);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-size:10px; color:rgba(255,255,255,0.3);">데이터 ${dataSize}자</span>
-                ${!hasAnalyzing ? `<button class="btn btn-sm" onclick="misoRunAnalysis('${drawingNum}')"
-                    style="background:#6366f1; color:#fff; font-size:10px;">분석 실행</button>` : ''}
+                <span style="font-size:11px; color:rgba(255,255,255,0.35);">블록 데이터 ${dataSize}자 · 분석 ${analysesList.length}회</span>
+                ${!hasAnalyzing ? `<button onclick="misoRunAnalysis('${drawingNum}')"
+                    style="background:linear-gradient(135deg,#6366f1,#7c3aed); color:#fff; font-size:11px; padding:5px 14px; border:none; border-radius:4px; cursor:pointer;">MISO 분석</button>` : ''}
             </div>
         </div>`;
 
@@ -417,14 +417,11 @@ function misoRenderDetail(drawingNum) {
         return;
     }
 
-    // 분석 목록 (상단 고정) + 선택된 분석 내용 (아래 스크롤)
+    // 전체를 하나의 스크롤 영역으로 — 목록 + 내용이 자연스럽게 흐름
     const openIdx = misoSelectedAnalysisIdx;
-    const openAnalysis = (openIdx !== undefined && openIdx >= 0 && openIdx < analysesList.length) ? analysesList[openIdx] : null;
 
-    html += `<div style="display:flex; flex-direction:column; height:calc(100% - 60px);">`;
+    html += `<div style="overflow-y:auto; height:calc(100% - 44px);">`;
 
-    // 분석 목록 (고정 영역)
-    html += `<div style="flex-shrink:0; max-height:${openAnalysis ? '120px' : '100%'}; overflow-y:auto; border-bottom:${openAnalysis ? '1px solid rgba(99,102,241,0.3)' : 'none'};">`;
     for (let i = analysesList.length - 1; i >= 0; i--) {
         const a = analysesList[i];
         const aDate = new Date(a.timestamp).toLocaleString('ko-KR');
@@ -438,7 +435,8 @@ function misoRenderDetail(drawingNum) {
                         : isError ? ' <span style="color:#f87171; font-size:9px; background:rgba(248,113,113,0.15); padding:1px 4px; border-radius:2px;">오류</span>' : '';
         const labelColor = isAnalyzing ? '#60a5fa' : isError ? '#f87171' : '#e0e0e0';
 
-        html += `<div class="miso-item ${isOpen ? 'active' : ''}" style="padding:6px 12px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;"
+        // 분석 항목 헤더
+        html += `<div class="miso-item ${isOpen ? 'active' : ''}" style="padding:6px 12px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.04);"
                  onclick="misoShowAnalysis('${drawingNum}', ${isOpen ? -1 : i})">
             <div style="display:flex; align-items:center; gap:6px; flex:1; min-width:0;">
                 <span style="font-size:9px; color:rgba(255,255,255,0.4);">${isAnalyzing ? '◌' : arrow}</span>
@@ -450,15 +448,14 @@ function misoRenderDetail(drawingNum) {
                 <button class="btn btn-sm" onclick="event.stopPropagation(); misoDeleteAnalysis('${drawingNum}', ${i})" style="font-size:9px; color:#f87171; padding:1px 5px;">X</button>
             </div>
         </div>`;
-    }
-    html += `</div>`;
 
-    // 선택된 분석 내용 (스크롤 영역)
-    if (openAnalysis) {
-        const resultHtml = misoMarkdownToHtml(openAnalysis.answer || '(응답 없음)');
-        html += `<div style="flex:1; overflow-y:auto; padding:16px; font-size:12px; line-height:1.7; color:#d0d0d0;">
-            ${resultHtml}
-        </div>`;
+        // 펼쳐진 내용 — 바로 아래에 표시
+        if (isOpen) {
+            const resultHtml = misoMarkdownToHtml(a.answer || '(응답 없음)');
+            html += `<div class="miso-content" style="border-bottom:1px solid rgba(99,102,241,0.15); background:rgba(0,0,0,0.1);">
+                ${resultHtml}
+            </div>`;
+        }
     }
 
     html += `</div>`;
@@ -489,21 +486,52 @@ function misoCopyResult(drawingNum, idx) {
     });
 }
 
-// 간단한 마크다운 → HTML 변환
+// 마크다운 → HTML 변환 (CSS 클래스 기반)
 function misoMarkdownToHtml(md) {
-    let html = md
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/^### (.+)$/gm, '<h4 style="color:#60a5fa; margin:16px 0 6px; font-size:13px;">$1</h4>')
-        .replace(/^## (.+)$/gm, '<h3 style="color:#818cf8; margin:18px 0 8px; font-size:14px;">$1</h3>')
-        .replace(/^# (.+)$/gm, '<h2 style="color:#a78bfa; margin:20px 0 10px; font-size:15px;">$1</h2>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#e0e0e0;">$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/`(.+?)`/g, '<code style="background:rgba(255,255,255,0.06); padding:1px 4px; border-radius:2px; font-size:11px;">$1</code>')
-        .replace(/^- (.+)$/gm, '<div style="padding-left:12px;">• $1</div>')
-        .replace(/^\d+\. (.+)$/gm, '<div style="padding-left:12px;">$&</div>')
-        .replace(/^```([\s\S]*?)```/gm, '<pre style="background:rgba(0,0,0,0.3); padding:8px; border-radius:4px; font-size:11px; overflow-x:auto;">$1</pre>')
-        .replace(/\n\n/g, '<br><br>')
-        .replace(/\n/g, '<br>');
+    // HTML 이스케이프
+    let html = md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+    // 코드 블록 (``` ... ```)
+    html = html.replace(/```([a-z]*)\n?([\s\S]*?)```/gm, (m, lang, code) => `<pre><code>${code.trim()}</code></pre>`);
+
+    // 테이블 파싱 (| col | col | 형식)
+    html = html.replace(/((?:^\|.+\|$\n?)+)/gm, (tableBlock) => {
+        const rows = tableBlock.trim().split('\n').filter(r => r.trim());
+        if (rows.length < 2) return tableBlock;
+        let table = '<table>';
+        rows.forEach((row, idx) => {
+            const cells = row.split('|').filter(c => c.trim() !== '');
+            // 구분선(---) 건너뛰기
+            if (cells.every(c => /^[\s-:]+$/.test(c))) return;
+            const tag = idx === 0 ? 'th' : 'td';
+            const tr = cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join('');
+            table += `<tr>${tr}</tr>`;
+        });
+        table += '</table>';
+        return table;
+    });
+
+    // 헤딩
+    html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+    html = html.replace(/^### (.+)$/gm, '<h4>$1</h4>');
+    html = html.replace(/^## (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^# (.+)$/gm, '<h2>$1</h2>');
+
+    // 인라인 스타일
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    html = html.replace(/`(.+?)`/g, '<code>$1</code>');
+
+    // 리스트
+    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>\n?)+/gm, (m) => `<ul>${m}</ul>`);
+
+    // 줄바꿈
+    html = html.replace(/\n\n/g, '</p><p>');
+    html = html.replace(/\n/g, '<br>');
+    html = `<p>${html}</p>`;
+    html = html.replace(/<p><\/p>/g, '');
+
     return html;
 }
 

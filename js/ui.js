@@ -1572,8 +1572,8 @@ async function goHome() {
     const welcomeScreen = document.getElementById('welcome-screen');
     const isDrawingOpen = welcomeScreen && welcomeScreen.classList.contains('hidden');
 
-    if (isDrawingOpen && blocks.length > 0) {
-        // 도면 수정 중 → 3버튼 저장 확인 팝업
+    if (isDrawingOpen && blocks.length > 0 && isEdited) {
+        // 변경사항 있을 때만 저장 확인 팝업
         const result = await showGoHomeConfirm();
         if (result === 'cancel') return;
         if (result === 'save') {

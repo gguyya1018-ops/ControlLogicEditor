@@ -989,14 +989,41 @@ select.form-input option {
 
 /* ===== 미소사전 스타일 ===== */
 .miso-container { display:flex; height:100%; }
-.miso-sidebar { width:240px; min-width:200px; border-right:1px solid rgba(255,255,255,0.06); overflow-y:auto; }
-.miso-detail { flex:1; overflow-y:auto; display:flex; flex-direction:column; }
-.miso-item { padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.04); cursor:pointer; transition:background 0.15s; }
-.miso-item:hover { background:rgba(255,255,255,0.04); }
-.miso-item.active { background:rgba(99,102,241,0.15); border-left:2px solid #6366f1; }
-#miso-result-content h2, #miso-result-content h3, #miso-result-content h4 { margin-top:16px; }
-#miso-result-content pre { margin:8px 0; }
-#miso-result-content code { font-family:'Consolas','Courier New',monospace; }
+.miso-sidebar {
+    width:280px; min-width:240px; max-width:320px;
+    border-right:1px solid rgba(255,255,255,0.08);
+    overflow-y:auto;
+    background:rgba(0,0,0,0.15);
+}
+.miso-detail { flex:1; overflow:hidden; display:flex; flex-direction:column; }
+.miso-item {
+    padding:12px 16px;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+    cursor:pointer;
+    transition:all 0.15s ease;
+}
+.miso-item:hover { background:rgba(255,255,255,0.05); }
+.miso-item.active {
+    background:rgba(99,102,241,0.12);
+    border-left:3px solid #6366f1;
+    padding-left:13px;
+}
+
+/* 분석 내용 마크다운 스타일 */
+.miso-content { padding:24px 28px; font-size:13px; line-height:1.8; color:#d4d4d8; }
+.miso-content h2 { color:#a78bfa; font-size:16px; margin:28px 0 12px; padding-bottom:6px; border-bottom:1px solid rgba(167,139,250,0.2); }
+.miso-content h3 { color:#818cf8; font-size:14px; margin:22px 0 10px; }
+.miso-content h4 { color:#60a5fa; font-size:13px; margin:18px 0 8px; }
+.miso-content strong { color:#e2e8f0; }
+.miso-content table { width:100%; border-collapse:collapse; margin:12px 0; font-size:12px; }
+.miso-content th { background:rgba(99,102,241,0.15); color:#c4b5fd; text-align:left; padding:8px 12px; border:1px solid rgba(255,255,255,0.08); font-weight:600; }
+.miso-content td { padding:6px 12px; border:1px solid rgba(255,255,255,0.06); color:#d4d4d8; }
+.miso-content tr:hover td { background:rgba(255,255,255,0.03); }
+.miso-content pre { background:rgba(0,0,0,0.3); padding:12px 16px; border-radius:6px; font-size:11px; overflow-x:auto; border:1px solid rgba(255,255,255,0.06); margin:10px 0; }
+.miso-content code { font-family:'Consolas','Courier New',monospace; background:rgba(99,102,241,0.1); padding:1px 5px; border-radius:3px; font-size:11.5px; color:#c4b5fd; }
+.miso-content ul, .miso-content ol { padding-left:20px; margin:8px 0; }
+.miso-content li { margin:4px 0; }
+.miso-content blockquote { border-left:3px solid #6366f1; padding-left:12px; margin:10px 0; color:rgba(255,255,255,0.6); }
 </style>
 
 <!-- JavaScript Modules - 순서 중요! -->
@@ -1012,8 +1039,8 @@ select.form-input option {
 <script src="js/templates.js?v=20260326"></script>
 <script src="js/graph.js?v=20260326"></script>
 <script src="js/fileIO.js?v=20260409j"></script>
-<script src="js/miso.js?v=20260409r"></script>
-<script src="js/ui.js?v=20260409c"></script>
+<script src="js/miso.js?v=20260409t"></script>
+<script src="js/ui.js?v=20260409d"></script>
 <script src="js/pid.js?v=20260326"></script>
 <script src="js/splitView.js?v=20260326"></script>
 <script src="js/app.js?v=20260409a"></script>
