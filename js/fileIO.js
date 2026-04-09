@@ -528,8 +528,7 @@ function renderFlatList(content, pages) {
     const html = pages.map(item => `
         <div class="drawing-list-item" onclick="loadFromSupabaseWithVersion('${item.drawingNum}', ${item.pageNum}, 'original')">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-                <span class="name" style="font-weight:bold;">${item.drawingNum} - Page ${item.pageNum}</span>
-                <span style="font-size:11px; color:#888;">Drop ${item.drop}</span>
+                <span class="name" style="font-weight:bold;">${formatDrawingId(item.drawingNum, item.pageNum)}</span>
             </div>
             <span class="info" style="font-size:12px; color:#666;">${item.title}</span>
         </div>
@@ -562,7 +561,7 @@ function renderGroupedByDrop(content, pages) {
         for (const item of group.drawings) {
             html += `
                 <div class="drawing-list-item" onclick="loadFromSupabaseWithVersion('${item.drawingNum}', ${item.pageNum}, 'original')">
-                    <span class="name">${item.drawingNum} - Page ${item.pageNum}</span>
+                    <span class="name">${formatDrawingId(item.drawingNum, item.pageNum)}</span>
                     <span class="info">${item.title}</span>
                 </div>`;
         }
@@ -575,6 +574,9 @@ function renderGroupedByDrop(content, pages) {
 async function loadFromSupabaseWithVersion(drawingNumber, pageNumber, version) {
     closeDrawingList();
     hideWelcomeScreen();
+
+    // 이전 선택 초기화 (하이라이트 잔상 방지, pendingTagHighlight는 유지)
+    selectedElement = null;
 
     currentDrawingNumber = drawingNumber;
     currentPageNumber = pageNumber;
@@ -599,10 +601,10 @@ async function loadFromSupabaseWithVersion(drawingNumber, pageNumber, version) {
 
     const drawingName = formatDrawingLabel(drawingNumber, pageNumber);
     setDrawingTitle(drawingName);
+    drawingNavPush(drawingNumber, pageNumber, '');
 
-    // 최근 도면에 추가
+    // 도면 ID 설정 (최근 목록은 저장 시에만 추가)
     currentDrawingId = `${drawingNumber}_page_${pageNumber}`;
-    addToRecentDrawings(currentDrawingId, drawingName, currentFilePath);
 }
 
 async function loadVectorLines(drawingNumber, pageNumber) {
@@ -751,6 +753,8 @@ async function loadFromDrawingsPath(dropFolder, drawingNumber, pageNumber) {
     closeDrawingList();
     hideWelcomeScreen();
 
+    selectedElement = null;
+
     currentDrawingNumber = drawingNumber;
     currentPageNumber = pageNumber;
     currentVersion = 'original';
@@ -808,10 +812,10 @@ async function loadFromDrawingsPath(dropFolder, drawingNumber, pageNumber) {
 
         const drawingName = formatDrawingLabel(drawingNumber, pageNumber);
         setDrawingTitle(drawingName);
+        drawingNavPush(drawingNumber, pageNumber, filePath || '');
 
         // 최근 도면에 추가
         currentDrawingId = `${drawingNumber}_page_${pageNumber}`;
-        addToRecentDrawings(currentDrawingId, drawingName, currentFilePath);
 
     } catch(e) {
         console.error('Error loading from drawings path:', e);
@@ -2445,6 +2449,8 @@ async function loadDrawing(drawingId, filePath = null) {
                     // 제목 설정
                     const name = recentDrawings.find(d => d.id === drawingId)?.name || drawingId;
                     setDrawingTitle(name);
+                    selectedElement = null;
+                    drawingNavPush(currentDrawingNumber, currentPageNumber, filePath);
                     console.log('saved 폴더에서 로드:', filePath);
                     return;
                 }

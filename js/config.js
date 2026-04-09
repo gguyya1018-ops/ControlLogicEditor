@@ -236,6 +236,63 @@ let currentListFolder = 'original';
 let supabaseDrawings = {};
 let localDrawingIndex = {};
 
+// ============ 도면 네비게이션 히스토리 ============
+let drawingNavHistory = [];
+let drawingNavIndex = -1;
+let drawingNavSkipPush = false; // back/forward 시 push 방지
+
+function drawingNavPush(drawingNum, pageNum, filePath) {
+    if (drawingNavSkipPush) { drawingNavSkipPush = false; return; }
+    // 현재 위치 이후의 히스토리 삭제 (새 분기)
+    if (drawingNavIndex < drawingNavHistory.length - 1) {
+        drawingNavHistory = drawingNavHistory.slice(0, drawingNavIndex + 1);
+    }
+    // 중복 방지
+    const last = drawingNavHistory[drawingNavHistory.length - 1];
+    if (last && last.drawingNum === drawingNum && last.pageNum === pageNum) return;
+    // drawingId도 저장 (recent에서 찾을 수 있도록)
+    const drawingId = currentDrawingId || `${drawingNum}_page_${pageNum}`;
+    drawingNavHistory.push({ drawingNum, pageNum, filePath: filePath || currentFilePath || '', drawingId });
+    if (drawingNavHistory.length > 30) drawingNavHistory.shift();
+    drawingNavIndex = drawingNavHistory.length - 1;
+    updateDrawingNavButtons();
+}
+
+async function drawingNavBack() {
+    if (drawingNavIndex <= 0) return;
+    drawingNavIndex--;
+    drawingNavSkipPush = true;
+    await drawingNavLoad(drawingNavHistory[drawingNavIndex]);
+    updateDrawingNavButtons();
+}
+
+async function drawingNavForward() {
+    if (drawingNavIndex >= drawingNavHistory.length - 1) return;
+    drawingNavIndex++;
+    drawingNavSkipPush = true;
+    await drawingNavLoad(drawingNavHistory[drawingNavIndex]);
+    updateDrawingNavButtons();
+}
+
+async function drawingNavLoad(entry) {
+    // 이전 선택/하이라이트 초기화
+    selectedElement = null;
+
+    // 저장된 파일이면 loadDrawing 사용
+    if (entry.filePath && entry.filePath.startsWith('saved/')) {
+        await loadDrawing(entry.drawingId, entry.filePath);
+    } else if (entry.drawingNum) {
+        await loadFromSupabaseWithVersion(entry.drawingNum, entry.pageNum, 'original');
+    }
+}
+
+function updateDrawingNavButtons() {
+    const backBtn = document.getElementById('nav-back-btn');
+    const fwdBtn = document.getElementById('nav-forward-btn');
+    if (backBtn) backBtn.disabled = drawingNavIndex <= 0;
+    if (fwdBtn) fwdBtn.disabled = drawingNavIndex >= drawingNavHistory.length - 1;
+}
+
 // ============ 도면 인덱스 (drawing_index.json) ============
 let drawingIndex = {};
 

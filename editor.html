@@ -180,6 +180,11 @@
             <button class="tool-btn" id="toolShowVLines" onclick="toggleVectorLines()" title="벡터 라인 (V)" style="color:#4488ff;">V</button>
             <button class="tool-btn active" id="toolShowConnLines" onclick="toggleConnectionLines()" title="적용된 연결 표시 (C)" style="color:#00e676;">C</button>
         </div>
+        <div class="tool-divider"></div>
+        <div class="tool-group">
+            <button class="tool-btn" id="nav-back-btn" onclick="drawingNavBack()" disabled title="이전 도면 (←)">◀</button>
+            <button class="tool-btn" id="nav-forward-btn" onclick="drawingNavForward()" disabled title="다음 도면 (→)">▶</button>
+        </div>
     </div>
 
     <!-- ===== P&ID TOOL PANEL ===== -->
@@ -401,7 +406,7 @@
                             <button class="btn" onclick="loadFromLocal()">💾 로컬 파일</button>
                         </div>
                         <div class="home-card-recent">
-                            <h4>최근 열었던 도면</h4>
+                            <h4>최근 저장한 도면</h4>
                             <div class="home-recent-list" id="home-logic-recent">
                                 <p class="text-muted">최근 항목 없음</p>
                             </div>
@@ -995,7 +1000,7 @@ select.form-input option {
 </style>
 
 <!-- JavaScript Modules - 순서 중요! -->
-<script src="js/config.js?v=20260409a"></script>
+<script src="js/config.js?v=20260409d"></script>
 <script src="js/utils.js?v=20260326"></script>
 <script src="js/data.js?v=20260326"></script>
 <script src="js/canvas.js?v=20260407g"></script>
@@ -1006,9 +1011,9 @@ select.form-input option {
 <script src="js/blockTypes.js?v=20260406"></script>
 <script src="js/templates.js?v=20260326"></script>
 <script src="js/graph.js?v=20260326"></script>
-<script src="js/fileIO.js?v=20260409d"></script>
+<script src="js/fileIO.js?v=20260409j"></script>
 <script src="js/miso.js?v=20260409r"></script>
-<script src="js/ui.js?v=20260408a"></script>
+<script src="js/ui.js?v=20260409c"></script>
 <script src="js/pid.js?v=20260326"></script>
 <script src="js/splitView.js?v=20260326"></script>
 <script src="js/app.js?v=20260409a"></script>

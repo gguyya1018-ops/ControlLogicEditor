@@ -589,6 +589,23 @@ function updateSelectionInfo() {
         html += `</div>`;
     }
 
+    // REF_SIGNAL / SHEET_REF: 도면 이동 버튼
+    if (e.type === 'REF_SIGNAL' || e.type === 'SHEET_REF' || /^D\d+-\d+-\d+/.test(e.name)) {
+        const ref = typeof parseRefSignal === 'function' ? parseRefSignal(e.name) : null;
+        if (ref) {
+            const refId = `D${ref.drop.padStart(2,'0')}-${ref.task}-${ref.sheet}`;
+            const refTitle = typeof getDrawingTitle === 'function' ? getDrawingTitle(ref.task) : '';
+            html += `
+                <div style="margin-top:8px; padding:8px; background:rgba(0,188,212,0.08); border:1px solid rgba(0,188,212,0.2); border-radius:6px;">
+                    <div style="font-size:10px; font-weight:600; color:#00bcd4; margin-bottom:6px;">참조 도면</div>
+                    <div style="font-size:11px; color:#f0a050; font-weight:600;">${refId}</div>
+                    ${refTitle ? `<div style="font-size:10px; color:rgba(255,255,255,0.6); margin-top:2px;">${refTitle}</div>` : ''}
+                    <button class="btn-primary" style="width:100%; margin-top:8px; font-size:11px; background:#00bcd4;"
+                        onclick="openDrawingFromTag('${ref.task}','','${e.name.replace(/'/g, "\\'")}')">도면 열기</button>
+                </div>`;
+        }
+    }
+
     if (['PORT', 'BLOCK_TYPE', 'SHEET_REF', 'JUNCTION'].includes(e.type)) {
         const validBlocks = blocks
             .filter(b => isBlockType(b.type) && !isPortLikeName(b.name))
@@ -2705,15 +2722,24 @@ function highlightMatch(text, query) {
 let pendingTagHighlight = null;
 
 async function openDrawingFromTag(drawingNum, fullNum, tagName) {
-    // drawingNum: "056", fullNum: "3-056"
+    // drawingNum: "056" 또는 "511"
+    let pages = null;
+
+    // 1. supabaseDrawings에서 찾기
     if (supabaseDrawings[drawingNum]) {
         const info = supabaseDrawings[drawingNum].info;
-        const pages = info.pages || [info.first_page];
-        pendingTagHighlight = tagName || null;
-        closeTagSearchResults();
-        document.getElementById('tag-search-input').blur();
+        pages = info.pages || [info.first_page];
+    }
+    // 2. drawingIndex (drawing_index.json)에서 찾기
+    if (!pages && drawingIndex[drawingNum]) {
+        pages = drawingIndex[drawingNum].pages || [];
+    }
 
-        // 태그가 있는 페이지 찾기 (여러 페이지 중 정확한 페이지 탐색)
+    if (pages && pages.length > 0) {
+        pendingTagHighlight = tagName || null;
+        const searchInput = document.getElementById('tag-search-input');
+        if (searchInput) { closeTagSearchResults(); searchInput.blur(); }
+
         let targetPage = pages[0];
         if (tagName && pages.length > 1) {
             const foundPage = await findPageWithTag(drawingNum, pages, tagName);
@@ -2725,7 +2751,7 @@ async function openDrawingFromTag(drawingNum, fullNum, tagName) {
             setTimeout(() => focusOnTag(pendingTagHighlight), 500);
         }
     } else {
-        showToast(`도면 ${fullNum} (${drawingNum})이 로컬에 없습니다`, 'warning');
+        showToast(`도면 ${drawingNum}을(를) 찾을 수 없습니다`, 'warning');
     }
 }
 
@@ -3530,11 +3556,20 @@ function openScanDetailPopup(blockName) {
             refConnHtml = `<div style="margin-top:6px; font-size:9px; color:rgba(255,255,255,0.3);">연결된 블록 없음 (포트사전에 미등록)</div>`;
         }
 
+        // 도면 이동 버튼 생성
+        const ref = typeof parseRefSignal === 'function' ? parseRefSignal(blockName) : null;
+        const refTask = ref ? ref.task : '';
+        const refTitle = refTask && typeof getDrawingTitle === 'function' ? getDrawingTitle(refTask) : '';
+        const refLabel = ref ? `D${ref.drop.padStart(2,'0')}-${ref.task}-${ref.sheet}` : refDrw;
+        const goBtn = refTask ? `<button class="btn btn-sm" onclick="openDrawingFromTag('${refTask}','','${blockName.replace(/'/g, "\\'")}')"
+            style="font-size:10px; background:#00bcd4; color:#fff; padding:3px 10px; margin-top:6px;">도면 ${refLabel} 열기</button>` : '';
+
         refSignalSection = `
             <div style="margin-bottom:12px; padding:8px 10px; background:rgba(0,188,212,0.08); border:1px solid rgba(0,188,212,0.2); border-radius:6px;">
                 <div style="font-size:10px; font-weight:600; color:#00bcd4; margin-bottom:4px;">외부 참조 신호</div>
-                ${refDrw ? `<div style="font-size:11px; color:rgba(255,255,255,0.7);">출처 도면: <span style="color:#f0a050; font-weight:600;">${refDrw}</span></div>` : ''}
+                <div style="font-size:11px; color:rgba(255,255,255,0.7);">출처: <span style="color:#f0a050; font-weight:600;">${refLabel}</span>${refTitle ? ` <span style="color:rgba(255,255,255,0.5);">${refTitle}</span>` : ''}</div>
                 ${sigDesc ? `<div style="font-size:11px; color:#e0e0e0; margin-top:4px; font-weight:500;">${sigDesc}</div>` : ''}
+                ${goBtn}
                 ${refConnHtml}
             </div>`;
     }
