@@ -224,7 +224,7 @@ async function updateWelcomeStats() {
         if (el) el.textContent = val.toLocaleString();
     };
     setVal('ws-pages', pageCount);
-    setVal('ws-tags', tagCount);
+    setVal('ws-tags', drawingCount);
     setVal('ws-drops', Object.keys(drops).length);
 
     // Drop 목록 (사이드바용)
