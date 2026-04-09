@@ -17,12 +17,12 @@ let showGraphEdges = false;
 
 // ============ 설정 ============
 const GRAPH_CONFIG = {
-    portSearchRadius: 30,    // 포트 근처 라인 검색 반경 (px)
-    lineSnapThreshold: 15,   // 라인 끝점 연결 거리 (px)
+    portSearchRadius: 22,    // 포트 근처 라인 검색 반경 (px)
+    lineSnapThreshold: 22,   // 라인 끝점 연결 거리 (px)
     extensionMaxDist: 800,   // 라인 연장 최대 거리 (px)
-    extensionSnapRadius: 30, // 연장선이 포트에 도달하는 판정 반경 (px)
-    maxLineLength: 800,      // 최대 라인 길이 (필터링)
-    maxChainDepth: 100,      // 체인 최대 깊이
+    extensionSnapRadius: 22, // 연장선이 포트에 도달하는 판정 반경 (px)
+    maxLineLength: 2000,     // 최대 라인 길이 (vlines에 긴 라인 있음)
+    maxChainDepth: 300,      // 체인 최대 깊이
 };
 
 // ============ 1단계: 라인 전처리 ============
@@ -699,11 +699,11 @@ function runAutoConnect() {
     }
 
     // 5. 라인 검색 함수
-    const SNAP_RADIUS = 30;  // 포트좌표~라인끝점 허용거리
-    const PORT_MATCH_RADIUS = 35;  // 포트 매칭 반경
-    // 짧은 대각선 라인(심볼 내부) 필터: 수평/수직 짧은 라인은 연결선이므로 유지
-    const MIN_LINE_LEN = 25;  // 최소 라인 길이
-    const DIAG_THRESHOLD = 5;
+    const SNAP_RADIUS = 22;  // 포트좌표~라인끝점 허용거리 (테스트 최적값)
+    const PORT_MATCH_RADIUS = 22;  // 포트 매칭 반경
+    // vlines 사용 시 대각선도 유효한 연결선이므로 필터 완화
+    const MIN_LINE_LEN = 3;   // 최소 라인 길이 (vlines는 깨끗)
+    const DIAG_THRESHOLD = 999; // 대각선 필터 비활성화
     const shortLineSet = new Set();
     for (const line of lines) {
         const len = Math.hypot(line.x2 - line.x1, line.y2 - line.y1);
