@@ -596,6 +596,231 @@ class Api:
             return {'success': False, 'error': str(e)}
 
 
+    # ============ MISO API 연동 ============
+
+    def miso_load_prompt(self):
+        """MISO 분석 프롬프트 로드 (data/miso_prompt.md)"""
+        prompt_path = DATA_DIR / 'miso_prompt.md'
+        try:
+            if prompt_path.exists():
+                with open(prompt_path, 'r', encoding='utf-8') as f:
+                    return {'success': True, 'data': f.read()}
+            return {'success': True, 'data': ''}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def miso_save_prompt(self, content):
+        """MISO 분석 프롬프트 저장"""
+        prompt_path = DATA_DIR / 'miso_prompt.md'
+        try:
+            with open(prompt_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+            return {'success': True}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def miso_load_config(self):
+        """MISO 설정 로드"""
+        config_path = DATA_DIR / 'miso_config.json'
+        try:
+            if config_path.exists():
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    return {'success': True, 'data': json.load(f)}
+            return {'success': True, 'data': {'api_key': '', 'api_url': 'https://api.holdings.miso.gs/ext/v1/chat', 'user': 'editor_user'}}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def miso_save_config(self, config):
+        """MISO 설정 저장"""
+        config_path = DATA_DIR / 'miso_config.json'
+        try:
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(config, f, ensure_ascii=False, indent=2)
+            return {'success': True}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def miso_load_analyses(self):
+        """MISO 분석 결과 로드"""
+        path = DATA_DIR / 'miso_analyses.json'
+        try:
+            if path.exists():
+                with open(path, 'r', encoding='utf-8') as f:
+                    return {'success': True, 'data': json.load(f)}
+            return {'success': True, 'data': {}}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def miso_save_analyses(self, data):
+        """MISO 분석 결과 저장"""
+        path = DATA_DIR / 'miso_analyses.json'
+        try:
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return {'success': True}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    # MISO 비동기 작업 저장소 (클래스 변수)
+    _miso_tasks = {}
+
+    def miso_chat_async(self, query, conversation_id='', drawing_num='', analysis_timestamp=''):
+        """MISO Chat API 비동기 — 즉시 task_id 반환, 스레드에서 직접 HTTP 호출 + 파일 저장"""
+        import threading, uuid, urllib.request, urllib.error
+        task_id = str(uuid.uuid4())[:8]
+        Api._miso_tasks[task_id] = {'status': 'running', 'result': None}
+
+        # 설정 미리 읽기 (메인 스레드에서)
+        config_path = DATA_DIR / 'miso_config.json'
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+        except Exception:
+            Api._miso_tasks[task_id] = {'status': 'done', 'result': {'success': False, 'error': 'MISO 설정 없음'}}
+            return {'success': True, 'task_id': task_id}
+
+        api_key = config.get('api_key', '')
+        api_url = config.get('api_url', 'https://api.holdings.miso.gs/ext/v1/chat')
+        user = config.get('user', 'editor_user')
+
+        def run():
+            # 스레드에서 직접 HTTP 호출 (self 사용 안 함)
+            result = {'success': False, 'error': '알 수 없는 오류'}
+            try:
+                payload = json.dumps({
+                    'query': query, 'mode': 'blocking',
+                    'conversation_id': conversation_id,
+                    'user': user, 'inputs': {}
+                }).encode('utf-8')
+                req = urllib.request.Request(api_url, data=payload, headers={
+                    'Content-Type': 'application/json',
+                    'Authorization': f'Bearer {api_key}'
+                })
+                with urllib.request.urlopen(req, timeout=300) as resp:
+                    r = json.loads(resp.read().decode('utf-8'))
+                    answer = ''
+                    conv_id = conversation_id
+                    if isinstance(r.get('data'), dict):
+                        answer = r['data'].get('answer', r['data'].get('text', ''))
+                        conv_id = r['data'].get('conversation_id', conversation_id)
+                    if not answer:
+                        answer = r.get('answer', r.get('message', ''))
+                        conv_id = r.get('conversation_id', conv_id)
+                    result = {'success': True, 'answer': answer, 'conversation_id': conv_id}
+            except urllib.error.HTTPError as e:
+                body = e.read().decode('utf-8', errors='replace')[:200]
+                result = {'success': False, 'error': f'API 오류 ({e.code}): {body}'}
+            except Exception as e:
+                result = {'success': False, 'error': str(e)[:200]}
+
+            Api._miso_tasks[task_id] = {'status': 'done', 'result': result}
+            print(f'[MISO] 스레드 완료: success={result.get("success")}, answer_len={len(result.get("answer",""))}')
+
+            # 파일에 직접 저장
+            if drawing_num and analysis_timestamp:
+                try:
+                    path = DATA_DIR / 'miso_analyses.json'
+                    analyses = {}
+                    if path.exists():
+                        with open(path, 'r', encoding='utf-8') as f:
+                            analyses = json.load(f)
+                    entry = analyses.get(drawing_num)
+                    if entry and entry.get('analyses'):
+                        for a in entry['analyses']:
+                            if a.get('timestamp') == analysis_timestamp:
+                                if result.get('success') and result.get('answer'):
+                                    a['status'] = '완료'
+                                    a['answer'] = result['answer']
+                                    a['label'] = a.get('label', '').replace('(분석중...)', '').strip()
+                                    a['conversation_id'] = result.get('conversation_id', '')
+                                    entry['status'] = '완료'
+                                    entry['conversation_id'] = result.get('conversation_id', '')
+                                else:
+                                    a['status'] = '오류'
+                                    a['answer'] = result.get('error', '응답 없음')
+                                    a['label'] = a.get('label', '').replace('(분석중...)', '(오류)')
+                                    entry['status'] = '오류'
+                                break
+                        with open(path, 'w', encoding='utf-8') as f:
+                            json.dump(analyses, f, ensure_ascii=False, indent=2)
+                        print(f'[MISO] 파일 저장 완료: {drawing_num}')
+                except Exception as e:
+                    print(f'[MISO] 파일 저장 오류: {e}')
+
+        t = threading.Thread(target=run, daemon=True)
+        t.start()
+        return {'success': True, 'task_id': task_id}
+
+    def miso_check_task(self, task_id):
+        """비동기 작업 결과 확인"""
+        task = Api._miso_tasks.get(task_id)
+        if not task:
+            return {'success': False, 'error': 'Task not found'}
+        if task['status'] == 'running':
+            return {'success': True, 'status': 'running'}
+        result = task['result']
+        del Api._miso_tasks[task_id]
+        return {'success': True, 'status': 'done', 'result': result}
+
+    def miso_chat(self, query, conversation_id=''):
+        """MISO Chat API 호출 (urllib 사용, CORS 우회)"""
+        import urllib.request
+        import urllib.error
+
+        # 설정 로드
+        config_path = DATA_DIR / 'miso_config.json'
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+        except Exception:
+            return {'success': False, 'error': 'MISO 설정 파일을 찾을 수 없습니다. 설정에서 API 키를 입력하세요.'}
+
+        api_key = config.get('api_key', '')
+        api_url = config.get('api_url', 'https://api.holdings.miso.gs/ext/v1/chat')
+        user = config.get('user', 'editor_user')
+
+        if not api_key:
+            return {'success': False, 'error': 'MISO API 키가 설정되지 않았습니다. 미소사전 설정에서 입력하세요.'}
+
+        payload = json.dumps({
+            'query': query,
+            'mode': 'blocking',
+            'conversation_id': conversation_id,
+            'user': user,
+            'inputs': {}
+        }).encode('utf-8')
+
+        req = urllib.request.Request(
+            api_url,
+            data=payload,
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {api_key}'
+            }
+        )
+
+        try:
+            with urllib.request.urlopen(req, timeout=300) as resp:
+                result = json.loads(resp.read().decode('utf-8'))
+                # MISO 응답: data.answer 또는 answer 또는 data.outputs.text
+                answer = ''
+                conv_id = conversation_id
+                if isinstance(result.get('data'), dict):
+                    answer = result['data'].get('answer', result['data'].get('text', ''))
+                    conv_id = result['data'].get('conversation_id', conversation_id)
+                if not answer:
+                    answer = result.get('answer', result.get('message', ''))
+                    conv_id = result.get('conversation_id', conv_id)
+                return {'success': True, 'answer': answer, 'conversation_id': conv_id}
+        except urllib.error.HTTPError as e:
+            body = e.read().decode('utf-8', errors='replace')
+            return {'success': False, 'error': f'MISO API 오류 ({e.code}): {body[:200]}'}
+        except urllib.error.URLError as e:
+            return {'success': False, 'error': f'네트워크 오류: {str(e.reason)}'}
+        except Exception as e:
+            return {'success': False, 'error': f'MISO 요청 실패: {str(e)}'}
+
+
 def main():
     import webview
 

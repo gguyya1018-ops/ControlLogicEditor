@@ -1,0 +1,166 @@
+app:
+  description: ''
+  icon: ''
+  icon_background: ''
+  memory_config: null
+  mode: advanced-chat
+  name: ControlLogicAI 도면분석 v1
+  use_icon_as_answer_icon: false
+kind: app
+version: 0.1.5
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      image:
+        enabled: false
+      number_limits: 10
+    opening_statement: ''
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        sourceType: start
+        targetType: llm
+      id: 1775521632400-source-1775521632402-target
+      selected: false
+      source: '1775521632400'
+      sourceHandle: source
+      target: '1775521632402'
+      targetHandle: target
+      type: custom
+    - data:
+        sourceType: llm
+        targetType: answer
+      id: 1775521632402-source-1775521632403-target
+      selected: false
+      source: '1775521632402'
+      sourceHandle: source
+      target: '1775521632403'
+      targetHandle: target
+      type: custom
+    nodes:
+    - data:
+        _connectedSourceHandleIds:
+        - source
+        _connectedTargetHandleIds: []
+        _inParallelHovering: false
+        _isEntering: false
+        _runningStatus: none
+        _waitingRun: false
+        desc: ''
+        selected: false
+        title: 시작
+        type: start
+        variables: []
+      id: '1775521632400'
+      position:
+        x: 80
+        y: 282
+      selected: false
+      type: custom
+    - data:
+        _connectedSourceHandleIds:
+        - source
+        _connectedTargetHandleIds:
+        - target
+        _inParallelHovering: false
+        _isEntering: false
+        _runningStatus: none
+        _waitingRun: false
+        context:
+          enabled: false
+          variable_selector: []
+        desc: ''
+        model:
+          completion_params:
+            max_tokens: 19560
+            temperature: 0.15
+          mode: chat
+          name: gpt-5.4-pro
+          provider: openai
+          registered_provider_id: 13f15379-37fd-4433-9968-0d9e8388fbe8
+        prompt_template:
+        - role: system
+          text: "당신은 화력발전소 DCS(Distributed Control System) 제어 로직 분석 전문가입니다.\n  사용자가\
+            \ Ovation DCS 제어 로직 도면의 블록/포트/연결 데이터를 전송하면, 아래 형식으로\n   분석 결과를 정리합니다.\n\
+            \n  [입력 데이터 형식]\n  - 블록: [블록명] 타입 — 설명\n  - 포트: ← 입력포트 (설명) : 연결대상  /\
+            \  → 출력포트 (설명) : 연결대상\n  - 외부참조: D03-XXX-YY 형식 (다른 도면의 신호)\n  - SIGNAL:\
+            \ ISA 태그 (SIT, TIT, PIT 등 = 현장 계측기)\n\n  [분석 규칙]\n  - 반드시 연결(connections)을\
+            \ 실제로 끝까지 추적하여 구체적인 결론을 도출할 것\n  - \"확인해야 합니다\" \"분석해야 합니다\" 같은 방법론 설명\
+            \ 금지. 직접 추적해서 결과를\n  말할 것\n  - 센서→중간블록→PID→M/A/C→최종출력까지 전체 체인을 빠짐없이 따라갈\
+            \ 것\n  - 병렬 구조(A/B/C/D 채널 등)가 있으면 패턴을 식별하고 대표 1개만 상세 분석, 나머지는\n  요약\n\n\
+            \  [출력 형식]\n\n  ## 1. 도면 개요\n  - 제어 대상 설비 (무엇을 제어하는 도면인지)\n  - 제어 목적 (속도,\
+            \ 온도, 압력, 유량 등)\n  - 병렬 채널 수 (동일 구조 반복 여부)\n\n  ## 2. 제어 대상 설비 목록\n  |\
+            \ 채널 | 측정 센서 | 설비명 | 제어 출력 |\n  표 형식으로 정리\n\n  ## 3. 피드백 제어 루프\n  각 PID\
+            \ 블록에 대해:\n  - PV (측정값): 어떤 센서에서 오는지, 무엇을 측정하는지\n  - STPT (설정값): 어디서 오는지\
+            \ (설정값 선택 로직 참조)\n  - OUT (제어출력): 어디로 가는지, 최종 출력까지의 경로\n\n  ## 4. 설정값(STPT)\
+            \ 선택 로직\n  Transfer(T) 블록 체인을 추적하여:\n  - 각 분기 조건 (FLAG 신호의 의미 추정)\n  -\
+            \ YES/NO 경로별 설정값 출처\n  - 캐스케이드/로컬 전환 구조\n\n  ## 5. 인터락 조건\n  NOT/AND/OR\
+            \ 게이트 구조:\n  - 어떤 신호가 인터락을 트리거하는지\n  - 인터락 시 어떤 동작이 차단되는지\n\n  ## 6. 기타\
+            \ 블록 및 미사용 출력\n  - 계산 블록 (DIV, ABS, SUM 등)의 역할\n  - 출력이 연결되지 않은 블록 목록\n\
+            \n  ## 7. 외부 참조 신호 요약\n  | 신호 | 출처 도면 | 추정 역할 |\n  D03-xxx 신호의 의미를 연결\
+            \ 위치로 추정"
+        - role: user
+          text: '{{#sys.query#}}'
+        selected: false
+        title: LLM
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      id: '1775521632402'
+      position:
+        x: 530
+        y: 282
+      selected: false
+      type: custom
+    - data:
+        _connectedSourceHandleIds: []
+        _connectedTargetHandleIds:
+        - target
+        _inParallelHovering: false
+        _isEntering: false
+        _waitingRun: true
+        answer: '{{#1775521632402.text#}}'
+        desc: ''
+        selected: false
+        title: 답변
+        type: answer
+        variables: []
+      id: '1775521632403'
+      position:
+        x: 980
+        y: 282
+      selected: false
+      type: custom
+    viewport:
+      x: 428.78280766830727
+      y: 62.001231762049656
+      zoom: 0.7578582832551992

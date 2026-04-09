@@ -1648,9 +1648,12 @@ function switchMainTab(tabName) {
     const pidBtns = document.getElementById('header-btns-pid');
     const btBtns = document.getElementById('header-btns-blocktype');
 
+    const misoBtns = document.getElementById('header-btns-miso');
+
     if (editorBtns) editorBtns.style.display = 'none';
     if (pidBtns) pidBtns.style.display = 'none';
     if (btBtns) btBtns.style.display = 'none';
+    if (misoBtns) misoBtns.style.display = 'none';
 
     if (tabName === 'editor') {
         // P&ID 전체 화면 모드가 활성화된 경우 P&ID 버튼 표시
@@ -1661,6 +1664,9 @@ function switchMainTab(tabName) {
         }
     } else if (tabName === 'block-types') {
         if (btBtns) btBtns.style.display = 'flex';
+    } else if (tabName === 'miso') {
+        if (misoBtns) misoBtns.style.display = 'flex';
+        misoInit();
     } else if (tabName === 'block-info') {
         biInit();
     }

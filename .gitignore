@@ -31,3 +31,5 @@ data/*.pdf
 data/*.PDF
 data/*.png
 data/pid/
+data/miso_config.json
+data/miso_analyses.json

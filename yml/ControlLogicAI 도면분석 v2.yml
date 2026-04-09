@@ -1,0 +1,241 @@
+app:
+  description: 'DCS 제어 로직 도면 분석 + Mermaid 흐름도 생성'
+  icon: ''
+  icon_background: ''
+  memory_config: null
+  mode: advanced-chat
+  name: ControlLogicAI 도면분석 v2
+  use_icon_as_answer_icon: false
+kind: app
+version: 0.1.5
+workflow:
+  conversation_variables: []
+  environment_variables: []
+  features:
+    file_upload:
+      allowed_file_extensions:
+      - .JPG
+      - .JPEG
+      - .PNG
+      - .GIF
+      - .WEBP
+      - .SVG
+      allowed_file_types:
+      - image
+      allowed_file_upload_methods:
+      - local_file
+      - remote_url
+      enabled: false
+      image:
+        enabled: false
+      number_limits: 10
+    opening_statement: ''
+    retriever_resource:
+      enabled: false
+    sensitive_word_avoidance:
+      enabled: false
+    speech_to_text:
+      enabled: false
+    suggested_questions: []
+    suggested_questions_after_answer:
+      enabled: false
+    text_to_speech:
+      enabled: false
+      language: ''
+      voice: ''
+  graph:
+    edges:
+    - data:
+        sourceType: start
+        targetType: llm
+      id: 1735500000001-source-1735500000002-target
+      selected: false
+      source: '1735500000001'
+      sourceHandle: source
+      target: '1735500000002'
+      targetHandle: target
+      type: custom
+    - data:
+        sourceType: llm
+        targetType: code
+      id: 1735500000002-source-1735500000003-target
+      selected: false
+      source: '1735500000002'
+      sourceHandle: source
+      target: '1735500000003'
+      targetHandle: target
+      type: custom
+    - data:
+        sourceType: code
+        targetType: answer
+      id: 1735500000003-source-1735500000004-target
+      selected: false
+      source: '1735500000003'
+      sourceHandle: source
+      target: '1735500000004'
+      targetHandle: target
+      type: custom
+    nodes:
+    - data:
+        _connectedSourceHandleIds:
+        - source
+        _connectedTargetHandleIds: []
+        _inParallelHovering: false
+        _isEntering: false
+        _runningStatus: none
+        _waitingRun: false
+        desc: ''
+        selected: false
+        title: 시작
+        type: start
+        variables: []
+      id: '1735500000001'
+      position:
+        x: 80
+        y: 282
+      selected: false
+      type: custom
+    - data:
+        _connectedSourceHandleIds:
+        - source
+        _connectedTargetHandleIds:
+        - target
+        _inParallelHovering: false
+        _isEntering: false
+        _runningStatus: none
+        _waitingRun: false
+        context:
+          enabled: false
+          variable_selector: []
+        desc: 'DCS 제어 로직 전체 분석'
+        model:
+          completion_params:
+            max_tokens: 16000
+            temperature: 0.15
+          mode: chat
+          name: gpt-5.4-pro
+          provider: openai
+          registered_provider_id: 13f15379-37fd-4433-9968-0d9e8388fbe8
+        prompt_template:
+        - role: system
+          text: "당신은 화력발전소 DCS(Distributed Control System) 제어 로직 분석 전문가입니다.\n\
+            사용자가 Ovation DCS 제어 로직 도면의 블록/포트/연결 데이터를 전송하면, 아래 형식으로 분석 결과를 정리합니다.\n\n\
+            [입력 데이터 형식]\n\
+            - 블록: [블록명] 타입 — 설명\n\
+            - 포트: ← 입력포트 (설명) : 연결대상  /  → 출력포트 (설명) : 연결대상\n\
+            - 외부참조: D03-XXX-YY 형식 (다른 도면의 신호)\n\
+            - SIGNAL: ISA 태그 (SIT, TIT, PIT 등 = 현장 계측기)\n\n\
+            [분석 규칙]\n\
+            - 반드시 연결(connections)을 실제로 끝까지 추적하여 구체적인 결론을 도출할 것\n\
+            - \"확인해야 합니다\" \"분석해야 합니다\" 같은 방법론 설명 금지. 직접 추적해서 결과를 말할 것\n\
+            - 센서→중간블록→PID→M/A/C→최종출력까지 전체 체인을 빠짐없이 따라갈 것\n\
+            - 병렬 구조(A/B/C/D 채널 등)가 있으면 패턴을 식별하고 대표 1개만 상세 분석, 나머지는 요약\n\n\
+            [출력 형식]\n\n\
+            ## 1. 도면 개요\n\
+            - 제어 대상 설비\n- 제어 목적\n- 병렬 채널 수\n\n\
+            ## 2. 제어 대상 설비 목록\n\
+            | 채널 | 측정 센서 | 설비명 | 제어 출력 |\n\n\
+            ## 3. 피드백 제어 루프\n\
+            각 PID: PV, STPT, OUT 경로\n\n\
+            ## 4. 설정값(STPT) 선택 로직\n\
+            Transfer 체인 추적\n\n\
+            ## 5. 인터락 조건\n\
+            NOT/AND/OR 게이트\n\n\
+            ## 6. 기타 블록 및 미사용 출력\n\n\
+            ## 7. 외부 참조 신호 요약\n\
+            | 신호 | 출처 도면 | 추정 역할 |\n\n\
+            추가로 분석 마지막에 제어 흐름을 Mermaid 다이어그램으로 출력하세요:\n\n\
+            ## 8. 제어 흐름도\n\
+            ```mermaid\n\
+            graph TD\n\
+            센서 --> PID --> M/A/C --> 최종출력\n\
+            ```\n\
+            형태로, 주요 블록 간 연결만 포함하세요.\n\
+            - SIGNAL 블록은 둥근 사각형 ([\"이름\"])\n\
+            - PID 블록은 빨간색\n\
+            - Transfer(T) 블록은 마름모 {이름}\n\
+            - ALG/M/A/C 블록은 파란색\n\
+            style 지정으로 색상 구분하세요."
+        - role: user
+          text: '{{#sys.query#}}'
+        selected: false
+        title: LLM 분석
+        type: llm
+        variables: []
+        vision:
+          enabled: false
+      id: '1735500000002'
+      position:
+        x: 530
+        y: 282
+      selected: false
+      type: custom
+    - data:
+        _connectedSourceHandleIds:
+        - source
+        _connectedTargetHandleIds:
+        - target
+        _inParallelHovering: false
+        _isEntering: false
+        _runningStatus: none
+        _waitingRun: false
+        code: "\ndef main(analysis_text: str) -> dict:\n    \"\"\"분석 결과 정리 + 요약 생성\"\
+          \"\"\n    import re\n    \n    sections = {}\n    current = ''\n    content\
+          \ = []\n    \n    for line in analysis_text.split('\\n'):\n        m = re.match(r'^##\\\
+          s+(\\d+)\\.\\s+(.+)', line)\n        if m:\n            if current:\n  \
+          \              sections[current] = '\\n'.join(content).strip()\n         \
+          \   current = f\"{m.group(1)}. {m.group(2)}\"\n            content = []\n\
+          \            continue\n        content.append(line)\n    if current:\n  \
+          \      sections[current] = '\\n'.join(content).strip()\n    \n    overview\
+          \ = sections.get('1. 도면 개요', '')\n    summary_lines = [l.strip('- ').strip()\
+          \ for l in overview.split('\\n') if l.strip().startswith('-')]\n    summary\
+          \ = ' | '.join(summary_lines[:3]) if summary_lines else '분석 완료'\n    \n\
+          \    return {\n        'result': analysis_text,\n        'summary': summary,\n\
+          \        'section_count': len(sections)\n    }\n"
+        code_language: python3
+        desc: '분석 결과에서 요약 추출'
+        outputs:
+        - value_type: string
+          variable: result
+        - value_type: string
+          variable: summary
+        - value_type: number
+          variable: section_count
+        selected: false
+        title: 결과 포맷팅
+        type: code
+        variables:
+        - value_selector:
+          - '1735500000002'
+          - text
+          variable: analysis_text
+      id: '1735500000003'
+      position:
+        x: 980
+        y: 282
+      selected: false
+      type: custom
+    - data:
+        _connectedSourceHandleIds: []
+        _connectedTargetHandleIds:
+        - target
+        _inParallelHovering: false
+        _isEntering: false
+        _runningStatus: none
+        _waitingRun: true
+        answer: '{{#1735500000003.result#}}'
+        desc: ''
+        selected: false
+        title: 답변
+        type: answer
+        variables: []
+      id: '1735500000004'
+      position:
+        x: 1430
+        y: 282
+      selected: false
+      type: custom
+    viewport:
+      x: 428.78280766830727
+      y: 62.001231762049656
+      zoom: 0.7578582832551992

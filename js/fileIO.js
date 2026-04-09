@@ -1250,8 +1250,8 @@ async function saveData() {
     }
 }
 
-// LLM용 최소 JSON 내보내기
-async function exportForLLM() {
+// LLM용 텍스트 생성 (순수 데이터 생성만, 저장/전송 없음)
+function generateLLMText() {
     // 1. groups → 블록별 포트 이름만
     const llmGroups = {};
     for (const [gId, g] of Object.entries(groupsData || {})) {
@@ -1316,6 +1316,40 @@ async function exportForLLM() {
     lines.push(`도면번호: ${currentDrawingNumber || '?'}, 페이지: ${currentPageNumber || '?'}`);
     lines.push(`제목: ${drawingTitle}`);
     lines.push('');
+
+    // 심볼 사전 요약 (LLM이 블록 타입을 정확히 이해하도록)
+    const bdt = (typeof btBlockData !== 'undefined') ? btBlockData : {};
+    const usedTypes = new Set();
+    if (typeof scanResults !== 'undefined' && scanResults) {
+        for (const sr of scanResults) {
+            if (sr.blockType && sr.blockType !== 'OCB_BLOCK' && sr.blockType !== 'ALG_BLOCK') {
+                usedTypes.add(sr.blockType);
+            }
+        }
+    }
+    // 그룹 데이터에서도 추출
+    for (const [, g] of Object.entries(groupsData || {})) {
+        const t = g.type || '';
+        if (t && !['BLOCK_TYPE','OTHER','PORT','SIGNAL','REF_SIGNAL','OCB_BLOCK','ALG_BLOCK'].includes(t)) {
+            usedTypes.add(t);
+        }
+    }
+    if (usedTypes.size > 0) {
+        lines.push(`=== 심볼 사전 (이 도면에 사용된 블록 타입) ===`);
+        for (const typeId of usedTypes) {
+            const sym = bdt[typeId];
+            if (sym) {
+                let symLine = `[${typeId}] ${sym.desc || ''}`;
+                if (sym.ai) symLine += ` — ${sym.ai}`;
+                if (sym.ports && sym.ports.length > 0) {
+                    const portSummary = sym.ports.map(p => `${p.direction === 'output' ? '→' : '←'}${p.name}${p.description ? '(' + p.description + ')' : ''}`).join(', ');
+                    symLine += ` | 포트: ${portSummary}`;
+                }
+                lines.push(symLine);
+            }
+        }
+        lines.push('');
+    }
 
     // 스캔 결과 인덱스 (스캔 탭 실행 시 생성됨 — 없으면 {}로 폴백)
     const scanIdx = {};
@@ -1414,10 +1448,58 @@ async function exportForLLM() {
         return `${otherBlock}${showType}${otherPort ? '.' + otherPort : ''}`;
     };
 
-    // 블록 목록 — 포트 중심 통합 표시
-    lines.push(`=== 블록 목록 (${Object.keys(llmGroups).length}개) ===`);
-    lines.push('');
+    // 블록 분류: 제어블록 vs SIGNAL vs REF_SIGNAL
+    const ctrlBlocks = {};
+    const signalBlocks = {};
+    const refBlocks = {};
     for (const [name, info] of Object.entries(llmGroups)) {
+        const gdType = (gd[name]?.type || '').toUpperCase();
+        if (isRefSignal(name)) {
+            refBlocks[name] = info;
+        } else if (gdType === 'SIGNAL' || (scanIdx[name] || {}).type === 'SIGNAL') {
+            signalBlocks[name] = info;
+        } else {
+            ctrlBlocks[name] = info;
+        }
+    }
+
+    // SIGNAL 블록 요약 (개별 나열 대신 표)
+    if (Object.keys(signalBlocks).length > 0) {
+        lines.push(`=== 센서/계기 신호 (${Object.keys(signalBlocks).length}개) ===`);
+        for (const [name] of Object.entries(signalBlocks)) {
+            const sr = scanIdx[name] || {};
+            const ti = (sr.portSignals || {})['태그정보'] || {};
+            const sigSd = sd[name];
+            const equip = ti.equipment || (typeof sigSd === 'string' ? sigSd : sigSd?.equipment || '') || sr.autoDesc || '';
+            const tagType = ti.tag_type || '';
+            let sigLine = name;
+            if (tagType) sigLine += ` [${tagType}]`;
+            if (equip) sigLine += ` — ${equip}`;
+            lines.push(sigLine);
+        }
+        lines.push('');
+    }
+
+    // 외부참조 블록 요약 (도면별 그룹)
+    if (Object.keys(refBlocks).length > 0) {
+        const refByDrawing = {};
+        for (const [name] of Object.entries(refBlocks)) {
+            const m = name.match(/^(D\d+-\d+)-(\d+)/);
+            const drw = m ? m[1].replace(/^D0*/, '') : name;
+            if (!refByDrawing[drw]) refByDrawing[drw] = [];
+            refByDrawing[drw].push(name);
+        }
+        lines.push(`=== 외부 참조 신호 (${Object.keys(refBlocks).length}개) ===`);
+        for (const [drw, names] of Object.entries(refByDrawing)) {
+            lines.push(`도면 ${drw}: ${names.length}개 신호`);
+        }
+        lines.push('');
+    }
+
+    // 제어 블록 목록 — 포트 중심 통합 표시
+    lines.push(`=== 제어 블록 (${Object.keys(ctrlBlocks).length}개) ===`);
+    lines.push('');
+    for (const [name, info] of Object.entries(ctrlBlocks)) {
         const bi = pd[name] || {};
         const sr = scanIdx[name] || {};
         const si = sd[name];
@@ -1430,7 +1512,24 @@ async function exportForLLM() {
         // 블록명 접두어에서 타입 추출 (N_853_2251 → N, AND_xxx → AND)
         const namePrefix = name.split('_')[0] || '';
         const prefixType = /^(N|AND|OR|NOT|XOR|NAND|NOR|MODE|SR|RS|SEL|H|L|GT|LT|GE|LE|EQ|NE|SUM|ADD|SUB|K|X|MUL|DIV|ABS|LIM|PID|LAG|INTEG|RAMP)$/i.test(namePrefix) ? namePrefix.toUpperCase() : '';
-        const pdType     = userType || sr.blockType || bi.type || gdUseful || prefixType || '';
+        let pdType     = userType || sr.blockType || bi.type || gdUseful || prefixType || '';
+
+        // 포트 기반 자동 타입 추론 (OCB_BLOCK/ALG_BLOCK에서 포트 구성으로 판별)
+        if (!pdType || pdType === 'OCB_BLOCK' || pdType === 'ALG_BLOCK') {
+            const portSet = new Set((info.ports || []).map(p => (p || '').toUpperCase()));
+            const connPortSet = new Set(Object.keys(portConnMap[name] || {}).map(p => p.toUpperCase()));
+            const allPorts = new Set([...portSet, ...connPortSet]);
+            if ((allPorts.has('PV') || allPorts.has('STPT') || allPorts.has('SP')) && (allPorts.has('OUT') || allPorts.has('MV'))) {
+                pdType = 'PID';
+            } else if (allPorts.has('FLAG') && (allPorts.has('YES') || allPorts.has('NO'))) {
+                pdType = 'T';
+            } else if (allPorts.has('MODE') && allPorts.has('I') && allPorts.has('IN1')) {
+                pdType = 'M/A/C';
+            } else if (allPorts.has('NUM') && allPorts.has('DEN')) {
+                pdType = 'DIV';
+            }
+        }
+
         const pdTypedesc = sr.blockDesc || bi.type_desc || symbolDesc(pdType) || '';
         const memo       = si && typeof si === 'object' ? (si.memo || bi.memo || '') : (bi.memo || '');
         const scanEquip  = si ? (typeof si === 'string' ? si : (si.equipment || '')) : '';
@@ -1467,20 +1566,18 @@ async function exportForLLM() {
                 seenPorts.add(pUp);
             }
         }
-        // 심볼 정의 포트 중 연결된 것 또는 설명 있는 핵심 포트 (미연결 일반 입력 IN3~IN8 제외)
+        // 심볼 정의 포트 중 연결된 것만 표시 (LLM에 미연결 포트는 노이즈)
+        // 핵심 포트(PV, STPT, OUT, IN1, IN2, FLAG, YES, NO, MODE)는 연결 없어도 표시
+        const corePortNames = new Set(['PV','STPT','SP','OUT','MV','IN1','IN2','FLAG','YES','NO','MODE','IN']);
         for (const bp of bdtPorts) {
             if (!bp.name) continue;
             const pUp = bp.name.toUpperCase();
             if (pUp === blockTypeUpper) continue;
             if (seenPorts.has(pUp)) continue;
             const hasConn = !!(myConns[bp.name] || myConns[pUp]);
-            const hasDesc = !!(bp.description || portDescFallback[pUp] || portDescFallback[bp.name]);
-            // 입력 포트: IN3 이상 번호 포트는 연결 있을 때만 표시
-            // 출력 포트(output)는 항상 표시
-            const isOutput = bp.direction === 'output';
-            const isHighNumIn = /^IN([3-9]|\d{2,})$/i.test(bp.name);
-            if (!isOutput && isHighNumIn && !hasConn) continue;
-            if (!isOutput && !hasConn && !hasDesc) continue;
+            const isCore = corePortNames.has(pUp);
+            // 연결 있거나 핵심 포트만 표시
+            if (!hasConn && !isCore) continue;
             portNames.push(bp.name);
             seenPorts.add(pUp);
         }
@@ -1567,27 +1664,16 @@ async function exportForLLM() {
         lines.push('');
     }
 
-    // 제어 블록 간 흐름 요약 (SIGNAL/REF 제외 — 블록↔블록 연결만)
-    const ctrlConns = allConns.filter(c => {
-        const fromBlock = c.from.split('.')[0];
-        const toBlock   = c.to.split('.')[0];
-        const fsr = scanIdx[fromBlock] || {};
-        const tsr = scanIdx[toBlock]   || {};
-        return fsr.type !== 'SIGNAL' && tsr.type !== 'SIGNAL'
-            && !isRefSignal(fromBlock) && !isRefSignal(toBlock);
-    });
-    if (ctrlConns.length > 0) {
-        lines.push(`=== 제어 블록 연결 흐름 (${ctrlConns.length}개) ===`);
-        for (const c of ctrlConns) {
-            const [fromBlock, fromPort] = c.from.split('.');
-            const [toBlock,   toPort]   = c.to.split('.');
-            const fromStr = blockLabel(fromBlock, fromPort);
-            const toStr   = blockLabel(toBlock,   toPort);
-            lines.push(`${fromStr} → ${toStr}`);
-        }
-    }
+    // 제어 블록 연결 흐름 섹션 제거 — 블록 목록의 포트 연결 정보와 중복됨
+    // 데이터 크기 절감 (~5,000자 감소) → MISO 분석 속도 향상
 
-    const textStr = lines.join('\n');
+    return lines.join('\n');
+}
+
+// LLM용 텍스트 로컬 저장
+async function exportForLLM() {
+    const textStr = generateLLMText();
+    if (!textStr) { showToast('저장할 데이터 없음', 'warning'); return; }
 
     const drawingName = currentDrawingNumber || currentDrawingName || 'untitled';
     const now = new Date();

@@ -26,6 +26,7 @@
                 <button class="nav-tab" data-tab="home" onclick="goHome()">홈</button>
                 <button class="nav-tab active" data-tab="editor" onclick="switchMainTab('editor')">도면</button>
                 <button class="nav-tab" data-tab="block-types" onclick="switchMainTab('block-types')">심볼 사전</button>
+                <button class="nav-tab" data-tab="miso" onclick="switchMainTab('miso')">미소사전</button>
             </nav>
         </div>
         <!-- 통합 검색 (제어로직 태그 / P&ID 밸브,계기) -->
@@ -44,7 +45,8 @@
             <div id="header-btns-editor" style="display:none; gap:6px;">
                 <button class="btn btn-sm" onclick="loadFromLocal()" title="파일 열기">열기</button>
                 <button class="btn btn-sm btn-primary" onclick="saveData()" title="저장 (Ctrl+S)">저장</button>
-                <button class="btn btn-sm" onclick="exportForLLM()" title="LLM용 로직 데이터 내보내기" style="background:#2ea043; color:#fff;">LLM</button>
+                <button class="btn btn-sm" onclick="misoSendAnalysis()" title="MISO AI 분석 전송" style="background:#6366f1; color:#fff;">MISO</button>
+                <button class="btn btn-sm" onclick="exportForLLM()" title="LLM용 로컬 저장" style="background:#2ea043; color:#fff;">LLM</button>
             </div>
             <!-- P&ID 버튼 그룹 (P&ID 열렸을 때) -->
             <div id="header-btns-pid" style="display:none; gap:6px;">
@@ -57,6 +59,11 @@
                 <button class="btn btn-sm" onclick="btAddNewBlock()">+ 새블록</button>
                 <button class="btn btn-sm btn-primary" onclick="btSave(); showToast('블록 사전 저장 완료','success');">저장</button>
                 <button class="btn btn-sm" onclick="exportDictForLLM()" title="LLM용 심볼 사전 내보내기" style="background:#2ea043; color:#fff;">LLM</button>
+            </div>
+            <!-- 미소사전 버튼 그룹 -->
+            <div id="header-btns-miso" style="display:none; gap:6px;">
+                <button class="btn btn-sm" onclick="misoRefreshList()">새로고침</button>
+                <button class="btn btn-sm" onclick="misoShowSettings()" style="background:#6366f1; color:#fff;">설정</button>
             </div>
         </div>
     </header>
@@ -833,6 +840,23 @@
 
     </div><!-- end tab-block-types -->
 
+    <!-- ===== 미소사전 탭 ===== -->
+    <div id="tab-miso" class="tab-content">
+        <div class="miso-container">
+            <div class="miso-sidebar" id="miso-list">
+                <div style="padding:20px; text-align:center; color:rgba(255,255,255,0.4); font-size:12px;">
+                    등록된 도면이 없습니다.<br>
+                    도면을 열고 MISO 버튼을 누르면 등록됩니다.
+                </div>
+            </div>
+            <div class="miso-detail" id="miso-detail">
+                <div style="padding:40px; text-align:center; color:rgba(255,255,255,0.3); font-size:13px;">
+                    왼쪽 목록에서 도면을 선택하세요
+                </div>
+            </div>
+        </div>
+    </div><!-- end tab-miso -->
+
 
 
 </div><!-- end app-container -->
@@ -957,6 +981,17 @@ select.form-input option {
 .bt-icon-compare { background:linear-gradient(135deg, #ec4899, #db2777); }
 .bt-icon-timer { background:linear-gradient(135deg, #8b5cf6, #7c3aed); }
 .bt-icon-unknown { background:linear-gradient(135deg, #6b7280, #4b5563); }
+
+/* ===== 미소사전 스타일 ===== */
+.miso-container { display:flex; height:100%; }
+.miso-sidebar { width:240px; min-width:200px; border-right:1px solid rgba(255,255,255,0.06); overflow-y:auto; }
+.miso-detail { flex:1; overflow-y:auto; display:flex; flex-direction:column; }
+.miso-item { padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.04); cursor:pointer; transition:background 0.15s; }
+.miso-item:hover { background:rgba(255,255,255,0.04); }
+.miso-item.active { background:rgba(99,102,241,0.15); border-left:2px solid #6366f1; }
+#miso-result-content h2, #miso-result-content h3, #miso-result-content h4 { margin-top:16px; }
+#miso-result-content pre { margin:8px 0; }
+#miso-result-content code { font-family:'Consolas','Courier New',monospace; }
 </style>
 
 <!-- JavaScript Modules - 순서 중요! -->
@@ -971,8 +1006,9 @@ select.form-input option {
 <script src="js/blockTypes.js?v=20260406"></script>
 <script src="js/templates.js?v=20260326"></script>
 <script src="js/graph.js?v=20260326"></script>
-<script src="js/fileIO.js?v=20260407g"></script>
-<script src="js/ui.js?v=20260407y"></script>
+<script src="js/fileIO.js?v=20260409c"></script>
+<script src="js/miso.js?v=20260409q"></script>
+<script src="js/ui.js?v=20260408a"></script>
 <script src="js/pid.js?v=20260326"></script>
 <script src="js/splitView.js?v=20260326"></script>
 <script src="js/app.js?v=20260406"></script>
