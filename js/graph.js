@@ -17,12 +17,12 @@ let showGraphEdges = false;
 
 // ============ 설정 ============
 const GRAPH_CONFIG = {
-    portSearchRadius: 15,    // 포트 근처 라인 검색 반경 (px)
-    lineSnapThreshold: 8,    // 라인 끝점 연결 거리 (px)
-    extensionMaxDist: 300,   // 라인 연장 최대 거리 (px)
-    extensionSnapRadius: 15, // 연장선이 포트에 도달하는 판정 반경 (px)
-    maxLineLength: 500,      // 최대 라인 길이 (필터링)
-    maxChainDepth: 50,       // 체인 최대 깊이
+    portSearchRadius: 30,    // 포트 근처 라인 검색 반경 (px)
+    lineSnapThreshold: 15,   // 라인 끝점 연결 거리 (px)
+    extensionMaxDist: 800,   // 라인 연장 최대 거리 (px)
+    extensionSnapRadius: 30, // 연장선이 포트에 도달하는 판정 반경 (px)
+    maxLineLength: 800,      // 최대 라인 길이 (필터링)
+    maxChainDepth: 100,      // 체인 최대 깊이
 };
 
 // ============ 1단계: 라인 전처리 ============
@@ -699,10 +699,10 @@ function runAutoConnect() {
     }
 
     // 5. 라인 검색 함수
-    const SNAP_RADIUS = 20;  // 포트좌표~라인끝점 허용거리 (~7mm)
-    const PORT_MATCH_RADIUS = 25;
+    const SNAP_RADIUS = 30;  // 포트좌표~라인끝점 허용거리
+    const PORT_MATCH_RADIUS = 35;  // 포트 매칭 반경
     // 짧은 대각선 라인(심볼 내부) 필터: 수평/수직 짧은 라인은 연결선이므로 유지
-    const MIN_LINE_LEN = 50;
+    const MIN_LINE_LEN = 25;  // 최소 라인 길이
     const DIAG_THRESHOLD = 5;
     const shortLineSet = new Set();
     for (const line of lines) {
@@ -745,7 +745,7 @@ function runAutoConnect() {
         const waypoints = [];
         let cx = srcPort.cx, cy = srcPort.cy;
 
-        for (let depth = 0; depth < 200; depth++) {
+        for (let depth = 0; depth < 300; depth++) {
             const nearby = findLinesNear(cx, cy, usedLines);
             if (nearby.length === 0) break;
 
@@ -791,10 +791,12 @@ function runAutoConnect() {
             }
 
             if (targetPort) {
-                // 양쪽 다 입력포트(score=0)이면 잘못된 연결 → 스킵
+                // 양쪽 다 입력포트이고 둘 다 일반 포트(SIGNAL 아님)이면 스킵
                 const srcScore = _portOutScore(srcPort);
                 const tgtScore = _portOutScore(targetPort);
-                if (srcScore === 0 && tgtScore === 0) break;
+                const srcIsSig = srcPort.type === 'SIGNAL' || srcPort.type === 'REF_SIGNAL';
+                const tgtIsSig = targetPort.type === 'SIGNAL' || targetPort.type === 'REF_SIGNAL';
+                if (srcScore === 0 && tgtScore === 0 && !srcIsSig && !tgtIsSig) break;
 
                 const dupKey = [srcPort.id, targetPort.id].sort().join('|');
                 if (!connKeys.has(dupKey)) {
