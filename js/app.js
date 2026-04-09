@@ -37,7 +37,7 @@ async function init() {
     }, { passive: false, capture: true });
     canvas.addEventListener('click', onClick);
     canvas.addEventListener('dblclick', onDblClick);
-    canvas.addEventListener('contextmenu', showContextMenu);
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault()); // 우클릭 메뉴 비활성화
 
     // 키보드 이벤트 바인딩
     document.addEventListener('keydown', onKeyDown);
