@@ -1977,10 +1977,7 @@ function btRenderBlockList() {
     if (!list) return;
     const search = document.getElementById('btSearchInput')?.value.toLowerCase() || '';
 
-    // 별칭 원본은 목록에서 숨김 (T와 TRANSFER 중복 방지)
-    const _ALIAS_TARGETS = new Set(['TRANSFER', 'MASTATION', 'MAMODE']);
     const filtered = Object.values(btBlockData).filter(b => {
-        if (_ALIAS_TARGETS.has(b.id) && btBlockData[Object.entries({'T':'TRANSFER','N':'NOT','M/A':'MASTATION','MODE':'MAMODE'}).find(([k,v])=>v===b.id)?.[0]]) return false;
         if (btCurrentCat === 'core') { if (!b.core) return false; }
         else if (btCurrentCat !== 'all' && b.category !== btCurrentCat) return false;
         if (search && !b.id.toLowerCase().includes(search) && !(b.name||'').toLowerCase().includes(search) && !(b.desc||'').toLowerCase().includes(search)) return false;
@@ -2049,8 +2046,6 @@ function btRenderDetail() {
     }
 
     // Ovation 포트 데이터 우선 적용 (한글 번역 반영)
-    // 별칭 매핑: 도면 스캔 ID → Ovation 심볼 ID
-    const _SYM_ALIASES = { 'T': 'TRANSFER', 'N': 'NOT', 'M/A': 'MASTATION', 'M/A/C': 'MASTATION', 'MODE': 'MAMODE' };
     const ovKey = _SYM_ALIASES[b.id] || b.id;
     const ov0 = ovationSymbols && (ovationSymbols[ovKey] || ovationSymbols[b.id]) ? (ovationSymbols[ovKey] || ovationSymbols[b.id]) : {};
     if (ov0.ports && ov0.ports.length) {
