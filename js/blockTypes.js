@@ -26,11 +26,11 @@ function loadBlockDictionary() {
         // Ovation 데이터 강제 갱신 (버전 체크)
         const ovVer = localStorage.getItem('ovation_merge_ver');
         if (ovVer !== '20260403_rich8') {
-            localStorage.removeItem('blockDictionary_v3');
+            localStorage.removeItem('blockDictionary_v4');
             localStorage.setItem('ovation_merge_ver', '20260403_rich8');
             console.log('[BlockDict] Ovation 버전 변경 → localStorage 초기화');
         }
-        const saved = localStorage.getItem('blockDictionary_v3');
+        const saved = localStorage.getItem('blockDictionary_v4');
         if (saved) {
             blockDictionary = JSON.parse(saved);
             console.log('Block dictionary loaded:', Object.keys(blockDictionary).length, 'types');
@@ -38,7 +38,7 @@ function loadBlockDictionary() {
             // localStorage에 없으면 기본 블록으로 초기화
             if (typeof btDefaultBlocks !== 'undefined') {
                 blockDictionary = JSON.parse(JSON.stringify(btDefaultBlocks));
-                localStorage.setItem('blockDictionary_v3', JSON.stringify(blockDictionary));
+                localStorage.setItem('blockDictionary_v4', JSON.stringify(blockDictionary));
                 console.log('Block dictionary initialized with defaults:', Object.keys(blockDictionary).length, 'types');
             }
         }
@@ -59,6 +59,16 @@ async function mergeOvationSymbols() {
             ovationSymbols = await resp.json();
             console.log('[OvationSymbols] 로드:', Object.keys(ovationSymbols).length, '개 심볼');
         }
+        // 별칭 매핑: 도면 스캔 ID → Ovation 심볼 ID
+        const ALIASES = { 'T': 'TRANSFER', 'N': 'NOT', 'M/A': 'MASTATION', 'M/A/C': 'MASTATION', 'MODE': 'MAMODE' };
+        // 별칭 데이터를 원본 키에도 복제
+        for (const [shortKey, fullKey] of Object.entries(ALIASES)) {
+            if (ovationSymbols[fullKey] && !ovationSymbols[shortKey]) {
+                // fullKey의 데이터를 shortKey로도 접근 가능하게
+                ovationSymbols[shortKey] = ovationSymbols[fullKey];
+            }
+        }
+
         let merged = 0;
         for (const [key, sym] of Object.entries(ovationSymbols)) {
             if (!blockDictionary[key]) {
@@ -106,7 +116,7 @@ async function mergeOvationSymbols() {
         }
         console.log('[OvationSymbols] 신규 등록:', merged, '개, 기존 보강 포함');
         // localStorage를 Ovation 데이터로 갱신 (diagramDesc 등 새 필드 반영)
-        localStorage.setItem('blockDictionary_v3', JSON.stringify(blockDictionary));
+        localStorage.setItem('blockDictionary_v4', JSON.stringify(blockDictionary));
         console.log('[OvationSymbols] localStorage 갱신 완료. PID diagramDesc:', !!blockDictionary['PID']?.diagramDesc);
         // btBlockData에도 동기화 (심볼 탭용)
         if (typeof btBlockData !== 'undefined') {
@@ -1001,7 +1011,7 @@ function saveBlockToDict(blockType) {
 
     // localStorage에 저장
     try {
-        localStorage.setItem('blockDictionary_v3', JSON.stringify(blockDictionary));
+        localStorage.setItem('blockDictionary_v4', JSON.stringify(blockDictionary));
         console.log('Block added to dictionary:', blockType, newBlockData);
 
         // UI 업데이트
