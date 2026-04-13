@@ -1849,7 +1849,7 @@ const btDefaultBlocks = {
     'XOR': { id: 'XOR', name: 'XOR', category: 'logic', symbol: '⊕', desc: '배타적 논리합 (XOR)', ai: '2입력 배타적 OR 게이트 블록. 두 디지털 입력이 서로 다를 때 출력이 TRUE(1), 같을 때 FALSE(0)가 된다.', ports: [{name:'IN1',direction:'input',desc:'디지털 입력 1'},{name:'IN2',direction:'input',desc:'디지털 입력 2'},{name:'OUT',direction:'output',desc:'디지털 출력'}] },
     'NAND': { id: 'NAND', name: 'NAND', category: 'logic', symbol: '⊼', desc: 'NOT AND', ai: 'AND의 반전. 모든 입력이 TRUE일 때만 FALSE를 출력한다.', ports: [{name:'IN1',direction:'input'},{name:'IN2',direction:'input'},{name:'OUT',direction:'output'}] },
     'NOR': { id: 'NOR', name: 'NOR', category: 'logic', symbol: '⊽', desc: 'NOT OR', ai: 'OR의 반전. 모든 입력이 FALSE일 때만 TRUE를 출력한다.', ports: [{name:'IN1',direction:'input'},{name:'IN2',direction:'input'},{name:'OUT',direction:'output'}] },
-    'T': { id: 'T', name: 'T', category: 'logic', symbol: 'T', desc: '조건 분기 (Transfer)', ai: 'T 블록은 DCS 제어 로직의 핵심 분기 블록이다. FLAG가 TRUE이면 YES 입력값을, FALSE이면 NO 입력값을 OUT으로 전달한다. YES와 NO는 상류 블록의 OUT에서 값을 받는 입력 포트이며, OUT은 하류 블록(PID.STPT, 다음 T.NO, 최종출력.IN1 등)으로 연결된다. 여러 T블록이 체인으로 연결되어 다단계 조건 분기를 구성한다(T1.OUT→T2.NO→T2.OUT→...). FLAG에는 인터락 조건(외부참조 REF_SIGNAL 또는 OR/AND 출력)이 연결된다.', ports: [{name:'FLAG',direction:'input',desc:'조건 입력 (TRUE→YES, FALSE→NO)'},{name:'YES',direction:'input',desc:'참 경로 값 입력 (상류 블록.OUT에서 받음)'},{name:'NO',direction:'input',desc:'거짓 경로 값 입력 (상류 블록.OUT에서 받음)'},{name:'OUT',direction:'output',desc:'결과 출력 (FLAG 조건에 따라 YES 또는 NO 값 전달)'}] },
+    'T': { id: 'T', name: 'T', category: 'logic', symbol: 'T', desc: '조건 분기 (Transfer)', ovationAlias: 'TRANSFER', fullDesc: 'TRANSFER 블록은 2개의 아날로그 입력(IN1, IN2) 중 하나를 디지털 플래그(FLAG)로 선택하여 출력하는 전환 블록입니다.\n\nFLAG=FALSE(0)이면 IN1이 선택되고, FLAG=TRUE(1)이면 IN2가 선택되어 OUT으로 출력됩니다. Bumpless Transfer(범프리스 전환)를 지원하여 전환 시 출력이 급변하지 않도록 설정된 램프 레이트로 부드럽게 이동합니다.\n\nDCS 제어 로직에서 T블록은 조건 분기의 핵심입니다. YES(=IN2)와 NO(=IN1)는 상류 블록의 OUT에서 값을 받는 입력 포트이며, OUT은 하류 블록(PID.STPT, 다음 T.NO, 최종출력.IN1 등)으로 연결됩니다. 여러 T블록이 체인으로 연결되어 다단계 조건 분기를 구성합니다(T1.OUT→T2.NO→T2.OUT→...). FLAG에는 인터락 조건(외부참조 REF_SIGNAL 또는 OR/AND 출력)이 연결됩니다.', ai: 'T 블록은 DCS 제어 로직의 핵심 분기 블록이다. FLAG가 TRUE이면 YES 입력값을, FALSE이면 NO 입력값을 OUT으로 전달한다.', ports: [{name:'FLAG',direction:'input',desc:'조건 입력 (TRUE→YES, FALSE→NO)'},{name:'YES',direction:'input',desc:'참 경로 값 입력 (=IN2, 상류 블록.OUT에서 받음)'},{name:'NO',direction:'input',desc:'거짓 경로 값 입력 (=IN1, 상류 블록.OUT에서 받음)'},{name:'OUT',direction:'output',desc:'결과 출력 (FLAG 조건에 따라 YES 또는 NO 값 전달)'}] },
     'SEL': { id: 'SEL', name: 'SEL', category: 'logic', symbol: '⇌', desc: '선택 (Selector)', ai: 'SEL 블록은 G(Gate) 입력 조건에 따라 IN0 또는 IN1 중 하나를 선택하여 출력한다. T 블록과 유사하지만 아날로그 값 선택에 사용된다.', ports: [{name:'G',direction:'input'},{name:'IN0',direction:'input'},{name:'IN1',direction:'input'},{name:'OUT',direction:'output'}] },
     'SR': { id: 'SR', name: 'SR', category: 'logic', symbol: 'S', desc: 'Set-Reset 래치', ai: 'SR 블록은 Set 우선 플립플롭. S=TRUE면 출력 TRUE(래치), R=TRUE면 출력 FALSE(리셋). DCS에서 경보 래칭 등에 사용된다.', ports: [{name:'S',direction:'input'},{name:'R',direction:'input'},{name:'Q',direction:'output'}] },
     'RS': { id: 'RS', name: 'RS', category: 'logic', symbol: 'R', desc: 'Reset-Set 래치', ai: 'RS 블록은 Reset 우선 플립플롭. R=TRUE면 출력 FALSE(리셋 우선), S=TRUE면 출력 TRUE.', ports: [{name:'R',direction:'input'},{name:'S',direction:'input'},{name:'Q',direction:'output'}] },
@@ -3111,16 +3111,28 @@ function runScanElements() {
                 // 그 외는 blockType null (알 수 없음 — PID 단정 금지)
             }
         }
-        if (!isAlgBlock && typeof identifyBlockType === 'function' && (type === 'OCB_BLOCK' || type === 'BLOCK_TYPE' || type === 'OTHER')) {
+        if (!isAlgBlock && (type === 'OCB_BLOCK' || type === 'BLOCK_TYPE' || type === 'OTHER')) {
             if (gPorts.length > 0) {
-                // 포트가 있으면 포트 집합 매칭
-                const typeInfo = identifyBlockType(groupName, gPorts, '');
-                if (typeInfo && typeInfo.type && typeInfo.type !== 'UNKNOWN') {
-                    blockType = typeInfo.type;
-                    blockDesc = typeInfo.description || '';
-                    blockCategory = typeInfo.category || '';
-                    if (blockDesc) autoDesc = blockDesc;
+                // OCB: FLAG+YES+NO 패턴이면 T(Transfer) 우선 확정
+                const gPortSet = new Set(gPorts.map(p => (p.name || p.text || '').toUpperCase()));
+                if (gPortSet.has('FLAG') && gPortSet.has('YES') && gPortSet.has('NO')) {
+                    blockType = 'T';
+                    blockDesc = '조건 분기 (Transfer)';
+                    blockCategory = 'logic';
+                } else if ((gPortSet.has('STPT') || gPortSet.has('SP')) && gPortSet.has('PV')) {
+                    blockType = 'PID';
+                    blockDesc = 'PID 제어';
+                    blockCategory = 'control';
+                } else if (typeof identifyBlockType === 'function') {
+                    // 기타: 포트사전 매칭
+                    const typeInfo = identifyBlockType(groupName, gPorts, '');
+                    if (typeInfo && typeInfo.type && typeInfo.type !== 'UNKNOWN') {
+                        blockType = typeInfo.type;
+                        blockDesc = typeInfo.description || '';
+                        blockCategory = typeInfo.category || '';
+                    }
                 }
+                if (blockDesc && !autoDesc) autoDesc = blockDesc;
             }
             // 포트 없어도 이름 기반 사전 조회 (M/A, AND, OR 등 이름 자체가 심볼명인 경우)
             if (!blockType && typeof blockDictionary !== 'undefined') {

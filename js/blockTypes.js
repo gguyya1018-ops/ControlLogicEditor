@@ -25,9 +25,9 @@ function loadBlockDictionary() {
     try {
         // Ovation 데이터 강제 갱신 (버전 체크)
         const ovVer = localStorage.getItem('ovation_merge_ver');
-        if (ovVer !== '20260413_alias') {
+        if (ovVer !== '20260413_direct') {
             localStorage.removeItem('blockDictionary_v4');
-            localStorage.setItem('ovation_merge_ver', '20260413_alias');
+            localStorage.setItem('ovation_merge_ver', '20260413_direct');
             console.log('[BlockDict] Ovation 버전 변경 → localStorage 초기화');
         }
         const saved = localStorage.getItem('blockDictionary_v4');
