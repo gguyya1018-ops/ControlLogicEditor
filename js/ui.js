@@ -2036,7 +2036,7 @@ function btRenderDetail() {
         if (alias.fullDesc && !b.fullDesc) b.fullDesc = alias.fullDesc;
         if (alias.detailFull && !b.detailFull) b.detailFull = alias.detailFull;
         if (alias.diagramDesc && !b.diagramDesc) b.diagramDesc = alias.diagramDesc;
-        if (alias.ports && alias.ports.length > (b.ports || []).length) b.ports = alias.ports;
+        // 포트는 덮어쓰지 않음 (T의 FLAG=input이 TRANSFER의 FLAG=output으로 뒤집히는 문제 방지)
         if (alias.section) b.section = alias.section;
         if (alias.pdfPages) b.pdfPages = alias.pdfPages;
     }
@@ -2045,14 +2045,13 @@ function btRenderDetail() {
         return;
     }
 
-    // Ovation 포트 데이터 우선 적용 (한글 번역 반영)
-    const ovKey = _SYM_ALIASES[b.id] || b.id;
-    const ov0 = ovationSymbols && (ovationSymbols[ovKey] || ovationSymbols[b.id]) ? (ovationSymbols[ovKey] || ovationSymbols[b.id]) : {};
-    if (ov0.ports && ov0.ports.length) {
-        b.ports = ov0.ports;
-        console.log('[DEBUG] Ovation 포트 적용:', b.id, '포트수:', ov0.ports.length, '첫포트:', ov0.ports[0]?.description);
-    } else {
-        console.log('[DEBUG] Ovation 포트 없음:', b.id, 'ovationSymbols 존재:', !!ovationSymbols, 'ov0:', Object.keys(ov0).length);
+    // Ovation 포트 데이터 적용 (별칭 블록은 자체 포트 유지)
+    if (!_SYM_ALIASES[b.id]) {
+        const ovKey = b.id;
+        const ov0 = ovationSymbols && ovationSymbols[ovKey] ? ovationSymbols[ovKey] : {};
+        if (ov0.ports && ov0.ports.length) {
+            b.ports = ov0.ports;
+        }
     }
 
     const ports = b.ports || [];
