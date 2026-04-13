@@ -2029,13 +2029,27 @@ function btSelectBlock(id) {
 function btRenderDetail() {
     const content = document.getElementById('btContent');
     const b = btBlockData[btSelectedBlock];
+    // 별칭 심볼 데이터 병합 (T→TRANSFER 등)
+    const _SYM_ALIASES = { 'T': 'TRANSFER', 'N': 'NOT', 'M/A': 'MASTATION', 'M/A/C': 'MASTATION', 'MODE': 'MAMODE' };
+    if (b && _SYM_ALIASES[b.id] && btBlockData[_SYM_ALIASES[b.id]]) {
+        const alias = btBlockData[_SYM_ALIASES[b.id]];
+        if (alias.fullDesc && !b.fullDesc) b.fullDesc = alias.fullDesc;
+        if (alias.detailFull && !b.detailFull) b.detailFull = alias.detailFull;
+        if (alias.diagramDesc && !b.diagramDesc) b.diagramDesc = alias.diagramDesc;
+        if (alias.ports && alias.ports.length > (b.ports || []).length) b.ports = alias.ports;
+        if (alias.section) b.section = alias.section;
+        if (alias.pdfPages) b.pdfPages = alias.pdfPages;
+    }
     if (!b) {
         content.innerHTML = '<div class="bt-empty-state"><div style="font-size:48px; margin-bottom:16px;">📦</div><div>왼쪽에서 블록을 선택하세요</div></div>';
         return;
     }
 
     // Ovation 포트 데이터 우선 적용 (한글 번역 반영)
-    const ov0 = ovationSymbols && ovationSymbols[b.id] ? ovationSymbols[b.id] : {};
+    // 별칭 매핑: 도면 스캔 ID → Ovation 심볼 ID
+    const _SYM_ALIASES = { 'T': 'TRANSFER', 'N': 'NOT', 'M/A': 'MASTATION', 'M/A/C': 'MASTATION', 'MODE': 'MAMODE' };
+    const ovKey = _SYM_ALIASES[b.id] || b.id;
+    const ov0 = ovationSymbols && (ovationSymbols[ovKey] || ovationSymbols[b.id]) ? (ovationSymbols[ovKey] || ovationSymbols[b.id]) : {};
     if (ov0.ports && ov0.ports.length) {
         b.ports = ov0.ports;
         console.log('[DEBUG] Ovation 포트 적용:', b.id, '포트수:', ov0.ports.length, '첫포트:', ov0.ports[0]?.description);
@@ -2165,7 +2179,8 @@ function btRenderDetail() {
 
                 <!-- 통합 설명 박스 — 항상 보임 -->
                 ${(() => {
-                    const ov = ovationSymbols && ovationSymbols[b.id] ? ovationSymbols[b.id] : {};
+                    const ovk = _SYM_ALIASES[b.id] || b.id;
+                    const ov = ovationSymbols && (ovationSymbols[ovk] || ovationSymbols[b.id]) ? (ovationSymbols[ovk] || ovationSymbols[b.id]) : {};
                     if (ov.fullDesc) b.fullDesc = ov.fullDesc;
                     if (ov.detailFull) b.detailFull = ov.detailFull;
                     if (ov.diagramDesc) b.diagramDesc = ov.diagramDesc;
