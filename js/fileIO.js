@@ -1606,9 +1606,17 @@ function generateLLMText() {
             const bp = bdtPortMap[pUpper];
             const connInfo = myConns[pName] || myConns[pUpper] || null;
 
-            // 방향: 연결맵 > 심볼 정의
+            // 방향 결정: 확실한 포트만 고정, 나머지는 연결맵/심볼 정의 따름
+            // OUT = 항상 출력, PV/STPT/IN1/IN2/FLAG = 항상 입력
+            // YES/NO/MODE = 블록에 따라 입력/출력 → 연결맵 방향 사용
+            const _ALWAYS_OUT = new Set(['OUT','MV','Q','AUTO','MRE','ARE']);
+            const _ALWAYS_IN = new Set(['PV','STPT','IN1','IN2','IN3','IN4','IN','FLAG','NUM','DEN','SP']);
             let dir = '·';
-            if (connInfo) {
+            if (_ALWAYS_OUT.has(pUpper)) {
+                dir = '→';
+            } else if (_ALWAYS_IN.has(pUpper)) {
+                dir = '←';
+            } else if (connInfo) {
                 dir = connInfo.isOutput ? '→' : '←';
             } else if (bp) {
                 dir = bp.direction === 'output' ? '→' : '←';

@@ -553,292 +553,373 @@ function toggleGraphDisplay() {
 }
 
 // ============================================================
-// 자동 연결 분석 (벡터 라인 기반) - OUT 포트 추적 방식
+// 자동 연결 분석 (벡터 라인 기반) - v5 알고리즘
+// 포트 필터 + 라인 중심 추적 + SIGNAL/REF nearest + self-loop
 // ============================================================
 
 let autoConnectResults = [];
 
-// 포트 출력 점수: 높을수록 출력(from) 역할
+// 외부 연결 포트만 (내부 파라미터/피드백은 심볼사전에서 설명)
+const _CONNECTABLE_PORTS = new Set([
+    'OUT', 'IN1', 'IN2', 'IN',           // 범용 입출력
+    'PV', 'STPT',                         // PID
+    'FLAG', 'YES', 'NO',                  // T블록
+    'MODE', 'AUTO', 'MRE', 'ARE',         // MODE
+    'NUM', 'DEN', 'MV', 'Q',             // 기타
+]);
+// 제외: I(자기피드백), H/L(상하한), T/A/G/K/d/dt(내부파라미터)
+
+// 같은 그룹 내 허용 패턴 (외부 연결 포트만이므로 self-loop 최소화)
+const _SELF_LOOP_PATTERNS = new Set(['NO|OUT', 'OUT|YES']);
+
 function _portOutScore(port) {
-    const n = port.name.toUpperCase();
-    const g = (port.groupName || '').toUpperCase();
-    if (n === 'OUT') return 10;
-    // MODE 블록의 출력 포트들
-    if (g.startsWith('MODE') || g.startsWith('M/A')) {
-        if (['MODE','AUTO','MAN','NO'].includes(n)) return 8;
-    }
+    const n = (port.name || '').toUpperCase();
+    if (n === 'OUT' || n === 'MV' || n === 'AUTO' || n === 'MODE') return 2;
+    if (n === 'YES' || n === 'NO' || n === 'Q' || n === 'TOUT' || n === 'DEVA') return 1;
     return 0;
 }
 
+function _ptToSegDist(px, py, x1, y1, x2, y2) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const ll = dx * dx + dy * dy;
+    if (ll === 0) return Math.hypot(px - x1, py - y1);
+    const t = Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / ll));
+    return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+}
+
 function runAutoConnect() {
-    console.log('[AutoConnect] 분석 시작 - OUT 포트 추적 방식');
+    console.time('[AutoConnect v5]');
     autoConnectResults = [];
 
     if (!vectorLinesData || vectorLinesData.length === 0) {
         showToast('벡터 라인 데이터가 없습니다. V 버튼으로 먼저 로드해주세요.', 'error');
         return;
     }
-
-    // 그룹화 여부 확인
-    const assignedPorts = ports.filter(p => p.parent);
-    if (assignedPorts.length === 0) {
-        showToast('포트가 블록에 할당되지 않았습니다. 먼저 템플릿을 적용해주세요.', 'error');
+    if (!groupsData || Object.keys(groupsData).length === 0) {
+        showToast('그룹 데이터가 없습니다. 먼저 템플릿을 적용해주세요.', 'error');
         return;
     }
 
-    // 1. 모든 포트 수집 (그룹 포트 + 독립 포트)
+    const CFG = {
+        portSnap: 25, portOnLine: 12, chainSnap: 25,
+        maxChain: 300, sigSearchRadius: 500, refSearchRadius: 400,
+        selfLoopDist: 200, modeMatchDist: 200,
+    };
+
+    // 1. 포트 수집 (CONNECTABLE 필터 + REF/SIGNAL 센터)
     const allPorts = [];
-    const addedKeys = new Set();
-
-    // 그룹 내 포트
-    for (const [groupId, group] of Object.entries(groupsData)) {
-        if (!group.ports) continue;
-        for (const port of group.ports) {
-            const cx = parseFloat(port.cx), cy = parseFloat(port.cy);
-            const key = `${Math.round(cx)}_${Math.round(cy)}`;
-            if (addedKeys.has(key)) continue;
-            addedKeys.add(key);
+    for (const [gn, gd] of Object.entries(groupsData)) {
+        const gt = gd.type || '';
+        const gports = gd.ports || [];
+        if (gports.length > 0) {
+            for (const p of gports) {
+                const pn = p.name || '';
+                if (!_CONNECTABLE_PORTS.has(pn.toUpperCase())) continue;
+                allPorts.push({
+                    id: `${gn}.${pn}`, name: pn,
+                    cx: parseFloat(p.cx), cy: parseFloat(p.cy),
+                    type: p.type || '', group: gn, gtype: gt,
+                });
+            }
+            if (gt === 'REF_SIGNAL' || gt === 'SIGNAL') {
+                allPorts.push({
+                    id: `${gn}.${gn}`, name: gn,
+                    cx: parseFloat(gd.cx || 0), cy: parseFloat(gd.cy || 0),
+                    type: gt, group: gn, gtype: gt, isCenter: true,
+                });
+            }
+        } else {
             allPorts.push({
-                id: port.id || `PORT_${cx}_${cy}`,
-                name: port.name || port.text || '',
-                cx, cy,
-                groupId: groupId,
-                groupName: group.name || groupId,
-                parent: groupId,
-                role: port.role || ''
+                id: `${gn}.${gn}`, name: gn,
+                cx: parseFloat(gd.cx || 0), cy: parseFloat(gd.cy || 0),
+                type: gt, group: gn, gtype: gt,
             });
         }
     }
-
-    // 독립 포트 (전역 ports 배열에서 그룹에 없는 것)
-    if (typeof ports !== 'undefined' && Array.isArray(ports)) {
-        for (const port of ports) {
-            const cx = parseFloat(port.cx), cy = parseFloat(port.cy);
-            const key = `${Math.round(cx)}_${Math.round(cy)}`;
-            if (addedKeys.has(key)) continue;
-            addedKeys.add(key);
-            allPorts.push({
-                id: port.id || `PORT_${cx}_${cy}`,
-                name: port.name || port.text || '',
-                cx, cy,
-                groupId: `independent_${cx}_${cy}`,
-                groupName: port.name || 'independent',
-                parent: null,
-                role: port.role || ''
-            });
-        }
-    }
-
-    // SIGNAL/REF_SIGNAL (전역 allElements에서 신호명 추가)
-    if (typeof allElements !== 'undefined' && Array.isArray(allElements)) {
-        for (const elem of allElements) {
-            if (elem.type !== 'SIGNAL' && elem.type !== 'REF_SIGNAL') continue;
-            const cx = parseFloat(elem.cx), cy = parseFloat(elem.cy);
-            const key = `${Math.round(cx)}_${Math.round(cy)}`;
-            if (addedKeys.has(key)) continue;
-            addedKeys.add(key);
-            allPorts.push({
-                id: elem.id || `SIG_${cx}_${cy}`,
-                name: elem.name || elem.text || '',
-                cx, cy,
-                groupId: `signal_${cx}_${cy}`,
-                groupName: elem.name || 'signal',
-                parent: null,
-                role: 'signal'
-            });
-        }
-    }
-
-    // 모든 포트에서 시작, 연결 생성 시 방향 정규화 (OUT쪽이 from)
-    const startPorts = allPorts;
-    console.log(`[AutoConnect] 전체 포트: ${allPorts.length}, 출발 포트: ${startPorts.length}`);
+    console.log(`[AutoConnect v5] 포트: ${allPorts.length}개`);
 
     // 2. 벡터 라인 파싱
-    const lines = vectorLinesData.map((l, i) => ({
-        idx: i,
-        x1: parseFloat(l.x1), y1: parseFloat(l.y1),
-        x2: parseFloat(l.x2), y2: parseFloat(l.y2)
+    const vlines = vectorLinesData.map((l, i) => ({
+        idx: i, x1: parseFloat(l.x1), y1: parseFloat(l.y1),
+        x2: parseFloat(l.x2), y2: parseFloat(l.y2),
     }));
 
-    // 3. 라인 끝점 그리드 인덱스
-    const CELL = 20;
-    const endpointGrid = {};
-    for (const line of lines) {
-        for (const [px, py] of [[line.x1, line.y1], [line.x2, line.y2]]) {
-            const key = `${Math.floor(px / CELL)}_${Math.floor(py / CELL)}`;
-            if (!endpointGrid[key]) endpointGrid[key] = [];
-            endpointGrid[key].push(line);
-        }
+    // 3. 포트 그리드
+    const PCELL = 20;
+    const pgrid = {};
+    for (const p of allPorts) {
+        const key = Math.floor(p.cx / PCELL) + ',' + Math.floor(p.cy / PCELL);
+        if (!pgrid[key]) pgrid[key] = [];
+        pgrid[key].push(p);
     }
 
-    // 4. 포트 그리드 인덱스 (OUT 제외한 모든 포트)
-    const PORT_CELL = 30;
-    const portGrid = {};
-    for (const port of allPorts) {
-        const key = `${Math.floor(port.cx / PORT_CELL)}_${Math.floor(port.cy / PORT_CELL)}`;
-        if (!portGrid[key]) portGrid[key] = [];
-        portGrid[key].push(port);
-    }
-
-    function findNearbyPort(px, py, excludeGroupId, radius) {
-        let best = null, bestDist = radius;
-        for (let dx = -2; dx <= 2; dx++) {
-            for (let dy = -2; dy <= 2; dy++) {
-                const key = `${Math.floor(px / PORT_CELL) + dx}_${Math.floor(py / PORT_CELL) + dy}`;
-                for (const port of (portGrid[key] || [])) {
-                    if (port.groupId === excludeGroupId) continue;
-                    const d = Math.hypot(port.cx - px, port.cy - py);
-                    if (d < bestDist) {
-                        bestDist = d;
-                        best = port;
-                    }
+    function findPortsAt(x, y, radius) {
+        const r = Math.ceil(radius / PCELL);
+        const gx = Math.floor(x / PCELL), gy = Math.floor(y / PCELL);
+        const res = [];
+        const seen = new Set();
+        for (let dx = -r; dx <= r; dx++) {
+            for (let dy = -r; dy <= r; dy++) {
+                for (const p of (pgrid[(gx + dx) + ',' + (gy + dy)] || [])) {
+                    if (seen.has(p.id)) continue;
+                    seen.add(p.id);
+                    const d = Math.hypot(p.cx - x, p.cy - y);
+                    if (d <= radius) res.push([p, d]);
                 }
             }
         }
-        return best;
+        res.sort((a, b) => a[1] - b[1]);
+        return res;
     }
 
-    // 5. 라인 검색 함수
-    const SNAP_RADIUS = 22;  // 포트좌표~라인끝점 허용거리 (테스트 최적값)
-    const PORT_MATCH_RADIUS = 22;  // 포트 매칭 반경
-    // vlines 사용 시 대각선도 유효한 연결선이므로 필터 완화
-    const MIN_LINE_LEN = 3;   // 최소 라인 길이 (vlines는 깨끗)
-    const DIAG_THRESHOLD = 999; // 대각선 필터 비활성화
-    const shortLineSet = new Set();
-    for (const line of lines) {
-        const len = Math.hypot(line.x2 - line.x1, line.y2 - line.y1);
-        if (len < MIN_LINE_LEN) {
-            const adx = Math.abs(line.x2 - line.x1);
-            const ady = Math.abs(line.y2 - line.y1);
-            if (adx > DIAG_THRESHOLD && ady > DIAG_THRESHOLD) {
-                shortLineSet.add(line.idx);
-            }
-        }
-    }
-
-    function findLinesNear(px, py, excludeIdxSet) {
-        const results = [];
-        const searchRange = Math.ceil(SNAP_RADIUS / CELL);
-        for (let dx = -searchRange; dx <= searchRange; dx++) {
-            for (let dy = -searchRange; dy <= searchRange; dy++) {
-                const key = `${Math.floor(px / CELL) + dx}_${Math.floor(py / CELL) + dy}`;
-                for (const line of (endpointGrid[key] || [])) {
-                    if (excludeIdxSet.has(line.idx)) continue;
-                    if (shortLineSet.has(line.idx)) continue;  // 짧은 라인 스킵
-                    const d1 = Math.hypot(line.x1 - px, line.y1 - py);
-                    const d2 = Math.hypot(line.x2 - px, line.y2 - py);
-                    if (d1 <= SNAP_RADIUS) results.push({ line, nearEnd: 'p1', farX: line.x2, farY: line.y2, dist: d1 });
-                    else if (d2 <= SNAP_RADIUS) results.push({ line, nearEnd: 'p2', farX: line.x1, farY: line.y1, dist: d2 });
+    function findPortsOnSeg(x1, y1, x2, y2, maxDist) {
+        const xmin = Math.min(x1, x2) - maxDist, xmax = Math.max(x1, x2) + maxDist;
+        const ymin = Math.min(y1, y2) - maxDist, ymax = Math.max(y1, y2) + maxDist;
+        const gx1 = Math.floor(xmin / PCELL), gy1 = Math.floor(ymin / PCELL);
+        const gx2 = Math.floor(xmax / PCELL), gy2 = Math.floor(ymax / PCELL);
+        const res = [];
+        const seen = new Set();
+        for (let gx = gx1; gx <= gx2; gx++) {
+            for (let gy = gy1; gy <= gy2; gy++) {
+                for (const p of (pgrid[gx + ',' + gy] || [])) {
+                    if (seen.has(p.id)) continue;
+                    seen.add(p.id);
+                    const d = _ptToSegDist(p.cx, p.cy, x1, y1, x2, y2);
+                    if (d <= maxDist) res.push([p, d]);
                 }
             }
         }
-        results.sort((a, b) => a.dist - b.dist);
-        return results;
+        res.sort((a, b) => a[1] - b[1]);
+        return res;
     }
 
-    // 6. 모든 포트에서 라인 추적
+    // 4. 라인 끝점 그리드
+    const LCELL = 20;
+    const lgrid = {};
+    for (let i = 0; i < vlines.length; i++) {
+        const l = vlines[i];
+        const k1 = Math.floor(l.x1 / LCELL) + ',' + Math.floor(l.y1 / LCELL);
+        const k2 = Math.floor(l.x2 / LCELL) + ',' + Math.floor(l.y2 / LCELL);
+        if (!lgrid[k1]) lgrid[k1] = [];
+        lgrid[k1].push([i, 'p1']);
+        if (!lgrid[k2]) lgrid[k2] = [];
+        lgrid[k2].push([i, 'p2']);
+    }
+
+    function linesNear(x, y, radius) {
+        const r = Math.ceil(radius / LCELL);
+        const gx = Math.floor(x / LCELL), gy = Math.floor(y / LCELL);
+        const res = [];
+        const seen = new Set();
+        for (let dx = -r; dx <= r; dx++) {
+            for (let dy = -r; dy <= r; dy++) {
+                for (const [idx, end] of (lgrid[(gx + dx) + ',' + (gy + dy)] || [])) {
+                    if (seen.has(idx)) continue;
+                    seen.add(idx);
+                    const l = vlines[idx];
+                    const d1 = Math.hypot(l.x1 - x, l.y1 - y);
+                    const d2 = Math.hypot(l.x2 - x, l.y2 - y);
+                    if (d1 <= radius) res.push([idx, 'p1', d1]);
+                    if (d2 <= radius) res.push([idx, 'p2', d2]);
+                }
+            }
+        }
+        res.sort((a, b) => a[2] - b[2]);
+        return res;
+    }
+
+    // 5. 연결 관리
     const connections = [];
     const connKeys = new Set();
 
-    for (const srcPort of startPorts) {
-        const usedLines = new Set();
-        const waypoints = [];
-        let cx = srcPort.cx, cy = srcPort.cy;
+    const _OUT_PORTS = new Set(['OUT', 'YES', 'NO', 'MV', 'Q', 'AUTO', 'MAN', 'MODE', 'MRE', 'ARE']);
+    const _IN_PORTS = new Set(['PV', 'STPT', 'IN1', 'IN2', 'IN3', 'IN4', 'IN', 'FLAG', 'NUM', 'DEN', 'I', 'H', 'L', 'SP']);
 
-        for (let depth = 0; depth < 300; depth++) {
-            const nearby = findLinesNear(cx, cy, usedLines);
-            if (nearby.length === 0) break;
+    function addConn(src, tgt, method, wps) {
+        if (src.group === tgt.group) {
+            const pair = [src.name.toUpperCase(), tgt.name.toUpperCase()].sort().join('|');
+            if (!_SELF_LOOP_PATTERNS.has(pair)) return false;
+        }
+        // 출력↔출력 차단 (확실한 FP)
+        const sn = src.name.toUpperCase(), tn = tgt.name.toUpperCase();
+        if (sn === 'OUT' && tn === 'OUT') return false;
+        // MODE↔NO/YES/OUT 차단 (MODE↔MODE는 유효하므로 허용)
+        if (sn === 'MODE' && (tn === 'NO' || tn === 'YES' || tn === 'OUT')) return false;
+        if (tn === 'MODE' && (sn === 'NO' || sn === 'YES' || sn === 'OUT')) return false;
+        const dup = [src.id, tgt.id].sort().join('|');
+        if (connKeys.has(dup)) return false;
+        connKeys.add(dup);
+        const s1 = _portOutScore(src), s2 = _portOutScore(tgt);
+        const swap = s2 > s1;
+        const fp = swap ? tgt : src;
+        const tp = swap ? src : tgt;
+        // waypoints: from→to 방향으로 정렬, swap 시 반전
+        let finalWps = wps || [];
+        if (swap && finalWps.length > 0) finalWps = [...finalWps].reverse();
+        // from/to 근처 중복 제거
+        finalWps = finalWps.filter(wp => {
+            const dF = Math.hypot(wp.x - fp.cx, wp.y - fp.cy);
+            const dT = Math.hypot(wp.x - tp.cx, wp.y - tp.cy);
+            return dF > 5 && dT > 5;
+        });
+        connections.push({
+            fromId: fp.id, fromName: fp.name, fromParent: fp.group,
+            fromGroup: fp.group, fromCx: fp.cx, fromCy: fp.cy,
+            toId: tp.id, toName: tp.name, toParent: tp.group,
+            toGroup: tp.group, toCx: tp.cx, toCy: tp.cy,
+            waypoints: finalWps, source: 'auto', method,
+        });
+        return true;
+    }
 
-            const best = nearby[0];
-            usedLines.add(best.line.idx);
-            waypoints.push({ x: cx, y: cy });
+    // 6. 라인 체인 추적 — {target, waypoints} 반환
+    function traceChain(src, snapRadius) {
+        if (!snapRadius) snapRadius = CFG.portSnap;
+        let nearby = linesNear(src.cx, src.cy, snapRadius);
+        if (nearby.length === 0) {
+            for (let i = 0; i < vlines.length; i++) {
+                const l = vlines[i];
+                const d = _ptToSegDist(src.cx, src.cy, l.x1, l.y1, l.x2, l.y2);
+                if (d <= CFG.portOnLine * 2) {
+                    const d1 = Math.hypot(src.cx - l.x1, src.cy - l.y1);
+                    const d2 = Math.hypot(src.cx - l.x2, src.cy - l.y2);
+                    nearby.push([i, 'p1', d1]);
+                    nearby.push([i, 'p2', d2]);
+                }
+            }
+            nearby.sort((a, b) => a[2] - b[2]);
+        }
+        const excludeIds = new Set(allPorts.filter(p => p.group === src.group).map(p => p.id));
 
-            cx = best.farX;
-            cy = best.farY;
+        // 가장 가까운 라인 1개만 추적 (정밀도 우선)
+        for (let si = 0; si < Math.min(nearby.length, 1); si++) {
+            const [startIdx, startEnd] = nearby[si];
+            const used = new Set([startIdx]);
+            const l = vlines[startIdx];
+            const path = [];  // 중간 경유점만 (src/tgt 근처는 addConn에서 제거)
 
-            let targetPort = findNearbyPort(cx, cy, srcPort.groupId, PORT_MATCH_RADIUS);
+            // 첫 라인: 반대쪽 끝점만 기록 (시작 끝점은 src 근처이므로 생략)
+            let cx = startEnd === 'p1' ? l.x2 : l.x1;
+            let cy = startEnd === 'p1' ? l.y2 : l.y1;
 
-            // 특수 매핑: MODE 블록 → ALG 블록 영역이면 ALG의 MODE 포트로 연결
-            if (!targetPort) {
-                const srcGroupUp = (srcPort.groupName || '').toUpperCase();
-                if (srcGroupUp.startsWith('MODE')) {
-                    // 라인 끝점이 ALG 그룹 영역 안에 있는지 확인
-                    for (const [gId, g] of Object.entries(groupsData)) {
-                        const gName = (g.name || gId).toUpperCase();
-                        if (!gName.startsWith('ALG')) continue;
-                        if (!g.ports) continue;
-                        // 그룹 바운딩박스 계산
-                        const pxs = g.ports.map(p => parseFloat(p.cx));
-                        const pys = g.ports.map(p => parseFloat(p.cy));
-                        const margin = 50;
-                        if (cx >= Math.min(...pxs) - margin && cx <= Math.max(...pxs) + margin &&
-                            cy >= Math.min(...pys) - margin && cy <= Math.max(...pys) + margin) {
-                            // ALG의 MODE 포트 찾기
-                            const modePort = g.ports.find(p => p.name && p.name.toUpperCase() === 'MODE');
-                            if (modePort) {
-                                targetPort = allPorts.find(ap =>
-                                    Math.abs(ap.cx - parseFloat(modePort.cx)) < 3 &&
-                                    Math.abs(ap.cy - parseFloat(modePort.cy)) < 3
-                                );
-                                if (targetPort) {
-                                    console.log(`[AutoConnect] MODE→ALG 자동매핑: ${srcPort.groupName}.MODE → ${gName}.MODE`);
-                                }
-                            }
-                            break;
-                        }
+            // 첫 라인 위 포트
+            const onSeg = findPortsOnSeg(l.x1, l.y1, l.x2, l.y2, CFG.portOnLine);
+            for (const [p] of onSeg) {
+                if (!excludeIds.has(p.id)) return { target: p, waypoints: [] };
+            }
+
+            path.push({ x: cx, y: cy });
+
+            for (let depth = 0; depth < CFG.maxChain; depth++) {
+                const endPorts = findPortsAt(cx, cy, CFG.portSnap);
+                const filtered = endPorts.filter(([p]) => !excludeIds.has(p.id));
+                if (filtered.length > 0) return { target: filtered[0][0], waypoints: path };
+
+                const nextLines = linesNear(cx, cy, CFG.chainSnap);
+                let foundNext = false;
+                for (const [nlIdx, nlEnd] of nextLines) {
+                    if (used.has(nlIdx)) continue;
+                    used.add(nlIdx);
+                    const nl = vlines[nlIdx];
+                    const onSeg2 = findPortsOnSeg(nl.x1, nl.y1, nl.x2, nl.y2, CFG.portOnLine);
+                    for (const [p] of onSeg2) {
+                        if (!excludeIds.has(p.id)) return { target: p, waypoints: path };
                     }
+                    cx = nlEnd === 'p1' ? nl.x2 : nl.x1;
+                    cy = nlEnd === 'p1' ? nl.y2 : nl.y1;
+                    path.push({ x: cx, y: cy });
+                    foundNext = true;
+                    break;
                 }
+                if (!foundNext) break;
             }
+        }
+        return null;
+    }
 
-            if (targetPort) {
-                // 양쪽 다 입력포트이고 둘 다 일반 포트(SIGNAL 아님)이면 스킵
-                const srcScore = _portOutScore(srcPort);
-                const tgtScore = _portOutScore(targetPort);
-                const srcIsSig = srcPort.type === 'SIGNAL' || srcPort.type === 'REF_SIGNAL';
-                const tgtIsSig = targetPort.type === 'SIGNAL' || targetPort.type === 'REF_SIGNAL';
-                if (srcScore === 0 && tgtScore === 0 && !srcIsSig && !tgtIsSig) break;
+    // ===== 7. 모든 포트에서 추적 + 블록쌍 중복제거 (OUT 우선) =====
+    const normalPorts = allPorts.filter(p => !p.isCenter);
 
-                const dupKey = [srcPort.id, targetPort.id].sort().join('|');
-                if (!connKeys.has(dupKey)) {
-                    connKeys.add(dupKey);
-                    waypoints.push({ x: cx, y: cy });
-                    const swap = tgtScore > srcScore;
-                    const fPort = swap ? targetPort : srcPort;
-                    const tPort = swap ? srcPort : targetPort;
-                    // waypoints 정리: from/to 근처 중복 제거
-                    let rawWps = swap ? [...waypoints].reverse() : [...waypoints];
-                    const wps = rawWps.filter(wp => {
-                        const dFrom = Math.hypot(wp.x - fPort.cx, wp.y - fPort.cy);
-                        const dTo = Math.hypot(wp.x - tPort.cx, wp.y - tPort.cy);
-                        return dFrom > 5 && dTo > 5;
-                    });
-                    connections.push({
-                        fromId: fPort.id,
-                        fromName: fPort.name,
-                        fromParent: fPort.parent,
-                        fromGroup: fPort.groupName || fPort.parent || '',
-                        fromCx: fPort.cx,
-                        fromCy: fPort.cy,
-                        toId: tPort.id,
-                        toName: tPort.name,
-                        toParent: tPort.parent,
-                        toGroup: tPort.groupName || tPort.parent || '',
-                        toCx: tPort.cx,
-                        toCy: tPort.cy,
-                        waypoints: wps,
-                        source: 'auto'
-                    });
-                    console.log(`[AutoConnect] ${srcPort.groupName}.${srcPort.name} → ${targetPort.groupName}.${targetPort.name} (${usedLines.size} lines)`);
-                }
-                break;
-            }
+    // 1차: 모든 포트에서 추적
+    const traceResults = [];
+    for (const src of normalPorts) {
+        const result = traceChain(src);
+        if (result) traceResults.push({ src, target: result.target, wps: result.waypoints });
+    }
+
+    // 2차: OUT(score 2) 우선 정렬 → 블록쌍당 1개만
+    traceResults.sort((a, b) => _portOutScore(b.src) - _portOutScore(a.src));
+    const blockPairUsed = new Set();
+    for (const tr of traceResults) {
+        const pairKey = [tr.src.group, tr.target.group].sort().join('|');
+        if (blockPairUsed.has(pairKey)) continue;
+        if (addConn(tr.src, tr.target, 'line_trace', tr.wps)) {
+            blockPairUsed.add(pairKey);
         }
     }
 
-    autoConnectResults = connections;
-    console.log(`[AutoConnect] 완료: ${connections.length}개 연결 발견 (포트 ${startPorts.length}개 중)`);
+    // ===== 8. SIGNAL 센터 → PV 우선 nearest =====
+    const centerPorts = allPorts.filter(p => p.isCenter);
+    for (const cp of centerPorts) {
+        if (cp.gtype === 'SIGNAL') {
+            // 라인 추적 먼저
+            const result = traceChain(cp, CFG.portSnap * 2);
+            if (result) { addConn(cp, result.target, 'sig_trace', result.waypoints); continue; }
+            // PV 우선 nearest (waypoints 없음)
+            const pvPorts = [], otherPorts = [];
+            for (const p of normalPorts) {
+                if (p.group === cp.group || p.isCenter) continue;
+                const dd = Math.hypot(p.cx - cp.cx, p.cy - cp.cy);
+                if (dd >= CFG.sigSearchRadius) continue;
+                const pn = p.name.toUpperCase();
+                if (pn === 'PV') pvPorts.push([p, dd]);
+                else if (['NUM', 'DEN', 'IN1', 'IN2'].includes(pn)) otherPorts.push([p, dd]);
+            }
+            const cands = pvPorts.sort((a, b) => a[1] - b[1]);
+            if (cands.length === 0) cands.push(...otherPorts.sort((a, b) => a[1] - b[1]));
+            if (cands.length > 0) addConn(cp, cands[0][0], 'sig_nearest');
+        } else if (cp.gtype === 'REF_SIGNAL') {
+            // REF: 라인 추적만 (nearest 제거 — FP 방지)
+            const result = traceChain(cp, CFG.portSnap * 2);
+            if (result) addConn(cp, result.target, 'ref_trace', result.waypoints);
+        }
+    }
 
-    updateAutoConnectUI(lines.length, startPorts.length, connections.length, allPorts.length);
+    // ===== 9. 내부 self-loop 제거 (심볼사전에서 설명) =====
+    // ALG OUT→I, OCB OUT→YES 등은 블록 내부 동작 → autoConnect 대상 아님
+    const groupsMap = {};
+    for (const p of allPorts) {
+        if (!groupsMap[p.group]) groupsMap[p.group] = [];
+        groupsMap[p.group].push(p);
+    }
+
+    for (const [gn, gports] of Object.entries(groupsMap)) {
+        const pm = {};
+        for (const p of gports) pm[p.name.toUpperCase()] = p;
+    }
+
+    // ===== 10. MODE 매칭 =====
+    for (const [gn, gports] of Object.entries(groupsMap)) {
+        const pm = {};
+        for (const p of gports) pm[p.name.toUpperCase()] = p;
+        if (!pm.MODE) continue;
+        const modeP = pm.MODE;
+        let best = null, bestD = CFG.modeMatchDist;
+        for (const p2 of allPorts) {
+            if (p2.group === gn) continue;
+            if (p2.name.toUpperCase() === 'MODE') {
+                const dd = Math.hypot(modeP.cx - p2.cx, modeP.cy - p2.cy);
+                if (dd < bestD) { bestD = dd; best = p2; }
+            }
+        }
+        if (best) addConn(modeP, best, 'mode_match');
+    }
+
+    autoConnectResults = connections;
+    console.timeEnd('[AutoConnect v5]');
+    console.log(`[AutoConnect v5] 완료: ${connections.length}개 연결`);
+
+    updateAutoConnectUI(vlines.length, normalPorts.length, connections.length, allPorts.length);
     if (showVectorLines) render();
 }
 
