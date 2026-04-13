@@ -25,9 +25,9 @@ function loadBlockDictionary() {
     try {
         // Ovation 데이터 강제 갱신 (버전 체크)
         const ovVer = localStorage.getItem('ovation_merge_ver');
-        if (ovVer !== '20260413_direct') {
+        if (ovVer !== '20260413_noport') {
             localStorage.removeItem('blockDictionary_v4');
-            localStorage.setItem('ovation_merge_ver', '20260413_direct');
+            localStorage.setItem('ovation_merge_ver', '20260413_noport');
             console.log('[BlockDict] Ovation 버전 변경 → localStorage 초기화');
         }
         const saved = localStorage.getItem('blockDictionary_v4');
@@ -61,6 +61,7 @@ async function mergeOvationSymbols() {
         }
         // 별칭 매핑: 도면 스캔 ID → Ovation 심볼 ID
         const ALIASES = { 'T': 'TRANSFER', 'N': 'NOT', 'M/A': 'MASTATION', 'M/A/C': 'MASTATION', 'MODE': 'MAMODE' };
+        const _ALIAS_KEYS = new Set(Object.keys(ALIASES));
         // 별칭 데이터를 원본 키에도 복제
         for (const [shortKey, fullKey] of Object.entries(ALIASES)) {
             if (ovationSymbols[fullKey] && !ovationSymbols[shortKey]) {
@@ -110,7 +111,8 @@ async function mergeOvationSymbols() {
                 if (sym.detailFull) existing.detailFull = sym.detailFull;
                 if (sym.core !== undefined) existing.core = sym.core;
                 if (sym.ai && sym.ai.length > (existing.ai || '').length) existing.ai = sym.ai;
-                if (sym.ports && sym.ports.length) existing.ports = sym.ports;
+                // 별칭 블록(T,MODE 등)은 포트 덮어쓰기 안 함 (DCS vs Ovation 방향 충돌 방지)
+                if (sym.ports && sym.ports.length && !_ALIAS_KEYS.has(key)) existing.ports = sym.ports;
                 existing.source = 'merged';
             }
         }
@@ -136,7 +138,7 @@ async function mergeOvationSymbols() {
                     if (val.fullDesc) bt.fullDesc = val.fullDesc;
                     if (val.detailFull) bt.detailFull = val.detailFull;
                     if (val.core !== undefined) bt.core = val.core;
-                    if (val.ports && val.ports.length) bt.ports = val.ports;
+                    if (val.ports && val.ports.length && !_ALIAS_KEYS.has(key)) bt.ports = val.ports;
                 }
             }
         }
