@@ -1938,14 +1938,14 @@ async function btInit() {
         if (deletedSaved) btDeletedBlocks = JSON.parse(deletedSaved);
     } catch (e) { btDeletedBlocks = []; }
 
-    const saved = localStorage.getItem('blockDictionary_v3');
+    const saved = localStorage.getItem('blockDictionary_v4');
     btBlockData = saved ? JSON.parse(saved) : { ...btDefaultBlocks };
 
     // Ovation 매뉴얼 심볼 머지 대기
     await mergeOvationSymbols();
 
     // 머지 후 localStorage에서 다시 로드 (diagramDesc 등 새 필드 반영)
-    const refreshed = localStorage.getItem('blockDictionary_v3');
+    const refreshed = localStorage.getItem('blockDictionary_v4');
     if (refreshed) btBlockData = JSON.parse(refreshed);
 
     btRenderBlockList();
@@ -1962,7 +1962,7 @@ function btGuessCategory(id) {
     return 'unknown';
 }
 
-function btSave() { localStorage.setItem('blockDictionary_v3', JSON.stringify(btBlockData)); }
+function btSave() { localStorage.setItem('blockDictionary_v4', JSON.stringify(btBlockData)); }
 
 function btUpdateStats() {
     const blocks = Object.values(btBlockData);
@@ -2358,7 +2358,7 @@ function btCloseModal() { document.getElementById('btEditModal').style.display =
 
 async function btResetToDefaults() {
     if (!(await showConfirm('블록 사전을 초기화하시겠습니까? 모든 데이터가 삭제되고 기본값으로 복원됩니다.', { title: '삭제 확인', type: 'danger', confirmText: '초기화' }))) return;
-    localStorage.removeItem('blockDictionary_v3');
+    localStorage.removeItem('blockDictionary_v4');
     localStorage.removeItem('blockDictionary_deleted');
     btDeletedBlocks = [];
     btBlockData = JSON.parse(JSON.stringify(btDefaultBlocks));
